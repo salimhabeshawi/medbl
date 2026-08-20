@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { submitPoetRequest } from "@/app/actions";
 
@@ -9,6 +9,13 @@ export function PoetRequestForm() {
     submitPoetRequest,
     {} as { error?: string; success?: boolean },
   );
+
+  // Controlled fields so React's form-action auto-reset doesn't wipe the
+  // user's input when the server action returns an error.
+  const [nameAm, setNameAm] = useState("");
+  const [nameEn, setNameEn] = useState("");
+  const [bio, setBio] = useState("");
+  const [source, setSource] = useState("");
 
   if (state.success) {
     return (
@@ -42,6 +49,8 @@ export function PoetRequestForm() {
           name="name_am"
           required
           autoComplete="off"
+          value={nameAm}
+          onChange={(e) => setNameAm(e.target.value)}
           placeholder="e.g. ቀኔ ገዳ"
           className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
         />
@@ -53,6 +62,8 @@ export function PoetRequestForm() {
           type="text"
           name="name_en"
           autoComplete="off"
+          value={nameEn}
+          onChange={(e) => setNameEn(e.target.value)}
           placeholder="e.g. Kene Gedah (optional)"
           className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
         />
@@ -63,6 +74,8 @@ export function PoetRequestForm() {
         <textarea
           name="bio"
           rows={4}
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
           placeholder="A few words about the poet (optional)"
           className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
         />
@@ -74,6 +87,8 @@ export function PoetRequestForm() {
           type="text"
           name="source"
           autoComplete="off"
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
           placeholder="Book, website, personal knowledge… (optional, but encouraged)"
           className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
         />

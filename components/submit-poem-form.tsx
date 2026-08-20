@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { submitPoem } from "@/app/actions";
 import { PoetSelect } from "./poet-select";
@@ -10,6 +10,14 @@ export function SubmitPoemForm() {
     submitPoem,
     {} as { error?: string; success?: boolean },
   );
+
+  // Controlled fields so React's form-action auto-reset doesn't wipe the
+  // user's input when the server action returns an error.
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [category, setCategory] = useState("");
+  const [tags, setTags] = useState("");
+  const [source, setSource] = useState("");
 
   if (state.success) {
     return (
@@ -52,6 +60,8 @@ export function SubmitPoemForm() {
           name="title"
           required
           autoComplete="off"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
         />
       </label>
@@ -62,6 +72,8 @@ export function SubmitPoemForm() {
           name="body"
           required
           rows={12}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
           placeholder="Lines are preserved exactly as written."
           className="whitespace-pre-wrap rounded-md border px-3 py-2 font-normal text-sm leading-relaxed outline-none focus:ring-2 focus:ring-zinc-400"
         />
@@ -74,6 +86,8 @@ export function SubmitPoemForm() {
             type="text"
             name="category"
             autoComplete="off"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
             placeholder="e.g. ፍቅር, ባህል"
             className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
           />
@@ -84,6 +98,8 @@ export function SubmitPoemForm() {
             type="text"
             name="tags"
             autoComplete="off"
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
             placeholder="Comma separated, e.g. ፍቅር, modern"
             className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
           />
@@ -97,6 +113,8 @@ export function SubmitPoemForm() {
           name="source"
           required
           autoComplete="off"
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
           placeholder="Book, website, personal knowledge, oral tradition…"
           className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
         />

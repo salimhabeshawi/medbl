@@ -28,20 +28,21 @@ export default async function MySubmissionsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: submissions }, { data: poetRequests }] = await Promise.all([
-    supabase
-      .from("poem_submissions")
-      .select(
-        "id, title, poet_id, poets(name_am, name_en), status, rejection_reason, created_at",
-      )
-      .eq("submitted_by", user.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("poet_requests")
-      .select("id, name_am, name_en, status, rejection_reason, created_at")
-      .eq("requested_by", user.id)
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: submissions, error: submissionsError }, { data: poetRequests, error: poetRequestsError }] =
+    await Promise.all([
+      supabase
+        .from("poem_submissions")
+        .select(
+          "id, title, poet_id, poets(name_am, name_en), status, rejection_reason, created_at",
+        )
+        .eq("submitted_by", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("poet_requests")
+        .select("id, name_am, name_en, status, created_at")
+        .eq("requested_by", user.id)
+        .order("created_at", { ascending: false }),
+    ]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -49,7 +50,11 @@ export default async function MySubmissionsPage() {
 
       <section className="mb-12">
         <h2 className="mb-4 text-2xl font-semibold">Poem submissions</h2>
-        {submissions && submissions.length > 0 ? (
+        {submissionsError ? (
+          <p className="rounded-md border border-red-200 bg-red-50 px-4 py-6 text-center text-sm text-red-700">
+            Could not load poem submissions: {submissionsError.message}
+          </p>
+        ) : submissions && submissions.length > 0 ? (
           <ul className="divide-y rounded-lg border">
             {submissions.map((sub) => {
               const poet = firstRelation<{ name_am: string; name_en: string }>(
@@ -85,7 +90,11 @@ export default async function MySubmissionsPage() {
 
       <section>
         <h2 className="mb-4 text-2xl font-semibold">Poet requests</h2>
-        {poetRequests && poetRequests.length > 0 ? (
+        {poetRequestsError ? (
+          <p className="rounded-md border border-red-200 bg-red-50 px-4 py-6 text-center text-sm text-red-700">
+            Could not load poet requests: {poetRequestsError.message}
+          </p>
+        ) : poetRequests && poetRequests.length > 0 ? (
           <ul className="divide-y rounded-lg border">
             {poetRequests.map((req) => (
               <li key={req.id} className="px-4 py-3">
@@ -105,11 +114,6 @@ export default async function MySubmissionsPage() {
                   </div>
                   <StatusBadge status={req.status} />
                 </div>
-                {req.status === "rejected" && req.rejection_reason ? (
-                  <p className="mt-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-                    Reason: {req.rejection_reason}
-                  </p>
-                ) : null}
               </li>
             ))}
           </ul>
