@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
 import { FavoriteToggle } from "@/components/favorite-toggle";
+import { DisputedTag } from "@/components/disputed-tag";
 
 export async function generateMetadata({
   params,
@@ -38,9 +39,8 @@ export default async function PoetPage({
 
   const { data: poems } = await supabase
     .from("poems")
-    .select("id, title, category, created_at")
+    .select("id, title, category, attribution_status, created_at")
     .eq("poet_id", id)
-    .neq("attribution_status", "disputed")
     .order("created_at", { ascending: false });
 
   const years =
@@ -81,6 +81,9 @@ export default async function PoetPage({
                   >
                     {poem.title}
                   </Link>
+                  {poem.attribution_status === "disputed" ? (
+                    <DisputedTag />
+                  ) : null}
                   {poem.category ? (
                     <span className="ml-2 text-sm text-zinc-500">
                       {poem.category}

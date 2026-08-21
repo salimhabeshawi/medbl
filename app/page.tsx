@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
 import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
 import { FavoriteToggle } from "@/components/favorite-toggle";
+import { DisputedTag } from "@/components/disputed-tag";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -10,8 +11,7 @@ export default async function Home() {
   const [{ data: recentPoems }, { data: featuredPoets }] = await Promise.all([
     supabase
       .from("poems")
-      .select("id, title, poet_id, poets(name_am, name_en), created_at")
-      .neq("attribution_status", "disputed")
+      .select("id, title, attribution_status, poet_id, poets(name_am, name_en), created_at")
       .order("created_at", { ascending: false })
       .limit(6),
     supabase
@@ -75,6 +75,9 @@ export default async function Home() {
                     >
                       {poem.title}
                     </Link>
+                    {poem.attribution_status === "disputed" ? (
+                      <DisputedTag />
+                    ) : null}
                     {poet ? (
                       <span className="text-sm text-zinc-500">
                         {" "}

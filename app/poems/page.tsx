@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
 import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
 import { FavoriteToggle } from "@/components/favorite-toggle";
+import { DisputedTag } from "@/components/disputed-tag";
 
 export const metadata: Metadata = { title: "Poems" };
 
@@ -49,10 +50,9 @@ export default async function PoemsPage({
   let query = supabase
     .from("poems")
     .select(
-      "id, title, category, tags, poet_id, poets(name_am, name_en), created_at",
+      "id, title, category, tags, attribution_status, poet_id, poets(name_am, name_en), created_at",
       { count: "exact" },
     )
-    .neq("attribution_status", "disputed")
     .order("created_at", { ascending: false });
 
   if (q) query = query.ilike("title", `%${q}%`);
@@ -66,7 +66,6 @@ export default async function PoemsPage({
     supabase
       .from("poems")
       .select("category")
-      .neq("attribution_status", "disputed")
       .not("category", "is", null),
   ]);
 
@@ -152,6 +151,9 @@ export default async function PoemsPage({
                     >
                       {poem.title}
                     </Link>
+                    {poem.attribution_status === "disputed" ? (
+                      <DisputedTag />
+                    ) : null}
                     {poet ? (
                       <span className="ml-2 text-sm text-zinc-500">
                         — {poet.name_am ?? poet.name_en}

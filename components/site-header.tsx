@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUserWithRole, isModerator } from "@/lib/moderation";
 import { signOut } from "@/app/actions";
 
 export async function SiteHeader() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUserWithRole();
+  const isStaff = user ? isModerator(user.role) : false;
 
   return (
     <header className="border-b">
@@ -40,6 +38,14 @@ export async function SiteHeader() {
               >
                 Request a poet
               </Link>
+              {isStaff ? (
+                <Link
+                  href="/moderate"
+                  className="rounded-md px-2 py-1.5 font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                >
+                  Moderate
+                </Link>
+              ) : null}
               <Link
                 href="/favorites"
                 className="text-zinc-600 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
