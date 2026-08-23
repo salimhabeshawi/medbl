@@ -162,14 +162,32 @@ export async function submitPoem(
   if (!user) return { error: "You must be logged in." };
 
   const poetId = String(formData.get("poet_id") ?? "").trim();
+  const proposedNameAm = String(
+    formData.get("proposed_poet_name_am") ?? "",
+  ).trim();
+  const proposedNameEn = String(
+    formData.get("proposed_poet_name_en") ?? "",
+  ).trim();
+  const proposedBio = String(formData.get("proposed_poet_bio") ?? "").trim();
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "");
   const category = String(formData.get("category") ?? "").trim();
   const tagsRaw = String(formData.get("tags") ?? "").trim();
   const source = String(formData.get("source") ?? "").trim();
 
-  if (!poetId) {
-    return { error: "Please select a poet from the list." };
+  // Mirror of the poem_submissions_poet_xor check constraint: exactly one
+  // of an existing poet OR a proposed new poet.
+  if (!poetId && !proposedNameAm) {
+    return {
+      error:
+        "Please select an existing poet, or add new poet details below the search box.",
+    };
+  }
+  if (poetId && proposedNameAm) {
+    return {
+      error:
+        "Either select an existing poet or propose a new one — not both.",
+    };
   }
   if (!title) return { error: "Title is required." };
   if (!body.trim()) return { error: "Poem text is required." };
@@ -180,18 +198,20 @@ export async function submitPoem(
     };
   }
 
-  // The poet_id always comes from the search-and-select control, but we
-  // re-validate it server-side: it must reference an existing poet row.
-  const { data: poet } = await supabase
-    .from("poets")
-    .select("id")
-    .eq("id", poetId)
-    .maybeSingle();
-  if (!poet) {
-    return {
-      error:
-        "Selected poet no longer exists. Please pick one from the list again.",
-    };
+  if (poetId) {
+    // The poet_id always comes from the search-and-select control, but we
+    // re-validate it server-side: it must reference an existing poet row.
+    const { data: poet } = await supabase
+      .from("poets")
+      .select("id")
+      .eq("id", poetId)
+      .maybeSingle();
+    if (!poet) {
+      return {
+        error:
+          "Selected poet no longer exists. Please pick one from the list again.",
+      };
+    }
   }
 
   const tags = tagsRaw
@@ -207,7 +227,10 @@ export async function submitPoem(
 
   const { error } = await supabase.from("poem_submissions").insert({
     submitted_by: user.id,
-    poet_id: poet.id,
+    poet_id: poetId || null,
+    proposed_poet_name_am: proposedNameAm || null,
+    proposed_poet_name_en: proposedNameEn || null,
+    proposed_poet_bio: proposedBio || null,
     title,
     body,
     category: category || null,
@@ -223,6 +246,59 @@ export async function submitPoem(
 
 function requireModeratorRole(role: string | null | undefined) {
   return role === "moderator" || role === "admin";
+}
+
+// Shared parsing/validation for the inline-editable fields on a pending
+// submission card. Used by BOTH "Save edits" and "Approve", so approving
+// publishes exactly what the moderator sees in the form.
+function buildEditableUpdates(formData: FormData): {
+  updates?: Record<string, unknown>;
+  error?: string;
+} {
+  const title = String(formData.get("title") ?? "").trim();
+  const body = String(formData.get("body") ?? "");
+  const category = String(formData.get("category") ?? "").trim();
+  const tagsRaw = String(formData.get("tags") ?? "").trim();
+  const source = String(formData.get("source") ?? "").trim();
+
+  if (!title) return { error: "Title is required." };
+  if (!body.trim()) return { error: "Poem text is required." };
+  if (!source) return { error: "Source is required." };
+
+  const updates: Record<string, unknown> = {
+    title,
+    body,
+    category: category || null,
+    tags: tagsRaw
+      ? [
+          ...new Set(
+            tagsRaw
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean),
+          ),
+        ]
+      : null,
+    source,
+  };
+
+  // Only proposed-poet cards render these fields; when present, keep the
+  // XOR constraint intact (this row has poet_id null, so name_am must
+  // stay non-empty).
+  const proposedNameAmRaw = formData.get("proposed_poet_name_am");
+  if (proposedNameAmRaw !== null) {
+    const proposedNameAm = String(proposedNameAmRaw).trim();
+    if (!proposedNameAm) {
+      return { error: "Proposed poet name (Amharic) is required." };
+    }
+    updates.proposed_poet_name_am = proposedNameAm;
+    updates.proposed_poet_name_en =
+      String(formData.get("proposed_poet_name_en") ?? "").trim() || null;
+    updates.proposed_poet_bio =
+      String(formData.get("proposed_poet_bio") ?? "").trim() || null;
+  }
+
+  return { updates };
 }
 
 export async function approveSubmission(
@@ -244,6 +320,7 @@ export async function approveSubmission(
 
   const submissionId = formData.get("submission_id");
   const attribution = formData.get("attribution_status");
+  const rawPoetId = String(formData.get("poet_id") ?? "").trim();
   if (typeof submissionId !== "string" || !submissionId) {
     return { error: "Missing submission id." };
   }
@@ -251,14 +328,32 @@ export async function approveSubmission(
     return { error: "Invalid attribution status." };
   }
 
+  // Publish what the form shows: persist the moderator's inline edits on
+  // the submission BEFORE promoting it into poems.
+  const { updates, error: parseError } = buildEditableUpdates(formData);
+  if (parseError || !updates) {
+    return { error: parseError ?? "Invalid input." };
+  }
+  const { error: saveError } = await supabase
+    .from("poem_submissions")
+    .update(updates)
+    .eq("id", submissionId);
+  if (saveError) {
+    return { error: `Could not save your edits: ${saveError.message}` };
+  }
+
+  // p_poet_id: the moderator's resolved poet — the submission's own poet,
+  // a fuzzy-matched existing poet, or null to create the proposed poet.
   const { error } = await supabase.rpc("approve_poem_submission", {
     p_submission_id: submissionId,
     p_attribution_status: attribution,
+    p_poet_id: rawPoetId || null,
   });
   if (error) {
     return { error: `Could not approve: ${error.message}` };
   }
 
+  revalidatePath("/moderate/submissions");
   revalidatePath("/moderate");
   return { success: true };
 }
@@ -301,11 +396,12 @@ export async function rejectSubmission(
     return { error: `Could not reject: ${error.message}` };
   }
 
+  revalidatePath("/moderate/submissions");
   revalidatePath("/moderate");
   return { success: true };
 }
 
-export async function approvePoetRequest(
+export async function updateSubmission(
   _prevState: FormState,
   formData: FormData,
 ): Promise<FormState> {
@@ -322,77 +418,25 @@ export async function approvePoetRequest(
     return { error: "You are not authorized to moderate." };
   }
 
-  const requestId = formData.get("request_id");
-  if (typeof requestId !== "string" || !requestId) {
-    return { error: "Missing request id." };
+  const submissionId = formData.get("submission_id");
+  if (typeof submissionId !== "string" || !submissionId) {
+    return { error: "Missing submission id." };
   }
 
-  const { data: request, error: fetchError } = await supabase
-    .from("poet_requests")
-    .select("id, requested_by, name_am, name_en, bio, status")
-    .eq("id", requestId)
-    .single();
-  if (fetchError || !request) {
-    return { error: "Could not find that poet request." };
-  }
-  if (request.status !== "pending") {
-    return { error: "This request has already been reviewed." };
-  }
-
-  const poetInsert = await supabase.from("poets").insert({
-    name_am: request.name_am,
-    name_en: request.name_en,
-    bio: request.bio,
-    verified: false,
-    created_by: request.requested_by,
-  });
-  if (poetInsert.error) {
-    return { error: `Could not create poet: ${poetInsert.error.message}` };
-  }
-
-  const { error: updateError } = await supabase
-    .from("poet_requests")
-    .update({ status: "approved", reviewed_by: user.id })
-    .eq("id", requestId);
-  if (updateError) {
-    return { error: `Poet created, but could not mark request approved: ${updateError.message}` };
-  }
-
-  revalidatePath("/moderate");
-  return { success: true };
-}
-
-export async function rejectPoetRequest(
-  _prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { error: "You must be logged in." };
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (!requireModeratorRole(profile?.role)) {
-    return { error: "You are not authorized to moderate." };
-  }
-
-  const requestId = formData.get("request_id");
-  if (typeof requestId !== "string" || !requestId) {
-    return { error: "Missing request id." };
+  const { updates, error: parseError } = buildEditableUpdates(formData);
+  if (parseError || !updates) {
+    return { error: parseError ?? "Invalid input." };
   }
 
   const { error } = await supabase
-    .from("poet_requests")
-    .update({ status: "rejected", reviewed_by: user.id })
-    .eq("id", requestId);
+    .from("poem_submissions")
+    .update(updates)
+    .eq("id", submissionId);
   if (error) {
-    return { error: `Could not reject: ${error.message}` };
+    return { error: `Could not save edits: ${error.message}` };
   }
 
-  revalidatePath("/moderate");
+  revalidatePath("/moderate/submissions");
   return { success: true };
 }
 
@@ -596,38 +640,6 @@ export async function removeDisputedPoem(
   return { success: true };
 }
 
-export async function submitPoetRequest(
-  _prevState: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "You must be logged in." };
-
-  const name_am = String(formData.get("name_am") ?? "").trim();
-  const name_en = String(formData.get("name_en") ?? "").trim();
-  const bio = String(formData.get("bio") ?? "").trim();
-  const source = String(formData.get("source") ?? "").trim();
-
-  if (!name_am) return { error: "የገጣሚው ስም (Amharic name) is required." };
-
-  const { error } = await supabase.from("poet_requests").insert({
-    requested_by: user.id,
-    name_am,
-    name_en: name_en || null,
-    bio: bio || null,
-    source: source || null,
-  });
-
-  if (error) {
-    return { error: "Could not submit your request. Please try again." };
-  }
-  return { success: true };
-}
-
 export async function reportPoem(
   _prevState: FormState,
   formData: FormData,
@@ -673,4 +685,155 @@ export async function reportPoem(
     return { error: "Could not submit your report. Please try again." };
   }
   return { success: true };
+}
+
+// Only allow same-app relative paths as redirect targets.
+function internalPath(value: string | null | undefined): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
+
+export async function savePoetProfile(
+  _prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const nameAm = String(formData.get("name_am") ?? "").trim();
+  const nameEn = String(formData.get("name_en") ?? "").trim();
+  const bio = String(formData.get("bio") ?? "").trim();
+
+  if (!nameAm) return { error: "የገጣሚው ስም (Amharic name) is required." };
+
+  const birthYearRaw = String(formData.get("birth_year") ?? "").trim();
+  let birthYear: number | null = null;
+  if (birthYearRaw) {
+    const n = Number(birthYearRaw);
+    if (!Number.isInteger(n) || n < 1000 || n > new Date().getFullYear()) {
+      return { error: "Birth year must be a valid year." };
+    }
+    birthYear = n;
+  }
+
+  const { data: poetId, error } = await supabase.rpc("upsert_my_poet_profile", {
+    p_name_am: nameAm,
+    p_name_en: nameEn || null,
+    p_birth_year: birthYear,
+    p_bio: bio || null,
+  });
+  if (error) {
+    return {
+      error: error.message || "Could not save your poet details.",
+    };
+  }
+  if (!poetId) {
+    return { error: "Could not save your poet details." };
+  }
+
+  revalidatePath("/", "layout");
+
+  // Redirect-after-save: explicit ?redirect= target wins, then the page
+  // the user came from, then home. (Account settings don't route through
+  // this action, so they never trigger this.)
+  const target =
+    internalPath(String(formData.get("redirect_to") ?? "")) ??
+    internalPath(String(formData.get("came_from") ?? "")) ??
+    "/";
+  redirect(target);
+}
+
+export type AccountFormState = {
+  error?: string;
+  success?: string;
+  needsCode?: boolean;
+};
+
+export async function changeEmail(
+  _prevState: AccountFormState,
+  formData: FormData,
+): Promise<AccountFormState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email) return { error: "New email is required." };
+
+  // Relies on Supabase's built-in secure email change: confirmation links
+  // go to BOTH the current and the new address.
+  const { error } = await supabase.auth.updateUser({ email });
+  if (error) return { error: error.message };
+
+  return {
+    success:
+      "Confirmation links were sent to both your current and your new email address. The change completes once confirmed.",
+  };
+}
+
+export async function startPasswordChange(
+  _prevState: AccountFormState,
+  formData: FormData,
+): Promise<AccountFormState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const password = String(formData.get("password") ?? "");
+  if (!password) return { error: "New password is required." };
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    if (error.code === "reauthentication_needed") {
+      // Secure password change is enabled: email the user a one-time code.
+      const { error: reauthError } = await supabase.auth.reauthenticate();
+      if (reauthError) {
+        return {
+          error: `Could not send the confirmation code: ${reauthError.message}`,
+        };
+      }
+      return {
+        needsCode: true,
+        success:
+          "We emailed you a one-time code. Enter it below to finish changing your password.",
+      };
+    }
+    return { error: error.message };
+  }
+
+  return { success: "Your password has been changed." };
+}
+
+export async function confirmPasswordChange(
+  _prevState: AccountFormState,
+  formData: FormData,
+): Promise<AccountFormState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const password = String(formData.get("password") ?? "");
+  const nonce = String(formData.get("nonce") ?? "").trim();
+  if (!password) return { error: "New password is required." };
+  if (!nonce) return { error: "Enter the one-time code we emailed you." };
+
+  const { error } = await supabase.auth.updateUser({ password, nonce });
+  if (error) return { error: error.message };
+
+  return { success: "Your password has been changed." };
 }

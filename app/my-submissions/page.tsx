@@ -28,27 +28,19 @@ export default async function MySubmissionsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: submissions, error: submissionsError }, { data: poetRequests, error: poetRequestsError }] =
-    await Promise.all([
-      supabase
-        .from("poem_submissions")
-        .select(
-          "id, title, poet_id, poets(name_am, name_en), status, rejection_reason, created_at",
-        )
-        .eq("submitted_by", user.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("poet_requests")
-        .select("id, name_am, name_en, status, created_at")
-        .eq("requested_by", user.id)
-        .order("created_at", { ascending: false }),
-    ]);
+  const { data: submissions, error: submissionsError } = await supabase
+    .from("poem_submissions")
+    .select(
+      "id, title, poet_id, proposed_poet_name_am, poets(name_am, name_en), status, rejection_reason, created_at",
+    )
+    .eq("submitted_by", user.id)
+    .order("created_at", { ascending: false });
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="mb-8 text-3xl font-bold">My submissions</h1>
 
-      <section className="mb-12">
+      <section>
         <h2 className="mb-4 text-2xl font-semibold">Poem submissions</h2>
         {submissionsError ? (
           <p className="rounded-md border border-red-200 bg-red-50 px-4 py-6 text-center text-sm text-red-700">
@@ -66,8 +58,10 @@ export default async function MySubmissionsPage() {
                     <div className="min-w-0">
                       <p className="font-medium">{sub.title}</p>
                       <p className="text-sm text-zinc-500">
-                        {poet?.name_am ?? poet?.name_en ?? "Unknown poet"} ·{" "}
-                        {new Date(sub.created_at).toLocaleDateString()}
+                        {sub.proposed_poet_name_am
+                          ? `Proposed new poet: ${sub.proposed_poet_name_am}`
+                          : poet?.name_am ?? poet?.name_en ?? "Unknown poet"}{" "}
+                        · {new Date(sub.created_at).toLocaleDateString()}
                       </p>
                     </div>
                     <StatusBadge status={sub.status} />
@@ -84,42 +78,6 @@ export default async function MySubmissionsPage() {
         ) : (
           <p className="rounded-md border border-dashed px-4 py-8 text-center text-sm text-zinc-500">
             You haven&apos;t submitted any poems yet.
-          </p>
-        )}
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-2xl font-semibold">Poet requests</h2>
-        {poetRequestsError ? (
-          <p className="rounded-md border border-red-200 bg-red-50 px-4 py-6 text-center text-sm text-red-700">
-            Could not load poet requests: {poetRequestsError.message}
-          </p>
-        ) : poetRequests && poetRequests.length > 0 ? (
-          <ul className="divide-y rounded-lg border">
-            {poetRequests.map((req) => (
-              <li key={req.id} className="px-4 py-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium">
-                      {req.name_am}
-                      {req.name_en ? (
-                        <span className="ml-2 text-sm font-normal text-zinc-500">
-                          {req.name_en}
-                        </span>
-                      ) : null}
-                    </p>
-                    <p className="text-sm text-zinc-500">
-                      {new Date(req.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <StatusBadge status={req.status} />
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="rounded-md border border-dashed px-4 py-8 text-center text-sm text-zinc-500">
-            You haven&apos;t requested any poets yet.
           </p>
         )}
       </section>

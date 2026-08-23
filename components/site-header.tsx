@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentUserWithRole, isModerator } from "@/lib/moderation";
 import { signOut } from "@/app/actions";
+import { MyProfileLink } from "./my-profile-link";
 
 export async function SiteHeader() {
   const user = await getCurrentUserWithRole();
@@ -32,12 +33,7 @@ export async function SiteHeader() {
               >
                 Submit a poem
               </Link>
-              <Link
-                href="/poets/request"
-                className="rounded-md px-2 py-1.5 font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
-              >
-                Request a poet
-              </Link>
+              <MyProfileLink className="rounded-md px-2 py-1.5 font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800" />
               {isStaff ? (
                 <Link
                   href="/moderate"

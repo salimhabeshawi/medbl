@@ -28,7 +28,6 @@ export default async function ModerateLayout({
   const nav = [
     { href: "/moderate", label: "Overview" },
     { href: "/moderate/submissions", label: "Submissions" },
-    { href: "/moderate/poet-requests", label: "Poet requests" },
     { href: "/moderate/reports", label: "Reports" },
   ];
 

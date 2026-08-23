@@ -13,16 +13,10 @@ async function count(
 export default async function ModerateOverviewPage() {
   const supabase = await createClient();
 
-  const [pendingSubmissions, pendingRequests, openReports] = await Promise.all([
+  const [pendingSubmissions, openReports] = await Promise.all([
     count(
       supabase
         .from("poem_submissions")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "pending"),
-    ),
-    count(
-      supabase
-        .from("poet_requests")
         .select("id", { count: "exact", head: true })
         .eq("status", "pending"),
     ),
@@ -39,13 +33,7 @@ export default async function ModerateOverviewPage() {
       href: "/moderate/submissions",
       label: "Pending poem submissions",
       value: pendingSubmissions,
-      hint: "Review poem text, poet link and source.",
-    },
-    {
-      href: "/moderate/poet-requests",
-      label: "Pending poet requests",
-      value: pendingRequests,
-      hint: "Approve to add a poet to the curated registry.",
+      hint: "Review poem text, poet link or proposal, and source.",
     },
     {
       href: "/moderate/reports",
@@ -58,7 +46,7 @@ export default async function ModerateOverviewPage() {
   return (
     <div>
       <h2 className="mb-6 text-2xl font-semibold">Overview</h2>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         {cards.map((card) => (
           <Link
             key={card.href}

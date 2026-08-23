@@ -1,13 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { searchPoets, type PoetResult } from "@/app/actions";
 
-export function PoetSelect() {
+export function PoetSelect({
+  value,
+  onChange,
+  onRequestNew,
+}: {
+  value: PoetResult | null;
+  onChange: (poet: PoetResult | null) => void;
+  onRequestNew?: () => void;
+}) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PoetResult[]>([]);
-  const [selected, setSelected] = useState<PoetResult | null>(null);
   const [open, setOpen] = useState(false);
   const [searching, setSearching] = useState(false);
   const [triedEmpty, setTriedEmpty] = useState(false);
@@ -16,7 +22,7 @@ export function PoetSelect() {
   const latestQueryRef = useRef<string>("");
 
   useEffect(() => {
-    if (selected) return;
+    if (value) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(async () => {
       const q = query.trim();
@@ -39,7 +45,7 @@ export function PoetSelect() {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [query, selected]);
+  }, [query, value]);
 
   useEffect(() => {
     function onDocMouseDown(e: MouseEvent) {
@@ -60,7 +66,7 @@ export function PoetSelect() {
   }
 
   function choose(poet: PoetResult) {
-    setSelected(poet);
+    onChange(poet);
     setQuery("");
     setResults([]);
     setOpen(false);
@@ -68,21 +74,22 @@ export function PoetSelect() {
   }
 
   function deselect() {
-    setSelected(null);
+    onChange(null);
     setQuery("");
   }
 
   return (
     <div ref={boxRef} className="relative">
       {/* The chosen poets.id is what actually gets submitted. There is no
-          free-text poet name field anywhere in this form. */}
-      <input type="hidden" name="poet_id" value={selected?.id ?? ""} />
+          free-text poet field here — new poets go through the separate
+          inline proposal fields rendered by the parent form. */}
+      <input type="hidden" name="poet_id" value={value?.id ?? ""} />
 
-      {selected ? (
+      {value ? (
         <div className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
           <span>
-            {selected.name_am}
-            {selected.name_en ? ` (${selected.name_en})` : ""}
+            {value.name_am}
+            {value.name_en ? ` (${value.name_en})` : ""}
           </span>
           <button
             type="button"
@@ -134,14 +141,20 @@ export function PoetSelect() {
                   </li>
                 ))
               )}
-              <li className="border-t px-3 py-2">
-                <Link
-                  href="/poets/request"
-                  className="text-xs text-zinc-500 underline hover:text-zinc-800 dark:hover:text-zinc-200"
-                >
-                  Can&apos;t find this poet? Request to add them
-                </Link>
-              </li>
+              {onRequestNew ? (
+                <li className="border-t px-3 py-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      onRequestNew();
+                    }}
+                    className="text-xs text-zinc-500 underline hover:text-zinc-800 dark:hover:text-zinc-200"
+                  >
+                    Can&apos;t find this poet? + Add poet details
+                  </button>
+                </li>
+              ) : null}
             </ul>
           ) : null}
         </>
