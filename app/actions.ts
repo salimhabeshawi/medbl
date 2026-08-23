@@ -4,6 +4,38 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+// Translate raw Supabase Auth errors into plain language before showing
+// them to users. Unknown errors fall through unchanged.
+function humanAuthError(error: { message?: string } | null | undefined): string {
+  const msg = error?.message ?? "";
+  if (/password should contain/i.test(msg)) {
+    return "That password is too weak — mix upper and lower case letters, a number, and a symbol.";
+  }
+  if (/current password/i.test(msg)) {
+    return "Your current password is incorrect.";
+  }
+  if (/reauthentication/i.test(msg)) {
+    return "For security, please log out and log back in first, then retry changing your password.";
+  }
+  if (/nonce has expired|code.?has expired|otp.*(expired|invalid|not valid)/i.test(msg)) {
+    return "That code is invalid or has expired. Go back and request a new one.";
+  }
+  const min = msg.match(/at least (\d+) characters/i)?.[1];
+  if (min) {
+    return `Password must be at least ${min} characters long.`;
+  }
+  if (/invalid login credentials/i.test(msg)) {
+    return "Email or password is incorrect.";
+  }
+  if (/email not confirmed/i.test(msg)) {
+    return "Please confirm your email address first — check your inbox for the confirmation link.";
+  }
+  if (/user already registered/i.test(msg)) {
+    return "An account with this email already exists. Try logging in instead.";
+  }
+  return msg || "Something went wrong. Please try again.";
+}
+
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
@@ -15,7 +47,7 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    redirect(`/login?error=${encodeURIComponent(humanAuthError(error))}`);
   }
 
   revalidatePath("/", "layout");
@@ -33,7 +65,7 @@ export async function signup(formData: FormData) {
   const { data: signUpData, error } = await supabase.auth.signUp(data);
 
   if (error) {
-    redirect(`/signup?error=${encodeURIComponent(error.message)}`);
+    redirect(`/signup?error=${encodeURIComponent(humanAuthError(error))}`);
   }
 
   revalidatePath("/", "layout");
@@ -771,7 +803,7 @@ export async function changeEmail(
   // Relies on Supabase's built-in secure email change: confirmation links
   // go to BOTH the current and the new address.
   const { error } = await supabase.auth.updateUser({ email });
-  if (error) return { error: error.message };
+  if (error) return { error: humanAuthError(error) };
 
   return {
     success:
@@ -779,7 +811,11 @@ export async function changeEmail(
   };
 }
 
-export async function startPasswordChange(
+// INTERIM simple password change: current + new password, no email step.
+// The emailed-code verification flow (signInWithOtp → verifyOtp → update)
+// is intentionally deferred until the project has a domain + custom SMTP;
+// restore it then (see git history / AGENTS.md note).
+export async function changePassword(
   _prevState: AccountFormState,
   formData: FormData,
 ): Promise<AccountFormState> {
@@ -793,47 +829,15 @@ export async function startPasswordChange(
   const password = String(formData.get("password") ?? "");
   if (!password) return { error: "New password is required." };
 
-  const { error } = await supabase.auth.updateUser({ password });
+  // "Require current password when updating" is enabled in Supabase Auth,
+  // so updateUser fails without it.
+  const currentPassword = String(formData.get("current_password") ?? "");
 
-  if (error) {
-    if (error.code === "reauthentication_needed") {
-      // Secure password change is enabled: email the user a one-time code.
-      const { error: reauthError } = await supabase.auth.reauthenticate();
-      if (reauthError) {
-        return {
-          error: `Could not send the confirmation code: ${reauthError.message}`,
-        };
-      }
-      return {
-        needsCode: true,
-        success:
-          "We emailed you a one-time code. Enter it below to finish changing your password.",
-      };
-    }
-    return { error: error.message };
-  }
-
-  return { success: "Your password has been changed." };
-}
-
-export async function confirmPasswordChange(
-  _prevState: AccountFormState,
-  formData: FormData,
-): Promise<AccountFormState> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "You must be logged in." };
-
-  const password = String(formData.get("password") ?? "");
-  const nonce = String(formData.get("nonce") ?? "").trim();
-  if (!password) return { error: "New password is required." };
-  if (!nonce) return { error: "Enter the one-time code we emailed you." };
-
-  const { error } = await supabase.auth.updateUser({ password, nonce });
-  if (error) return { error: error.message };
+  const { error } = await supabase.auth.updateUser({
+    password,
+    ...(currentPassword ? { current_password: currentPassword } : {}),
+  });
+  if (error) return { error: humanAuthError(error) };
 
   return { success: "Your password has been changed." };
 }

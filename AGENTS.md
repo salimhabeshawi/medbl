@@ -149,13 +149,16 @@ create/edit their OWN linked poet record this way, never anyone else's.
   Supabase Auth settings, and do not build a custom confirmation flow;
   rely on this built-in behavior. Show the user a "check your email to
   confirm" message after calling it.
-- Password change: requires confirmation via the registered email.
-  Enable "Secure password change" in Supabase Auth project settings so
-  that `updateUser({ password })` requires reauthentication. Flow:
-  attempt the update, catch the `reauthentication_needed` error, call
-  `supabase.auth.reauthenticate()` (sends a one-time code to the user's
-  registered email), prompt the user for that code, then retry
-  `updateUser({ password, nonce: <code> })` to finalize.
+- Password change: INTERIM simple flow — current password + new password
+  (`updateUser({ password, current_password })`), no email step. The
+  emailed-code verification (send OTP via `signInWithOtp`, verify with
+  `verifyOtp(type: 'email')`, then update) is deliberately deferred until
+  the project has a domain + custom SMTP; it was fully designed and works
+  — restore it from git history when SMTP exists. Do NOT rely on the
+  "Secure password change" + nonce mechanism as a substitute: GoTrue only
+  verifies the nonce for sessions older than 24 hours, making the check
+  fake for fresh sessions. The current-password field is required because
+  "Require current password when updating" is enabled in Supabase Auth.
 
 **Redirect-after-save behavior** (important, don't default to always
 redirecting to poem submission):
