@@ -30,8 +30,8 @@ export default async function Home() {
       <section className="mb-12 text-center">
         <h1 className="mb-3 text-4xl font-bold tracking-tight">Medbl</h1>
         <p className="mx-auto max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">
-          የአማርኛ ግጥም መድረክ — browse poets and poems, search the archive, and
-          discover Amharic poetry.
+          Amharic poetry platform — browse poets and poems, search the archive,
+          and discover Amharic poetry.
         </p>
         <div className="mt-6 flex items-center justify-center gap-4">
           <Link

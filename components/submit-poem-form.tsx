@@ -198,7 +198,7 @@ export function SubmitPoemForm() {
             autoComplete="off"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            placeholder="e.g. ፍቅር, ባህል"
+            placeholder="e.g. love, culture"
             className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
           />
         </label>
@@ -210,7 +210,7 @@ export function SubmitPoemForm() {
             autoComplete="off"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
-            placeholder="Comma separated, e.g. ፍቅር, modern"
+            placeholder="Comma separated, e.g. love, modern"
             className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
           />
         </label>

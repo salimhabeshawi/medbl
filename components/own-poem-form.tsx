@@ -77,7 +77,7 @@ export function OwnPoemForm({ poetId }: { poetId: string }) {
             autoComplete="off"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            placeholder="e.g. ፍቅር, ባህል"
+            placeholder="e.g. love, culture"
             className={inputClass}
           />
         </label>
@@ -89,7 +89,7 @@ export function OwnPoemForm({ poetId }: { poetId: string }) {
             autoComplete="off"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
-            placeholder="Comma separated, e.g. ፍቅር, modern"
+            placeholder="Comma separated, e.g. love, modern"
             className={inputClass}
           />
         </label>

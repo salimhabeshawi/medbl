@@ -741,7 +741,7 @@ export async function savePoetProfile(
   const nameEn = String(formData.get("name_en") ?? "").trim();
   const bio = String(formData.get("bio") ?? "").trim();
 
-  if (!nameAm) return { error: "የገጣሚው ስም (Amharic name) is required." };
+  if (!nameAm) return { error: "The poet's Amharic name is required." };
 
   const birthYearRaw = String(formData.get("birth_year") ?? "").trim();
   let birthYear: number | null = null;

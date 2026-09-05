@@ -10,11 +10,11 @@ const notoSansEthiopic = Noto_Sans_Ethiopic({
 
 export const metadata: Metadata = {
   title: {
-    default: "Medbl — የአማርኛ ግጥም መድረክ",
+    default: "Medbl — Amharic Poetry Platform",
     template: "%s | Medbl",
   },
   description:
-    "የአማርኛ ግጥም ማዕከል — አንብብ፣ አክብር፣ አጋራ።",
+    "Amharic poetry center — read, honor, share.",
 };
 
 export default function RootLayout({
@@ -24,14 +24,14 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="am"
+      lang="en"
       className={`${notoSansEthiopic.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <footer className="border-t py-6 text-center text-sm text-zinc-500">
-          Medbl — የአማርኛ ግጥም መድረክ
+          Medbl — Amharic Poetry Platform
         </footer>
       </body>
     </html>

@@ -15,13 +15,13 @@ export async function SiteHeader() {
         </Link>
         <nav className="flex items-center gap-6 text-sm text-zinc-600 dark:text-zinc-300">
           <Link href="/" className="hover:text-zinc-950 dark:hover:text-white">
-            መነሻ
+            Home
           </Link>
           <Link href="/poets" className="hover:text-zinc-950 dark:hover:text-white">
-            ገጣሚዎች
+            Poets
           </Link>
           <Link href="/poems" className="hover:text-zinc-950 dark:hover:text-white">
-            ግጥሞች
+            Poems
           </Link>
         </nav>
         <div className="flex items-center gap-4 text-sm">
@@ -46,7 +46,7 @@ export async function SiteHeader() {
                 href="/favorites"
                 className="text-zinc-600 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
               >
-                ከምርጦቼ
+                Favorites
               </Link>
               <span className="max-w-[200px] truncate text-zinc-600 dark:text-zinc-300">
                 {user.email}
