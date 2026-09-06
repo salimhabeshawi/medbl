@@ -44,6 +44,14 @@ auth funnel is not worth it. Anything related to "who is this user as a
 poet" belongs exclusively on `/profile`, filled in after signup, only
 if and when the user actually wants to submit their own poem.
 
+A Google OAuth sign-in option is also available on `/login` and
+`/signup` (a "Continue with Google" button). This is a pure
+alternative sign-in method — it adds no fields to the email/password
+forms. The flow: the browser client calls
+`signInWithOAuth({ provider: 'google', redirectTo: <origin>/auth/callback })`,
+and `app/auth/callback/route.ts` exchanges the PKCE code for a session
+server-side, honoring a `next` query param if present.
+
 The `handle_new_user()` trigger on `auth.users` only creates a
 `profiles` row (`role` default `member`, `poet_id` null). It does not
 read any poet-related metadata and does not create a `poets` row. Do
@@ -285,6 +293,8 @@ through the same moderation queue as everything else.
 10. `/profile` page (poet details + account settings) and the "my own
     poem" redirect-to-complete-profile flow — IN PROGRESS (see prompt
     used to implement this; once done, mark this line "done")
+11. Google OAuth sign-in (button on login/signup + `/auth/callback`
+    PKCE exchange) — done
 
 ## Guidelines for future changes
 

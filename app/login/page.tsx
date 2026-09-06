@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { login } from "@/app/actions";
+import { GoogleAuthButton } from "@/components/google-auth-button";
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{ error?: string; message?: string; next?: string }>;
 }) {
-  const { error, message } = await searchParams;
+  const { error, message, next } = await searchParams;
 
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
@@ -23,6 +24,14 @@ export default async function LoginPage({
             {message}
           </p>
         ) : null}
+
+        <GoogleAuthButton next={typeof next === "string" ? next : undefined} />
+
+        <div className="my-6 flex items-center gap-3 text-xs text-zinc-400">
+          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700" />
+          or
+          <div className="h-px flex-1 bg-zinc-200 dark:bg-zinc-700" />
+        </div>
 
         <form action={login} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1 text-sm font-medium">
