@@ -5,6 +5,7 @@ import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 import { Button } from "@/components/ui/button";
+import { SubmissionMenu } from "./submission-menu";
 
 type NavIcon =
   | "home"
@@ -12,6 +13,7 @@ type NavIcon =
   | "poets"
   | "submit"
   | "favorites"
+  | "submissions"
   | "profile"
   | "moderate";
 
@@ -32,12 +34,7 @@ export async function SiteHeader() {
     { href: "/", label: "Home", icon: "home" },
     { href: "/poems", label: "Poems", icon: "poems" },
     { href: "/poets", label: "Poets", icon: "poets" },
-    ...(user
-      ? [{ href: "/submit", label: "Submit a Poem", icon: "submit" as const }]
-      : []),
-    ...(user
-      ? [{ href: "/favorites", label: "Favorites", icon: "favorites" as const }]
-      : []),
+    ...(user ? [{ href: "/favorites", label: "Favorites", icon: "favorites" as const }] : []),
     ...(user
       ? [{ href: "/profile", label: "Profile", icon: "profile" as const }]
       : []),
@@ -52,12 +49,7 @@ export async function SiteHeader() {
     { href: "/", label: "Home", icon: "home" },
     { href: "/poems", label: "Poems", icon: "poems" },
     { href: "/poets", label: "Poets", icon: "poets" },
-    ...(user
-      ? [{ href: "/submit", label: "Submit a Poem", icon: "submit" as const }]
-      : []),
-    ...(user
-      ? [{ href: "/favorites", label: "Favorites", icon: "favorites" as const }]
-      : []),
+    ...(user ? [{ href: "/favorites", label: "Favorites", icon: "favorites" as const }] : []),
     ...(isStaff
       ? [{ href: "/moderate", label: "Moderate", icon: "moderate" as const }]
       : []),
@@ -74,7 +66,7 @@ export async function SiteHeader() {
         </Link>
 
         {/* Desktop nav (md and up) - no hamburger */}
-        <DesktopNav links={browseLinks} />
+        <div className="flex items-center gap-4"><DesktopNav links={browseLinks} />{user ? <div className="hidden md:block"><SubmissionMenu /></div> : null}</div>
 
         <div className="flex items-center gap-3">
           {/* Desktop auth controls */}

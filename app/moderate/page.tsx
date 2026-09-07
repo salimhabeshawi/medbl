@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ArrowRight, FileCheck2, Flag } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { CategoryManager } from "@/components/category-manager";
 
 export const metadata = { title: "Moderation" };
 
@@ -29,6 +30,7 @@ export default async function ModerateOverviewPage() {
         .eq("status", "open"),
     ),
   ]);
+  const { data: categoryRows } = await supabase.from("categories").select("id, name").order("name");
 
   const cards = [
     {
@@ -51,7 +53,7 @@ export default async function ModerateOverviewPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         {cards.map((card) => (
           <Link key={card.href} href={card.href}>
-            <Card className="h-full border-primary/15 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg"><CardContent className="p-6">
+            <Card className="content-card h-full border-primary/15"><CardContent className="p-6">
             <div className="mb-5 flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">{card.href.includes("reports") ? <Flag className="size-5" /> : <FileCheck2 className="size-5" />}</div>
             <p className="text-4xl font-semibold tracking-tight">
               {card.value === null ? "–" : card.value}
@@ -63,6 +65,7 @@ export default async function ModerateOverviewPage() {
           </Link>
         ))}
       </div>
+      <CategoryManager categories={(categoryRows ?? []) as { id: string; name: string }[]} />
     </div>
   );
 }

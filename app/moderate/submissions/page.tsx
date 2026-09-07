@@ -32,6 +32,13 @@ export default async function ModerateSubmissionsPage() {
   }
 
   const submissions = data ?? [];
+  const { data: categoryRows } = await supabase.from("categories").select("name").order("name");
+  const categories = [
+    ...new Set([
+      ...(categoryRows ?? []).map((category) => category.name),
+      ...submissions.map((submission) => submission.category).filter(Boolean),
+    ]),
+  ] as string[];
 
   // For proposals, fetch the top fuzzy-matched existing poets so the
   // moderator can avoid creating a duplicate registry entry.
@@ -82,6 +89,7 @@ export default async function ModerateSubmissionsPage() {
                 proposal={proposal}
                 matches={matchesBySubmission.get(sub.id) ?? []}
                 createdAt={sub.created_at}
+                categories={categories}
               />
             );
           })}

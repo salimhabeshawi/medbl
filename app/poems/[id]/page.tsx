@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
+import { getFavoriteCounts } from "@/lib/favorites";
 import { PoemActions } from "@/components/poem-actions";
 import { ReportPoem } from "@/components/report-poem";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +55,7 @@ export default async function PoemPage({
     name_am: string;
     name_en: string;
   }>(poem.poets);
+  const favoriteCounts = await getFavoriteCounts([poem.id]);
 
   const {
     data: { user },
@@ -105,6 +107,7 @@ export default async function PoemPage({
               title={poem.title}
               body={poem.body}
               initialFavorited={initialFavorited}
+              initialFavoriteCount={favoriteCounts.get(poem.id) ?? 0}
               canFavorite={Boolean(user)}
             />
           </div>

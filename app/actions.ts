@@ -101,7 +101,7 @@ export async function signOut() {
 
 export async function toggleFavorite(
   poemId: string,
-): Promise<{ favorited: boolean; error?: string }> {
+): Promise<{ favorited: boolean; favoriteCount?: number; error?: string }> {
   const supabase = await createClient();
 
   const {
@@ -129,7 +129,10 @@ export async function toggleFavorite(
         error: "Could not remove favorite. Please try again.",
       };
     }
-    return { favorited: false };
+    const { data: counts } = await supabase.rpc("get_poem_favorite_counts", {
+      p_poem_ids: [poemId],
+    });
+    return { favorited: false, favoriteCount: Number(counts?.[0]?.favorite_count ?? 0) };
   }
 
   const { error } = await supabase
@@ -145,7 +148,10 @@ export async function toggleFavorite(
       error: "Could not add favorite. Please try again.",
     };
   }
-  return { favorited: true };
+  const { data: counts } = await supabase.rpc("get_poem_favorite_counts", {
+    p_poem_ids: [poemId],
+  });
+  return { favorited: true, favoriteCount: Number(counts?.[0]?.favorite_count ?? 0) };
 }
 
 function escapeLike(value: string): string {
@@ -216,51 +222,84 @@ function normalizePoemResults(rows: unknown[]): UniversalPoemResult[] {
   });
 }
 
-export async function searchPoems(query: string): Promise<UniversalPoemResult[]> {
+export async function searchPoems(query: string, category?: string): Promise<UniversalPoemResult[]> {
   const supabase = await createClient();
   const trimmed = query.trim();
-  if (!trimmed) return [];
+  const selectedCategory = category?.trim();
+  if (!trimmed && !selectedCategory) return [];
 
   const escaped = escapeLike(trimmed);
-  const rpcResult = await supabase.rpc("search_poems", {
-    p_query: trimmed,
-    p_limit: 30,
-  });
-  if (!rpcResult.error && rpcResult.data && rpcResult.data.length > 0) {
-    return normalizePoemResults(rpcResult.data);
+  if (!selectedCategory) {
+    const rpcResult = await supabase.rpc("search_poems", { p_query: trimmed, p_limit: 30 });
+    if (!rpcResult.error && rpcResult.data && rpcResult.data.length > 0) {
+      return normalizePoemResults(rpcResult.data);
+    }
   }
 
-  // Keep search functional while a new migration is waiting to be deployed.
-  const { data } = await supabase
+  let queryBuilder = supabase
     .from("poems")
-    .select(
-      "id, title, body, category, tags, attribution_status, poets(name_am, name_en)",
-    )
+    .select("id, title, body, category, tags, attribution_status, poets(name_am, name_en)")
     .neq("attribution_status", "disputed")
-    .or(
-      `title.ilike.%${escaped}%,body.ilike.%${escaped}%,category.ilike.%${escaped}%`,
-    )
-    .order("created_at", { ascending: false })
-    .limit(50);
+    .order("created_at", { ascending: false });
+  if (trimmed) queryBuilder = queryBuilder.or(`title.ilike.%${escaped}%,body.ilike.%${escaped}%,category.ilike.%${escaped}%`);
+  if (selectedCategory) queryBuilder = queryBuilder.eq("category", selectedCategory);
+  const { data } = await queryBuilder.limit(50);
 
   const needle = trimmed.toLocaleLowerCase();
-  return normalizePoemResults(data ?? []).filter((poem) =>
-    [
-      poem.title,
-      poem.body,
-      poem.category,
-      ...(poem.tags ?? []),
-      poem.poet_name_am,
-      poem.poet_name_en,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLocaleLowerCase()
-      .includes(needle),
-  );
+  return normalizePoemResults(data ?? []).filter((poem) => !needle || [poem.title, poem.body, poem.category, ...(poem.tags ?? []), poem.poet_name_am, poem.poet_name_en].filter(Boolean).join(" ").toLocaleLowerCase().includes(needle));
 }
 
 export type FormState = { error?: string; success?: boolean };
+
+export type CategoryFormState = { error?: string; success?: string };
+
+export async function createCategory(
+  _prevState: CategoryFormState,
+  formData: FormData,
+): Promise<CategoryFormState> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (!requireModeratorRole(profile?.role)) {
+    return { error: "You are not authorized to add categories." };
+  }
+
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return { error: "Category name is required." };
+
+  const { error } = await supabase.from("categories").insert({
+    name,
+    created_by: user.id,
+  });
+  if (error?.code === "23505") return { error: "That category already exists." };
+  if (error) return { error: "Could not add category." };
+  revalidatePath("/submit");
+  revalidatePath("/moderate");
+  return { success: "Category added." };
+}
+
+export async function deleteCategory(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  if (!requireModeratorRole(profile?.role)) return;
+  const categoryId = String(formData.get("category_id") ?? "").trim();
+  if (!categoryId) return;
+  await supabase.rpc("delete_category", { p_category_id: categoryId });
+  revalidatePath("/moderate");
+  revalidatePath("/submit");
+}
+
+function categoryNames(values: { name: string }[] | null): string[] {
+  return (values ?? []).map((category) => category.name);
+}
 
 export async function submitPoem(
   _prevState: FormState,
@@ -285,7 +324,12 @@ export async function submitPoem(
   const body = String(formData.get("body") ?? "");
   const category = String(formData.get("category") ?? "").trim();
   const tagsRaw = String(formData.get("tags") ?? "").trim();
-  const source = String(formData.get("source") ?? "").trim();
+  const isOwnSubmission = formData.get("submission_mode") === "own";
+  const sourceInput = String(formData.get("source") ?? "").trim();
+  const source = sourceInput || (isOwnSubmission ? "Personal knowledge" : "");
+
+  const { data: categoryRows } = await supabase.from("categories").select("name");
+  const categories = categoryNames(categoryRows);
 
   // Mirror of the poem_submissions_poet_xor check constraint: exactly one
   // of an existing poet OR a proposed new poet.
@@ -303,11 +347,14 @@ export async function submitPoem(
   }
   if (!title) return { error: "Title is required." };
   if (!body.trim()) return { error: "Poem text is required." };
-  if (!source) {
+  if (!source && !isOwnSubmission) {
     return {
       error:
         "Source is required — it helps our moderators verify attribution.",
     };
+  }
+  if (category && !categories.includes(category)) {
+    return { error: "Please choose a category from the list." };
   }
 
   if (poetId) {

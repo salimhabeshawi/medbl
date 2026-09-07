@@ -5,12 +5,14 @@ import { firstRelation } from "@/lib/relations";
 import { FavoriteRow } from "@/components/favorite-row";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
+import { getFavoriteCounts } from "@/lib/favorites";
 
 export const metadata: Metadata = { title: "My favorites" };
 
 type PoemRow = {
   id: string;
   title: string;
+  body: string;
   category: string | null;
   tags: string[] | null;
   poets:
@@ -38,7 +40,7 @@ export default async function FavoritesPage({
   const { data: favorites, error } = await supabase
     .from("favorites")
     .select(
-      "id, poem_id, created_at, poems(id, title, category, tags, poets(name_am, name_en))",
+      "id, poem_id, created_at, poems(id, title, body, category, tags, poets(name_am, name_en))",
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
@@ -62,6 +64,7 @@ export default async function FavoritesPage({
           .includes(q),
       )
     : rows;
+  const favoriteCounts = await getFavoriteCounts(rows.map((row) => row.poem.id));
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
@@ -73,7 +76,7 @@ export default async function FavoritesPage({
       ) : filteredRows.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredRows.map((row) => (
-            <FavoriteRow key={row.poem.id} poem={row.poem} poet={row.poet} />
+            <FavoriteRow key={row.poem.id} poem={row.poem} poet={row.poet} favoriteCount={favoriteCounts.get(row.poem.id) ?? 0} />
           ))}
         </div>
       ) : (

@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserRound, LogOut } from "lucide-react";
+import { UserRound, ClipboardList, LogOut } from "lucide-react";
 
 function initials(email?: string): string {
   if (!email) return "U";
@@ -64,6 +64,12 @@ export function UserMenu({
             <Link href={`/profile?redirect=${redirectParam}`}>
               <UserRound className="text-primary" />
               Profile
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/my-submissions">
+              <ClipboardList className="text-primary" />
+              My submissions
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>

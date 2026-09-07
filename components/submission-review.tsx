@@ -9,6 +9,8 @@ import {
 import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import { CardHeader, CardTitle } from "./ui/card";
+import { CategorySelect } from "./category-select";
+import { TagInput } from "./tag-input";
 
 type PoetMatch = {
   id: string;
@@ -28,6 +30,7 @@ type Props = {
   proposal: { nameAm: string; nameEn: string | null; bio: string | null } | null;
   matches: PoetMatch[];
   createdAt: string;
+  categories: string[];
 };
 
 const inputClass =
@@ -45,6 +48,7 @@ export function SubmissionReview({
   proposal,
   matches,
   createdAt,
+  categories,
 }: Props) {
   const [updateState, updateFormAction, updatePending] = useActionState(
     updateSubmission,
@@ -61,8 +65,6 @@ export function SubmissionReview({
 
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
-  const [category, setCategory] = useState(initialCategory ?? "");
-  const [tagsText, setTagsText] = useState((tags ?? []).join(" "));
   const [source, setSource] = useState(initialSource);
   const [proposedNameAm, setProposedNameAm] = useState(
     proposal?.nameAm ?? "",
@@ -222,23 +224,11 @@ export function SubmissionReview({
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-2 text-sm font-medium">
             Category
-            <input
-              type="text"
-              name="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className={inputClass}
-            />
+            <CategorySelect categories={categories} defaultValue={initialCategory ?? ""} />
           </label>
           <label className="flex flex-col gap-2 text-sm font-medium">
             Tags (space separated)
-            <input
-              type="text"
-              name="tags"
-              value={tagsText}
-              onChange={(e) => setTagsText(e.target.value)}
-              className={inputClass}
-            />
+            <TagInput name="tags" initialTags={tags ?? []} />
           </label>
         </div>
 

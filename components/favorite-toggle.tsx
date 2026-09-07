@@ -15,13 +15,16 @@ import { toast } from "sonner";
 export function FavoriteToggle({
   poemId,
   initialFavorited,
+  initialFavoriteCount = 0,
   onUnfavorited,
 }: {
   poemId: string;
   initialFavorited: boolean;
+  initialFavoriteCount?: number;
   onUnfavorited?: () => void;
 }) {
   const [favorited, setFavorited] = useState(initialFavorited);
+  const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inFlight = useRef(false);
@@ -46,11 +49,12 @@ export function FavoriteToggle({
     }
 
     setFavorited(result.favorited);
+    if (result.favoriteCount !== undefined) setFavoriteCount(result.favoriteCount);
     if (!result.favorited) onUnfavorited?.();
   }
 
   return (
-    <span className="inline-flex flex-col items-end gap-0.5">
+    <span className="inline-flex items-center gap-2">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -85,6 +89,9 @@ export function FavoriteToggle({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+      <span className="min-w-5 text-center text-xs font-medium text-muted-foreground" aria-label={`${favoriteCount} likes`}>
+        {favoriteCount}
+      </span>
       {error ? <span className="sr-only">{error}</span> : null}
     </span>
   );

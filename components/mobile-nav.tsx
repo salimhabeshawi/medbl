@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import {
   BookOpen,
+  ClipboardList,
   Heart,
   Home,
   LogIn,
@@ -37,6 +38,7 @@ type LinkDef = {
     | "poets"
     | "submit"
     | "favorites"
+    | "submissions"
     | "profile"
     | "moderate";
 };
@@ -47,6 +49,7 @@ const icons = {
   poets: UsersRound,
   submit: Plus,
   favorites: Heart,
+  submissions: ClipboardList,
   profile: UserRound,
   moderate: ShieldCheck,
 };
@@ -70,7 +73,7 @@ export function MobileNav({
   const [open, setOpen] = useState(false);
   const redirectParam = encodeURIComponent(pathname);
 
-  const primaryLinks = links.filter((l) => l.href !== "/profile");
+  const primaryLinks = links.filter((l) => l.href !== "/profile" && l.href !== "/submit" && l.href !== "/my-submissions");
   const profileLink = links.find((l) => l.href === "/profile");
 
   return (
@@ -148,6 +151,7 @@ export function MobileNav({
             </>
           ) : null}
         </nav>
+        {role ? <div className="border-t border-background/15 px-4 py-3"><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Submissions</p><div className="flex flex-col gap-1"><SheetClose asChild><Link href="/submit" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10"><Plus className="size-4 text-primary" /> Submit a poem</Link></SheetClose><SheetClose asChild><Link href="/my-submissions" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10"><ClipboardList className="size-4 text-primary" /> My submissions</Link></SheetClose></div></div> : null}
         <ThemeToggle variant="mobile" />
         <div className="mt-auto flex flex-col gap-2 border-t border-background/15 p-4">
           {role ? (

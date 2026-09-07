@@ -89,11 +89,11 @@ export function PoetSelect({
       <input type="hidden" name="poet_id" value={value?.id ?? ""} />
 
       {value ? (
-        <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-accent/30 px-3 py-2.5 text-sm">
-          <span>
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-card px-3 py-3 text-sm shadow-sm">
+          <span className="flex min-w-0 items-center gap-2"><span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Search className="size-3.5" /></span><span className="truncate font-medium">
             {value.name_am}
             {value.name_en ? ` (${value.name_en})` : ""}
-          </span>
+          </span></span>
           <Button
             type="button"
             onClick={deselect}
@@ -120,7 +120,7 @@ export function PoetSelect({
             className="h-11 pl-9"
           /></div>
           {open ? (
-            <ul className="absolute z-10 mt-2 w-full overflow-hidden rounded-lg border border-primary/20 bg-card shadow-xl">
+            <ul className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-primary/15 bg-card p-1 shadow-xl">
               {searching ? (
                 <li className="px-3 py-3 text-sm text-muted-foreground">
                   Searching…
@@ -135,12 +135,9 @@ export function PoetSelect({
                     <button
                       type="button"
                       onClick={() => choose(poet)}
-                      className="flex w-full items-baseline gap-2 px-3 py-3 text-left text-sm transition hover:bg-accent"
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm transition hover:bg-accent"
                     >
-                      <span className="font-medium">{poet.name_am}</span>
-                      {poet.name_en ? (
-                        <span className="text-muted-foreground">{poet.name_en}</span>
-                      ) : null}
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary/15 text-secondary"><UserRoundPlus className="size-4" /></span><span><span className="block font-medium">{poet.name_am}</span>{poet.name_en ? <span className="block text-xs text-muted-foreground">{poet.name_en}</span> : null}</span>
                     </button>
                   </li>
                 ))

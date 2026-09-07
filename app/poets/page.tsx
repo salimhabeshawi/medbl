@@ -47,9 +47,9 @@ export default async function PoetsPage({
           {poets.map((poet) => (
             <Card
               key={poet.id}
-              className="border border-border bg-card shadow-none transition hover:border-primary/50 hover:bg-background/20"
+              className="content-card border border-border bg-card shadow-none"
             >
-              <Link href={`/poets/${poet.id}`} className="block p-5 text-left transition hover:bg-accent/20">
+              <Link href={`/poets/${poet.id}`} className="block p-5 text-left">
                 <div className="font-serif text-lg font-semibold text-foreground">
                   {poet.name_am}
                 </div>

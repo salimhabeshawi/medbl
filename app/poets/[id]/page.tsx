@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
+import { getCurrentUser, getFavoriteCounts, getFavoritePoemIds } from "@/lib/favorites";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { DisputedTag } from "@/components/disputed-tag";
 import { EmptyState } from "@/components/empty-state";
@@ -41,7 +41,7 @@ export default async function PoetPage({
 
   const { data: poems } = await supabase
     .from("poems")
-    .select("id, title, category, attribution_status, created_at")
+    .select("id, title, body, category, attribution_status, created_at")
     .eq("poet_id", id)
     .order("created_at", { ascending: false });
 
@@ -52,6 +52,7 @@ export default async function PoetPage({
 
   const user = await getCurrentUser();
   const favIds = await getFavoritePoemIds((poems ?? []).map((p) => p.id));
+  const favoriteCounts = await getFavoriteCounts((poems ?? []).map((p) => p.id));
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -74,9 +75,10 @@ export default async function PoetPage({
             {poems.map((poem) => (
               <Card
                 key={poem.id}
-                className="border-primary/15 shadow-sm transition hover:-translate-y-1 hover:border-primary/50 hover:bg-accent/40 hover:shadow-lg"
+                className="content-card relative border-primary/15 shadow-sm"
               >
-                <CardContent className="flex items-center justify-between gap-4 p-5"><div className="min-w-0">
+                <Link href={`/poems/${poem.id}`} className="absolute inset-0 z-0 rounded-xl" aria-label={`Open ${poem.title}`} />
+                <CardContent className="relative z-10 flex items-center justify-between gap-4 p-5"><div className="pointer-events-none min-w-0">
                   <Link
                     href={`/poems/${poem.id}`}
                     className="font-medium hover:underline"
@@ -91,12 +93,14 @@ export default async function PoetPage({
                       {poem.category}
                     </span>
                   ) : null}
+                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">{poem.body.split(/\r?\n/).slice(0, 4).join("\n").trim()}</p>
                 </div>
                 {user ? (
-                  <FavoriteToggle
+                  <span className="relative z-10 pointer-events-auto"><FavoriteToggle
                     poemId={poem.id}
                     initialFavorited={favIds.has(poem.id)}
-                  />
+                    initialFavoriteCount={favoriteCounts.get(poem.id) ?? 0}
+                  /></span>
                 ) : null}
                 </CardContent>
               </Card>

@@ -8,8 +8,10 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { CategorySelect } from "./category-select";
+import { TagInput } from "./tag-input";
 
-export function SubmitPoemForm() {
+export function SubmitPoemForm({ categories }: { categories: string[] }) {
   const [state, formAction, pending] = useActionState(
     submitPoem,
     {} as { error?: string; success?: boolean },
@@ -24,8 +26,6 @@ export function SubmitPoemForm() {
   const [proposedBio, setProposedBio] = useState("");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [category, setCategory] = useState("");
-  const [tags, setTags] = useState("");
   const [source, setSource] = useState("");
   const [clientError, setClientError] = useState<string | null>(null);
 
@@ -127,7 +127,7 @@ export function SubmitPoemForm() {
         <CardContent className="space-y-5 pt-5">
           <label className="space-y-2 text-sm font-medium"><span>Title</span><Input type="text" name="title" required autoComplete="off" value={title} onChange={(e) => setTitle(e.target.value)} /></label>
           <label className="space-y-2 text-sm font-medium"><span>Poem text</span><Textarea name="body" required rows={12} value={body} onChange={(e) => setBody(e.target.value)} placeholder="Lines are preserved exactly as written." className="min-h-64 whitespace-pre-wrap leading-relaxed" /></label>
-          <div className="grid gap-5 sm:grid-cols-2"><label className="space-y-2 text-sm font-medium"><span>Category</span><Input type="text" name="category" autoComplete="off" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. love, culture" /></label><label className="space-y-2 text-sm font-medium"><span>Tags</span><Input type="text" name="tags" autoComplete="off" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="Space separated, e.g. love modern" /></label></div>
+          <div className="grid gap-5 sm:grid-cols-2"><label className="space-y-2 text-sm font-medium"><span>Category</span><CategorySelect categories={categories} /></label><label className="space-y-2 text-sm font-medium"><span>Tags</span><TagInput /></label></div>
           <label className="space-y-2 text-sm font-medium"><span>Source</span><Input type="text" name="source" required autoComplete="off" value={source} onChange={(e) => setSource(e.target.value)} placeholder={proposeMode ? "Book, website, personal knowledge..." : "Book, website, personal knowledge, oral tradition..."} /><span className="block text-xs font-normal text-muted-foreground">This helps moderators verify attribution before publishing.</span></label>
           <Button type="submit" disabled={pending} size="lg" className="w-full sm:w-auto">{pending ? "Submitting..." : "Submit for review"}</Button>
         </CardContent>

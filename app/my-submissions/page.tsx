@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
 import { EmptyState } from "@/components/empty-state";
@@ -38,6 +39,7 @@ export default async function MySubmissionsPage() {
 
       <section>
         <h2 className="mb-4 font-serif text-2xl font-semibold">Poem submissions</h2>
+        <Link href="/submit" className="mb-4 inline-flex text-sm font-medium text-primary hover:underline">Submit a new poem</Link>
         {submissionsError ? (
           <EmptyState title="Could not load submissions" description={submissionsError.message} />
         ) : submissions && submissions.length > 0 ? (

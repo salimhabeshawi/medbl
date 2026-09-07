@@ -2,19 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
-import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
-import { FavoriteToggle } from "@/components/favorite-toggle";
-import { DisputedTag } from "@/components/disputed-tag";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { getCurrentUser, getFavoriteCounts, getFavoritePoemIds } from "@/lib/favorites";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
+import { PoemCard } from "@/components/poem-card";
+import { PostPoemAction } from "@/components/post-poem-action";
 
 export const metadata: Metadata = { title: "Poems" };
 
@@ -60,7 +52,7 @@ export default async function PoemsPage({
   let query = supabase
     .from("poems")
     .select(
-      "id, title, category, tags, attribution_status, poet_id, poets(name_am, name_en), created_at",
+      "id, title, body, category, tags, attribution_status, poet_id, poets(name_am, name_en), created_at",
       { count: "exact" },
     )
     .neq("attribution_status", "disputed")
@@ -82,17 +74,20 @@ export default async function PoemsPage({
   query = query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 
   const { data: poems, count } = await query;
+  const { data: categoryRows } = await supabase.from("categories").select("name").order("name");
+  const categories = (categoryRows ?? []).map((row) => row.name);
 
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   const user = await getCurrentUser();
   const favIds = await getFavoritePoemIds((poems ?? []).map((p) => p.id));
+  const favoriteCounts = await getFavoriteCounts((poems ?? []).map((p) => p.id));
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-3xl font-bold">Poems</h1>
 
-      <div className="mb-6"><UniversalSearch defaultValue={q} /></div>
+      <div className="mb-6"><UniversalSearch defaultValue={q} categories={categories} /><div className="mt-4 flex justify-end"><PostPoemAction /></div></div>
 
       {(q || category || tag) && (
         <p className="mb-4 text-sm text-muted-foreground">
@@ -125,60 +120,7 @@ export default async function PoemsPage({
               name_am: string;
               name_en: string;
             }>(poem.poets);
-            const tags = Array.isArray(poem.tags) ? poem.tags.slice(0, 3) : [];
-
-            return (
-              <Card
-                key={poem.id}
-                className="border border-border bg-card shadow-none transition hover:border-primary/50 hover:bg-background/20"
-              >
-                <CardHeader>
-                  <CardTitle className="font-sans text-base text-foreground">
-                    <Link href={`/poems/${poem.id}`} className="hover:text-primary">
-                      {poem.title}
-                    </Link>
-                  </CardTitle>
-                  {user ? (
-                    <CardAction>
-                      <FavoriteToggle
-                        poemId={poem.id}
-                        initialFavorited={favIds.has(poem.id)}
-                      />
-                    </CardAction>
-                  ) : null}
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {poet ? (
-                    <p className="text-sm text-muted-foreground">
-                      by {poet.name_am ?? poet.name_en}
-                    </p>
-                  ) : null}
-                  <div className="flex flex-wrap gap-2">
-                    {poem.attribution_status === "disputed" ? (
-                      <DisputedTag />
-                    ) : (
-                      <Badge
-                        variant={
-                          poem.attribution_status === "verified"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {poem.attribution_status}
-                      </Badge>
-                    )}
-                    {poem.category ? (
-                      <Badge variant="outline">{poem.category}</Badge>
-                    ) : null}
-                    {tags.map((tag) => (
-                      <Badge key={tag} variant="outline">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            );
+            return <PoemCard key={poem.id} poem={{ ...poem, poetName: poet?.name_am ?? poet?.name_en }} favorited={favIds.has(poem.id)} favoriteCount={favoriteCounts.get(poem.id) ?? 0} showFavorite={Boolean(user)} />;
           })}
         </div>
       ) : (

@@ -24,6 +24,11 @@ export default async function SubmitPage({
 
   const type = param((await searchParams).type);
   const supabase = await createClient();
+  const { data: categoryRows } = await supabase
+    .from("categories")
+    .select("name")
+    .order("name");
+  const categories = (categoryRows ?? []).map((category) => category.name);
 
   if (type === "own") {
     // The poet is always the caller's own linked record — resolved
@@ -55,7 +60,7 @@ export default async function SubmitPage({
           . Not you? Update your poet details on your profile.
           </p>
         </div>
-        <OwnPoemForm poetId={poetId} />
+        <OwnPoemForm poetId={poetId} categories={categories} />
         <p className="mt-6 text-sm">
           <Link href="/submit" className="inline-flex items-center gap-2 font-medium text-primary hover:underline">
             <ArrowLeft className="size-4" /> This is actually another poet&apos;s poem
@@ -77,7 +82,7 @@ export default async function SubmitPage({
           registry, or propose the poet inline if they aren&apos;t there yet.
           </p>
         </div>
-        <SubmitPoemForm />
+        <SubmitPoemForm categories={categories} />
         <p className="mt-6 text-sm">
           <Link href="/submit" className="inline-flex items-center gap-2 font-medium text-primary hover:underline">
             <ArrowLeft className="size-4" /> This is actually my own poem
@@ -99,7 +104,7 @@ export default async function SubmitPage({
       </div>
       <div className="grid gap-5 sm:grid-cols-2">
         <Link href="/submit?type=own">
-          <Card className="h-full border-primary/15 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg">
+          <Card className="content-card h-full border-primary/15">
             <CardContent className="space-y-5 p-6"><div className="flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary"><Feather className="size-5" /></div><div><h2 className="mb-2 font-serif text-xl">This is my own poem</h2><span className="text-sm leading-6 text-muted-foreground">
             You wrote it. We&apos;ll attribute it to your poet profile — set
             one up in a minute if you haven&apos;t yet.
@@ -107,7 +112,7 @@ export default async function SubmitPage({
           </Card>
         </Link>
         <Link href="/submit?type=other">
-          <Card className="h-full border-primary/15 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg">
+          <Card className="content-card h-full border-primary/15">
             <CardContent className="space-y-5 p-6"><div className="flex size-11 items-center justify-center rounded-full bg-secondary/15 text-secondary"><BookOpen className="size-5" /></div><div><h2 className="mb-2 font-serif text-xl">This is another poet&apos;s poem</h2><span className="text-sm leading-6 text-muted-foreground">
             Share work by a poet from our registry, or propose a new poet
             inline.

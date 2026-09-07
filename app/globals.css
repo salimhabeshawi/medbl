@@ -99,6 +99,16 @@ button:disabled {
   gap: 1.25rem;
 }
 
+.content-card {
+  border-color: var(--border);
+  background-color: var(--card);
+}
+
+.content-card:hover {
+  border-color: color-mix(in oklch, var(--primary), transparent 45%);
+  background-color: color-mix(in oklch, var(--accent), transparent 45%);
+}
+
 /* Latin headings in Lora; Amharic glyphs fall back to Noto Sans Ethiopic */
 h1,
 h2,

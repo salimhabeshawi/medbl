@@ -17,12 +17,14 @@ export function PoemActions({
   title,
   body,
   initialFavorited,
+  initialFavoriteCount,
   canFavorite,
 }: {
   poemId: string;
   title: string;
   body: string;
   initialFavorited: boolean;
+  initialFavoriteCount: number;
   canFavorite: boolean;
 }) {
   async function copyPoem() {
@@ -61,6 +63,7 @@ export function PoemActions({
           <FavoriteToggle
             poemId={poemId}
             initialFavorited={initialFavorited}
+            initialFavoriteCount={initialFavoriteCount}
           />
         ) : (
           <Tooltip>
