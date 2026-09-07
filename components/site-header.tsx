@@ -1,81 +1,101 @@
 import Link from "next/link";
 import { getCurrentUserWithRole, isModerator } from "@/lib/moderation";
-import { signOut } from "@/app/actions";
-import { MyProfileLink } from "./my-profile-link";
+import { DesktopNav } from "./desktop-nav";
+import { MobileNav } from "./mobile-nav";
+import { ThemeToggle } from "./theme-toggle";
+import { UserMenu } from "./user-menu";
+import { Button } from "@/components/ui/button";
+
+type NavIcon =
+  | "home"
+  | "poems"
+  | "poets"
+  | "submit"
+  | "favorites"
+  | "profile"
+  | "moderate";
+
+type NavLink = {
+  href: string;
+  label: string;
+  icon: NavIcon;
+};
 
 export async function SiteHeader() {
   const user = await getCurrentUserWithRole();
   const isStaff = user ? isModerator(user.role) : false;
+  const role = user?.role ?? null;
+
+  // Full set of nav links, gated by auth state. The mobile Sheet renders
+  // them vertically; the desktop bar and dropdown split them inline.
+  const links: NavLink[] = [
+    { href: "/", label: "Home", icon: "home" },
+    { href: "/poems", label: "Poems", icon: "poems" },
+    { href: "/poets", label: "Poets", icon: "poets" },
+    ...(user
+      ? [{ href: "/submit", label: "Submit a Poem", icon: "submit" as const }]
+      : []),
+    ...(user
+      ? [{ href: "/favorites", label: "Favorites", icon: "favorites" as const }]
+      : []),
+    ...(user
+      ? [{ href: "/profile", label: "Profile", icon: "profile" as const }]
+      : []),
+    ...(isStaff
+      ? [{ href: "/moderate", label: "Moderate", icon: "moderate" as const }]
+      : []),
+  ];
+
+  // Public browse links shown always; account/profile links live in the
+  // avatar dropdown on desktop.
+  const browseLinks: NavLink[] = [
+    { href: "/", label: "Home", icon: "home" },
+    { href: "/poems", label: "Poems", icon: "poems" },
+    { href: "/poets", label: "Poets", icon: "poets" },
+    ...(user
+      ? [{ href: "/submit", label: "Submit a Poem", icon: "submit" as const }]
+      : []),
+    ...(user
+      ? [{ href: "/favorites", label: "Favorites", icon: "favorites" as const }]
+      : []),
+    ...(isStaff
+      ? [{ href: "/moderate", label: "Moderate", icon: "moderate" as const }]
+      : []),
+  ];
 
   return (
-    <header className="border-b">
-      <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-4 px-4 py-4">
-        <Link href="/" className="text-xl font-bold tracking-tight">
-          Medbl
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 md:py-3.5">
+        <Link
+          href="/"
+          className="font-sans text-lg font-semibold text-primary transition hover:text-primary/80 md:text-xl"
+        >
+          መድብል
         </Link>
-        <nav className="flex items-center gap-6 text-sm text-zinc-600 dark:text-zinc-300">
-          <Link href="/" className="hover:text-zinc-950 dark:hover:text-white">
-            Home
-          </Link>
-          <Link href="/poets" className="hover:text-zinc-950 dark:hover:text-white">
-            Poets
-          </Link>
-          <Link href="/poems" className="hover:text-zinc-950 dark:hover:text-white">
-            Poems
-          </Link>
-        </nav>
-        <div className="flex items-center gap-4 text-sm">
-          {user ? (
-            <>
-              <Link
-                href="/submit"
-                className="rounded-md px-2 py-1.5 font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
-              >
-                Submit a poem
-              </Link>
-              <MyProfileLink className="rounded-md px-2 py-1.5 font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800" />
-              {isStaff ? (
-                <Link
-                  href="/moderate"
-                  className="rounded-md px-2 py-1.5 font-medium text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
-                >
-                  Moderate
+
+        {/* Desktop nav (md and up) - no hamburger */}
+        <DesktopNav links={browseLinks} />
+
+        <div className="flex items-center gap-3">
+          {/* Desktop auth controls */}
+          <div className="hidden items-center gap-2 md:flex">
+            <ThemeToggle />
+            {user ? (
+              <UserMenu email={user.email} role={user.role} />
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link href="/login" className="text-sm font-medium text-foreground transition hover:text-primary">
+                  Log in
                 </Link>
-              ) : null}
-              <Link
-                href="/favorites"
-                className="text-zinc-600 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
-              >
-                Favorites
-              </Link>
-              <span className="max-w-[200px] truncate text-zinc-600 dark:text-zinc-300">
-                {user.email}
-              </span>
-              <form action={signOut}>
-                <button
-                  type="submit"
-                  className="rounded-md border px-3 py-1.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                >
-                  Log out
-                </button>
-              </form>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="rounded-md border px-3 py-1.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              >
-                Log in
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-md bg-zinc-900 px-3 py-1.5 font-medium text-white transition hover:bg-zinc-700"
-              >
-                Sign up
-              </Link>
-            </>
-          )}
+                <Button asChild size="sm">
+                  <Link href="/signup">Sign up</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile hamburger (below md) */}
+          <MobileNav links={links} role={role} />
         </div>
       </div>
     </header>

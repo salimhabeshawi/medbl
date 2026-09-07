@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
 import { SubmissionReview } from "@/components/submission-review";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { EmptyState } from "@/components/empty-state";
 
 export const metadata = { title: "Moderation — submissions" };
 
@@ -23,10 +25,8 @@ export default async function ModerateSubmissionsPage() {
   if (error) {
     return (
       <div>
-        <h2 className="mb-6 text-2xl font-semibold">Pending submissions</h2>
-        <p className="rounded-md border border-red-200 bg-red-50 px-4 py-6 text-center text-sm text-red-700">
-          Could not load submissions: {error.message}
-        </p>
+        <h2 className="mb-6 font-serif text-2xl font-semibold">Pending submissions</h2>
+        <Alert variant="destructive"><AlertTitle>Could not load submissions</AlertTitle><AlertDescription>{error.message}</AlertDescription></Alert>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export default async function ModerateSubmissionsPage() {
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-semibold">Pending submissions</h2>
+      <h2 className="mb-6 font-serif text-2xl font-semibold">Pending submissions</h2>
       {submissions.length > 0 ? (
         <ul className="flex flex-col gap-4">
           {submissions.map((sub) => {
@@ -87,9 +87,7 @@ export default async function ModerateSubmissionsPage() {
           })}
         </ul>
       ) : (
-        <p className="rounded-md border border-dashed px-4 py-12 text-center text-sm text-zinc-500">
-          No submissions are waiting for review.
-        </p>
+        <EmptyState title="The queue is clear" description="No submissions are waiting for review." />
       )}
     </div>
   );

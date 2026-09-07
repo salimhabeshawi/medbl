@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
 import { FavoriteRow } from "@/components/favorite-row";
+import { UniversalSearch } from "@/components/universal-search";
+import { EmptyState } from "@/components/empty-state";
 
 export const metadata: Metadata = { title: "My favorites" };
 
@@ -19,7 +21,13 @@ type PoemRow = {
 
 type PoetRow = { name_am: string; name_en: string };
 
-export default async function FavoritesPage() {
+export default async function FavoritesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const q = (Array.isArray(params.q) ? params.q[0] : params.q ?? "").trim().toLocaleLowerCase();
   const supabase = await createClient();
 
   const {
@@ -45,25 +53,31 @@ export default async function FavoritesPage() {
     .filter(
       (row): row is { poem: PoemRow; poet: PoetRow | null } => row !== null,
     );
+  const filteredRows = q
+    ? rows.filter(({ poem, poet }) =>
+        [poem.title, poem.category, ...(poem.tags ?? []), poet?.name_am, poet?.name_en]
+          .filter(Boolean)
+          .join(" ")
+          .toLocaleLowerCase()
+          .includes(q),
+      )
+    : rows;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-6 text-3xl font-bold">My favorites</h1>
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+      <div className="mb-8"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Your private shelf</p><h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">My favorites</h1><p className="text-sm leading-7 text-muted-foreground">A quiet place for the poems you want to return to.</p></div>
+      <div className="mb-8"><UniversalSearch defaultValue={q} placeholder="Search your favorite poems..." /></div>
 
       {error ? (
-        <p className="rounded-md border border-red-200 bg-red-50 px-4 py-6 text-center text-sm text-red-700">
-          Could not load your favorites.
-        </p>
-      ) : rows.length > 0 ? (
-        <ul className="divide-y">
-          {rows.map((row) => (
+        <EmptyState title="Could not load your favorites" description="Please refresh and try again." />
+      ) : filteredRows.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredRows.map((row) => (
             <FavoriteRow key={row.poem.id} poem={row.poem} poet={row.poet} />
           ))}
-        </ul>
+        </div>
       ) : (
-        <p className="rounded-md border border-dashed px-4 py-10 text-center text-sm text-zinc-500">
-          You have no favorite poems yet. Tap the heart on any poem to add it.
-        </p>
+        <EmptyState title={q ? "No favorites match your search" : "Your shelf is empty"} description={q ? "Try a different title, poet, tag, or category." : "Tap the heart on any poem to keep it close."} />
       )}
     </div>
   );

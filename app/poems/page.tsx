@@ -5,6 +5,16 @@ import { firstRelation } from "@/lib/relations";
 import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { DisputedTag } from "@/components/disputed-tag";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { UniversalSearch } from "@/components/universal-search";
+import { EmptyState } from "@/components/empty-state";
 
 export const metadata: Metadata = { title: "Poems" };
 
@@ -53,25 +63,25 @@ export default async function PoemsPage({
       "id, title, category, tags, attribution_status, poet_id, poets(name_am, name_en), created_at",
       { count: "exact" },
     )
+    .neq("attribution_status", "disputed")
     .order("created_at", { ascending: false });
 
-  if (q) query = query.ilike("title", `%${q}%`);
+  if (q) {
+    const { data: searchResults } = await supabase.rpc("search_poems", {
+      p_query: q,
+      p_limit: 100,
+    });
+    const ids = ((searchResults ?? []) as { id: string }[]).map(
+      (result) => result.id,
+    );
+    query = ids.length > 0 ? query.in("id", ids) : query.eq("id", "00000000-0000-0000-0000-000000000000");
+  }
   if (category) query = query.eq("category", category);
   if (tag) query = query.contains("tags", [tag]);
 
   query = query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 
-  const [{ data: poems, count }, { data: categories }] = await Promise.all([
-    query,
-    supabase
-      .from("poems")
-      .select("category")
-      .not("category", "is", null),
-  ]);
-
-  const allCategories = [
-    ...new Set((categories ?? []).map((c) => c.category)),
-  ].sort();
+  const { data: poems, count } = await query;
 
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
@@ -82,52 +92,26 @@ export default async function PoemsPage({
     <div className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-3xl font-bold">Poems</h1>
 
-      <form method="get" action="/poems" className="mb-4 flex flex-wrap gap-2">
-        <input
-          type="search"
-          name="q"
-          defaultValue={q}
-          placeholder="Search poems by title…"
-          className="min-w-0 flex-1 rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
-        />
-        <select
-          name="category"
-          defaultValue={category}
-          className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
-        >
-          <option value="">All categories</option>
-          {allCategories.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-700"
-        >
-          Search
-        </button>
-      </form>
+      <div className="mb-6"><UniversalSearch defaultValue={q} /></div>
 
       {(q || category || tag) && (
-        <p className="mb-4 text-sm text-zinc-500">
+        <p className="mb-4 text-sm text-muted-foreground">
           Filters:
           {q ? (
-            <span className="ml-1 rounded bg-zinc-100 px-2 py-0.5 dark:bg-zinc-800">
+            <span className="ml-1 rounded bg-muted px-2 py-0.5 text-muted-foreground">
               “{q}”
             </span>
           ) : null}
           {category ? (
-            <span className="ml-1 rounded bg-zinc-100 px-2 py-0.5 dark:bg-zinc-800">
+            <span className="ml-1 rounded bg-muted px-2 py-0.5 text-muted-foreground">
               {category}
             </span>
           ) : null}
           {tag ? (
-            <span className="ml-1 rounded bg-zinc-100 px-2 py-0.5 dark:bg-zinc-800">
+            <span className="ml-1 rounded bg-muted px-2 py-0.5 text-muted-foreground">
               #{tag}
             </span>
-          ) : null}{" "}
+          ) : null}
           <Link href="/poems" className="underline">
             Clear
           </Link>
@@ -135,92 +119,94 @@ export default async function PoemsPage({
       )}
 
       {poems && poems.length > 0 ? (
-        <>
-          <ul className="divide-y">
-            {poems.map((poem) => {
-              const poet = firstRelation<{
-                name_am: string;
-                name_en: string;
-              }>(poem.poets);
-              return (
-                <li key={poem.id} className="flex items-center justify-between gap-4 py-3">
-                  <div className="min-w-0">
-                    <Link
-                      href={`/poems/${poem.id}`}
-                      className="font-medium hover:underline"
-                    >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {poems.map((poem) => {
+            const poet = firstRelation<{
+              name_am: string;
+              name_en: string;
+            }>(poem.poets);
+            const tags = Array.isArray(poem.tags) ? poem.tags.slice(0, 3) : [];
+
+            return (
+              <Card
+                key={poem.id}
+                className="border border-border bg-card shadow-none transition hover:border-primary/50 hover:bg-background/20"
+              >
+                <CardHeader>
+                  <CardTitle className="font-sans text-base text-foreground">
+                    <Link href={`/poems/${poem.id}`} className="hover:text-primary">
                       {poem.title}
                     </Link>
+                  </CardTitle>
+                  {user ? (
+                    <CardAction>
+                      <FavoriteToggle
+                        poemId={poem.id}
+                        initialFavorited={favIds.has(poem.id)}
+                      />
+                    </CardAction>
+                  ) : null}
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {poet ? (
+                    <p className="text-sm text-muted-foreground">
+                      by {poet.name_am ?? poet.name_en}
+                    </p>
+                  ) : null}
+                  <div className="flex flex-wrap gap-2">
                     {poem.attribution_status === "disputed" ? (
                       <DisputedTag />
-                    ) : null}
-                    {poet ? (
-                      <span className="ml-2 text-sm text-zinc-500">
-                        — {poet.name_am ?? poet.name_en}
-                      </span>
-                    ) : null}
+                    ) : (
+                      <Badge
+                        variant={
+                          poem.attribution_status === "verified"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
+                        {poem.attribution_status}
+                      </Badge>
+                    )}
                     {poem.category ? (
-                      <span className="ml-2 text-sm text-zinc-500">
-                        {poem.category}
-                      </span>
+                      <Badge variant="outline">{poem.category}</Badge>
                     ) : null}
-                    {Array.isArray(poem.tags) && poem.tags.length > 0 ? (
-                      <span className="ml-2 text-sm text-zinc-400">
-                        {poem.tags.map((t: string) => (
-                          <Link
-                            key={t}
-                            href={`/poems?tag=${encodeURIComponent(t)}`}
-                            className="mr-1 underline hover:text-zinc-600"
-                          >
-                            #{t}
-                          </Link>
-                        ))}
-                      </span>
-                    ) : null}
+                    {tags.map((tag) => (
+                      <Badge key={tag} variant="outline">
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
-                  {user ? (
-                    <FavoriteToggle
-                      poemId={poem.id}
-                      initialFavorited={favIds.has(poem.id)}
-                    />
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-
-          <nav className="mt-8 flex items-center justify-between text-sm">
-            {page > 1 ? (
-              <Link
-                href={pageUrl({ q, category, tag, page: page - 1 })}
-                className="rounded-md border px-3 py-1.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              >
-                Previous
-              </Link>
-            ) : (
-              <span className="px-3 py-1.5 text-zinc-400">Previous</span>
-            )}
-            <span className="text-zinc-500">
-              Page {Math.min(page, totalPages)} of {totalPages}
-            </span>
-            {page < totalPages ? (
-              <Link
-                href={pageUrl({ q, category, tag, page: page + 1 })}
-                className="rounded-md border px-3 py-1.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              >
-                Next
-              </Link>
-            ) : (
-              <span className="px-3 py-1.5 text-zinc-400">Next</span>
-            )}
-          </nav>
-        </>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       ) : (
-        <p className="rounded-md border border-dashed px-4 py-10 text-center text-sm text-zinc-500">
-          {q || category || tag
-            ? "No poems match your filters."
-            : "No poems published yet."}
-        </p>
+        <EmptyState title={q || category || tag ? "No poems match your filters" : "No poems published yet"} description={q || category || tag ? "Try a different phrase, poet name, or theme." : "The anthology is waiting for its next voice."} />
+      )}
+
+      {totalPages > 1 && (
+        <nav className="mt-8 flex items-center justify-between">
+          {page > 1 ? (
+            <Link
+              href={pageUrl({ q, category, tag, page: page - 1 })}
+              className="rounded-md border border-border px-3 py-1.5 transition hover:bg-accent hover:text-foreground"
+            >
+              Previous
+            </Link>
+          ) : null}
+          <span className="text-muted-foreground">
+            Page {Math.min(page, totalPages)} of {totalPages}
+          </span>
+          {page < totalPages ? (
+            <Link
+              href={pageUrl({ q, category, tag, page: page + 1 })}
+              className="rounded-md border border-border px-3 py-1.5 transition hover:bg-accent hover:text-foreground"
+            >
+              Next
+            </Link>
+          ) : null}
+        </nav>
       )}
     </div>
   );

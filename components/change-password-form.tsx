@@ -2,9 +2,10 @@
 
 import { useActionState, useState } from "react";
 import { changePassword, type AccountFormState } from "@/app/actions";
-
-const inputClass =
-  "rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "./ui/input";
 
 export function ChangePasswordForm() {
   const [state, formAction, pending] = useActionState(
@@ -31,62 +32,27 @@ export function ChangePasswordForm() {
     <form
       action={formAction}
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-lg border p-6"
+      className="form-stack"
     >
-      <p className="text-sm font-medium">Change password</p>
+      <Card className="border-primary/15 shadow-sm"><CardHeader className="border-b border-border/70 bg-accent/20"><CardTitle className="font-serif text-xl">Change password</CardTitle><p className="text-sm text-muted-foreground">Use your current password to secure a new one.</p></CardHeader><CardContent className="space-y-4 pt-5">
       {state.success ? (
-        <p className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
-          {state.success}
-        </p>
+        <Alert className="border-secondary/30 bg-secondary/10 text-secondary"><AlertDescription className="text-secondary/90">{state.success}</AlertDescription></Alert>
       ) : null}
       {error && !mismatch ? (
-        <p className="text-sm text-red-600">{error}</p>
+        <Alert variant="destructive"><AlertTitle>We could not update your password</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>
       ) : null}
 
-      <label className="flex flex-col gap-1 text-sm font-medium">
-        Current password
-        <input
-          type="password"
-          name="current_password"
-          required
-          autoComplete="current-password"
-          className={inputClass}
-        />
+      <label className="space-y-2 text-sm font-medium"><span>Current password</span><Input type="password" name="current_password" required autoComplete="current-password" />
       </label>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-sm font-medium">
-          New password
-          <input
-            type="password"
-            name="password"
-            required
-            autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={inputClass}
-          />
+        <label className="space-y-2 text-sm font-medium"><span>New password</span><Input type="password" name="password" required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </label>
-        <label className="flex flex-col gap-1 text-sm font-medium">
-          Confirm new password
-          <input
-            type="password"
-            required
-            autoComplete="new-password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            className={inputClass}
-          />
+        <label className="space-y-2 text-sm font-medium"><span>Confirm new password</span><Input type="password" required autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
         </label>
       </div>
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="self-start rounded-md border px-4 py-2 text-sm font-medium transition hover:bg-zinc-100 disabled:opacity-60 dark:hover:bg-zinc-800"
-      >
-        {pending ? "Updating…" : "Change password"}
-      </button>
+      <Button type="submit" disabled={pending} variant="outline">{pending ? "Updating..." : "Change password"}</Button>
+      </CardContent></Card>
     </form>
   );
 }

@@ -4,6 +4,16 @@ import { firstRelation } from "@/lib/relations";
 import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { DisputedTag } from "@/components/disputed-tag";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { UniversalSearch } from "@/components/universal-search";
+import { EmptyState } from "@/components/empty-state";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -11,7 +21,9 @@ export default async function Home() {
   const [{ data: recentPoems }, { data: featuredPoets }] = await Promise.all([
     supabase
       .from("poems")
-      .select("id, title, attribution_status, poet_id, poets(name_am, name_en), created_at")
+      .select(
+        "id, title, attribution_status, category, tags, poet_id, poets(name_am, name_en), created_at"
+      )
       .order("created_at", { ascending: false })
       .limit(6),
     supabase
@@ -27,26 +39,14 @@ export default async function Home() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <section className="mb-12 text-center">
-        <h1 className="mb-3 text-4xl font-bold tracking-tight">Medbl</h1>
-        <p className="mx-auto max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-300">
-          Amharic poetry platform — browse poets and poems, search the archive,
-          and discover Amharic poetry.
+      <section className="-mx-4 mb-12 border-y border-border bg-accent px-4 py-8 text-center sm:mx-0 sm:rounded-lg sm:border">
+        <h1 className="mb-2 text-2xl font-semibold tracking-normal text-foreground">
+          A living anthology of Amharic poetry
+        </h1>
+        <p className="mx-auto max-w-2xl text-sm leading-6 text-secondary">
+          Read, favorite, and contribute verses from poets past and present.
         </p>
-        <div className="mt-6 flex items-center justify-center gap-4">
-          <Link
-            href="/poems"
-            className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-700"
-          >
-            Browse poems
-          </Link>
-          <Link
-            href="/poets"
-            className="rounded-md border px-4 py-2 text-sm font-semibold transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
-          >
-            Browse poets
-          </Link>
-        </div>
+        <div className="mx-auto mt-6 max-w-2xl text-left"><UniversalSearch /></div>
       </section>
 
       <section className="mb-12">
@@ -57,48 +57,70 @@ export default async function Home() {
           </Link>
         </div>
         {recentPoems && recentPoems.length > 0 ? (
-          <ul className="divide-y">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recentPoems.map((poem) => {
               const poet = firstRelation<{
                 name_am: string;
                 name_en: string;
               }>(poem.poets);
+              const tags = Array.isArray(poem.tags) ? poem.tags.slice(0, 3) : [];
+
               return (
-                <li
+                <Card
                   key={poem.id}
-                  className="flex items-center justify-between gap-4 py-3"
+                  className="border border-border bg-card shadow-none transition hover:border-primary/50 hover:bg-accent/40"
                 >
-                  <div className="min-w-0">
-                    <Link
-                      href={`/poems/${poem.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {poem.title}
-                    </Link>
-                    {poem.attribution_status === "disputed" ? (
-                      <DisputedTag />
+                  <CardHeader>
+                    <CardTitle className="font-sans text-base text-foreground">
+                      <Link href={`/poems/${poem.id}`} className="hover:text-primary">
+                        {poem.title}
+                      </Link>
+                    </CardTitle>
+                    {user ? (
+                      <CardAction>
+                        <FavoriteToggle
+                          poemId={poem.id}
+                          initialFavorited={favIds.has(poem.id)}
+                        />
+                      </CardAction>
                     ) : null}
+                  </CardHeader>
+                  <CardContent className="space-y-3">
                     {poet ? (
-                      <span className="text-sm text-zinc-500">
-                        {" "}
-                        — {poet.name_am ?? poet.name_en}
-                      </span>
+                      <p className="text-sm text-secondary">
+                        by {poet.name_am ?? poet.name_en}
+                      </p>
                     ) : null}
-                  </div>
-                  {user ? (
-                    <FavoriteToggle
-                      poemId={poem.id}
-                      initialFavorited={favIds.has(poem.id)}
-                    />
-                  ) : null}
-                </li>
+                    <div className="flex flex-wrap gap-2">
+                      {poem.attribution_status === "disputed" ? (
+                        <DisputedTag />
+                      ) : (
+                        <Badge
+                          variant={
+                            poem.attribution_status === "verified"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {poem.attribution_status}
+                        </Badge>
+                      )}
+                      {poem.category ? (
+                        <Badge variant="outline">{poem.category}</Badge>
+                      ) : null}
+                      {tags.map((tag) => (
+                        <Badge key={tag} variant="outline">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
-          </ul>
+          </div>
         ) : (
-          <p className="rounded-md border border-dashed px-4 py-10 text-center text-sm text-zinc-500">
-            No poems published yet.
-          </p>
+          <EmptyState title="No poems published yet" description="The anthology is waiting for its next voice." />
         )}
       </section>
 
@@ -115,19 +137,17 @@ export default async function Home() {
               <Link
                 key={poet.id}
                 href={`/poets/${poet.id}`}
-                className="rounded-lg border p-4 transition hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                className="rounded-lg border border-border bg-card p-4 transition hover:border-primary/50 hover:bg-accent/40"
               >
                 <div className="font-semibold">{poet.name_am}</div>
                 {poet.name_en ? (
-                  <div className="text-sm text-zinc-500">{poet.name_en}</div>
+                  <div className="text-sm text-muted-foreground">{poet.name_en}</div>
                 ) : null}
               </Link>
             ))}
           </div>
         ) : (
-          <p className="rounded-md border border-dashed px-4 py-10 text-center text-sm text-zinc-500">
-            No featured poets yet.
-          </p>
+          <EmptyState title="No featured poets yet" description="The registry will appear here as poets are verified." />
         )}
       </section>
     </div>

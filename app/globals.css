@@ -1,26 +1,110 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "tw-animate-css";
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-noto-ethiopic);
-  --font-mono: var(--font-noto-ethiopic);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-inter), var(--font-noto-ethiopic), sans-serif;
+  --font-serif: var(--font-lora), var(--font-noto-ethiopic), serif;
+  --font-mono: var(--font-noto-ethiopic), monospace;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --radius: 0.5rem;
+
+  /* Warm & traditional palette - parchment/manuscript */
+  --background: #FBF3E6;
+  --foreground: #2E2018;
+  --card: #fffdf7;
+  --card-foreground: #2E2018;
+  --popover: #fffdf7;
+  --popover-foreground: #2E2018;
+  --primary: #B5651D;
+  --primary-foreground: #fffdf7;
+  --secondary: #5B6B3F;
+  --secondary-foreground: #FBF3E6;
+  --muted: #D9C7AC;
+  --muted-foreground: #6b5540;
+  --accent: #ead9be;
+  --accent-foreground: #2E2018;
+  --destructive: #8B3A3A;
+  --destructive-foreground: #FBF3E6;
+  --border: #D9C7AC;
+  --input: #D9C7AC;
+  --ring: #B5651D;
+}
+
+.dark {
+  --background: #241914;
+  --foreground: #F7EBDD;
+  --card: #2E2018;
+  --card-foreground: #F7EBDD;
+  --popover: #2E2018;
+  --popover-foreground: #F7EBDD;
+  --primary: #D58A3A;
+  --primary-foreground: #241914;
+  --secondary: #A9B47D;
+  --secondary-foreground: #241914;
+  --muted: #4B382C;
+  --muted-foreground: #D9C7AC;
+  --accent: #3A2A21;
+  --accent-foreground: #F7EBDD;
+  --destructive: #D06A6A;
+  --destructive-foreground: #241914;
+  --border: #5A4234;
+  --input: #5A4234;
+  --ring: #D58A3A;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-noto-ethiopic), sans-serif;
+  font-family: var(--font-inter), var(--font-noto-ethiopic), sans-serif;
+}
+
+button,
+a,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Latin headings in Lora; Amharic glyphs fall back to Noto Sans Ethiopic */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-lora), var(--font-noto-ethiopic), serif;
 }

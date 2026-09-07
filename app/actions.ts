@@ -180,6 +180,86 @@ export async function searchPoets(
   }));
 }
 
+export type UniversalPoemResult = {
+  id: string;
+  title: string;
+  body: string;
+  category: string | null;
+  tags: string[] | null;
+  attribution_status: string;
+  poet_name_am: string;
+  poet_name_en: string | null;
+};
+
+function normalizePoemResults(rows: unknown[]): UniversalPoemResult[] {
+  return rows.map((row) => {
+    const poem = row as Record<string, unknown>;
+    const poet = poem.poets as
+      | { name_am?: string; name_en?: string | null }
+      | { name_am?: string; name_en?: string | null }[]
+      | null
+      | undefined;
+    const relatedPoet = Array.isArray(poet) ? poet[0] : poet;
+    return {
+      id: String(poem.id),
+      title: String(poem.title ?? ""),
+      body: String(poem.body ?? ""),
+      category: typeof poem.category === "string" ? poem.category : null,
+      tags: Array.isArray(poem.tags) ? (poem.tags as string[]) : null,
+      attribution_status: String(poem.attribution_status ?? "community"),
+      poet_name_am: String(poem.poet_name_am ?? relatedPoet?.name_am ?? ""),
+      poet_name_en:
+        (poem.poet_name_en as string | null | undefined) ??
+        relatedPoet?.name_en ??
+        null,
+    };
+  });
+}
+
+export async function searchPoems(query: string): Promise<UniversalPoemResult[]> {
+  const supabase = await createClient();
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const escaped = escapeLike(trimmed);
+  const rpcResult = await supabase.rpc("search_poems", {
+    p_query: trimmed,
+    p_limit: 30,
+  });
+  if (!rpcResult.error && rpcResult.data && rpcResult.data.length > 0) {
+    return normalizePoemResults(rpcResult.data);
+  }
+
+  // Keep search functional while a new migration is waiting to be deployed.
+  const { data } = await supabase
+    .from("poems")
+    .select(
+      "id, title, body, category, tags, attribution_status, poets(name_am, name_en)",
+    )
+    .neq("attribution_status", "disputed")
+    .or(
+      `title.ilike.%${escaped}%,body.ilike.%${escaped}%,category.ilike.%${escaped}%`,
+    )
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  const needle = trimmed.toLocaleLowerCase();
+  return normalizePoemResults(data ?? []).filter((poem) =>
+    [
+      poem.title,
+      poem.body,
+      poem.category,
+      ...(poem.tags ?? []),
+      poem.poet_name_am,
+      poem.poet_name_en,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLocaleLowerCase()
+      .includes(needle),
+  );
+}
+
 export type FormState = { error?: string; success?: boolean };
 
 export async function submitPoem(
@@ -250,7 +330,7 @@ export async function submitPoem(
     ? [
         ...new Set(
           tagsRaw
-            .split(",")
+            .split(/\s+/)
             .map((t) => t.trim())
             .filter(Boolean),
         ),
@@ -305,7 +385,7 @@ function buildEditableUpdates(formData: FormData): {
       ? [
           ...new Set(
             tagsRaw
-              .split(",")
+              .split(/\s+/)
               .map((t) => t.trim())
               .filter(Boolean),
           ),

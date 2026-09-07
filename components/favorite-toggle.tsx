@@ -2,6 +2,15 @@
 
 import { useRef, useState } from "react";
 import { toggleFavorite } from "@/app/actions";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Heart, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export function FavoriteToggle({
   poemId,
@@ -32,6 +41,7 @@ export function FavoriteToggle({
 
     if (result.error) {
       setError(result.error);
+      toast.error(result.error);
       return;
     }
 
@@ -41,27 +51,41 @@ export function FavoriteToggle({
 
   return (
     <span className="inline-flex flex-col items-end gap-0.5">
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={pending}
-        aria-pressed={favorited}
-        aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-        className={
-          "inline-flex h-8 w-8 items-center justify-center rounded-full text-lg leading-none transition select-none " +
-          (pending
-            ? "cursor-wait opacity-60"
-            : "cursor-pointer hover:scale-110 hover:bg-zinc-100 dark:hover:bg-zinc-800") +
-          (favorited ? " text-red-600" : " text-zinc-400")
-        }
-      >
-        {favorited ? "\u2665" : "\u2661"}
-      </button>
-      {error ? (
-        <span className="max-w-[160px] text-center text-[11px] text-red-600">
-          {error}
-        </span>
-      ) : null}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              onClick={handleClick}
+              disabled={pending}
+              variant="outline"
+              size="icon"
+              aria-pressed={favorited}
+              aria-label={
+                favorited ? "Remove from favorites" : "Add to favorites"
+              }
+              className={
+                "rounded-full border-border bg-card shadow-none transition hover:border-primary/60 hover:bg-accent " +
+                (pending ? "cursor-wait opacity-70 " : "") +
+                (favorited ? "text-destructive" : "text-secondary")
+              }
+            >
+              {pending ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Heart
+                  className={favorited ? "size-4 fill-current" : "size-4"}
+                  aria-hidden="true"
+                />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {favorited ? "Remove favorite" : "Add favorite"}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      {error ? <span className="sr-only">{error}</span> : null}
     </span>
   );
 }

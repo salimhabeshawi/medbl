@@ -6,6 +6,9 @@ import {
   rejectSubmission,
   updateSubmission,
 } from "@/app/actions";
+import { Alert, AlertDescription } from "./ui/alert";
+import { Button } from "./ui/button";
+import { CardHeader, CardTitle } from "./ui/card";
 
 type PoetMatch = {
   id: string;
@@ -28,7 +31,7 @@ type Props = {
 };
 
 const inputClass =
-  "w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400";
+  "w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none transition focus:border-ring focus:ring-3 focus:ring-ring/30";
 
 export function SubmissionReview({
   id,
@@ -59,7 +62,7 @@ export function SubmissionReview({
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
   const [category, setCategory] = useState(initialCategory ?? "");
-  const [tagsText, setTagsText] = useState((tags ?? []).join(", "));
+  const [tagsText, setTagsText] = useState((tags ?? []).join(" "));
   const [source, setSource] = useState(initialSource);
   const [proposedNameAm, setProposedNameAm] = useState(
     proposal?.nameAm ?? "",
@@ -74,8 +77,8 @@ export function SubmissionReview({
 
   if (approveState.success || rejectState.success) {
     return (
-      <li className="rounded-lg border p-6">
-        <p className="text-sm font-medium text-green-700">
+      <li className="rounded-xl border border-secondary/30 bg-secondary/10 p-6">
+        <p className="text-sm font-medium text-secondary">
           Submission reviewed.
         </p>
       </li>
@@ -83,10 +86,10 @@ export function SubmissionReview({
   }
 
   return (
-    <li className="rounded-lg border p-6">
-      <div className="mb-4 text-xs text-zinc-400">
+    <li className="overflow-hidden rounded-xl border border-primary/15 bg-card shadow-sm">
+      <CardHeader className="border-b border-border/70 bg-accent/20"><div className="text-xs text-muted-foreground">
         {new Date(createdAt).toLocaleDateString()}
-      </div>
+      </div><CardTitle className="mt-1 font-serif text-xl">Review submission</CardTitle></CardHeader>
 
       {/* ONE shared form: every button below submits the CURRENT field
           values. "Save edits" stores them; "Approve" persists them and then
@@ -105,12 +108,12 @@ export function SubmissionReview({
         {poetId ? (
           <div className="text-sm">
             <span className="font-medium">Poet:</span>{" "}
-            <span className="text-zinc-600 dark:text-zinc-300">
+            <span className="text-muted-foreground">
               {poetName ?? "Unknown poet"}
             </span>
           </div>
         ) : (
-          <fieldset className="rounded-md border border-dashed p-4">
+          <fieldset className="rounded-lg border border-dashed border-primary/40 bg-accent/20 p-4">
             <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
               New poet proposed
             </legend>
@@ -192,7 +195,7 @@ export function SubmissionReview({
           </fieldset>
         )}
 
-        <label className="flex flex-col gap-1 text-xs font-medium">
+        <label className="flex flex-col gap-2 text-sm font-medium">
           Title
           <input
             type="text"
@@ -204,7 +207,7 @@ export function SubmissionReview({
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-xs font-medium">
+        <label className="flex flex-col gap-2 text-sm font-medium">
           Poem text
           <textarea
             name="body"
@@ -217,7 +220,7 @@ export function SubmissionReview({
         </label>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-xs font-medium">
+          <label className="flex flex-col gap-2 text-sm font-medium">
             Category
             <input
               type="text"
@@ -227,8 +230,8 @@ export function SubmissionReview({
               className={inputClass}
             />
           </label>
-          <label className="flex flex-col gap-1 text-xs font-medium">
-            Tags (comma separated)
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            Tags (space separated)
             <input
               type="text"
               name="tags"
@@ -239,7 +242,7 @@ export function SubmissionReview({
           </label>
         </div>
 
-        <label className="flex flex-col gap-1 text-xs font-medium">
+        <label className="flex flex-col gap-2 text-sm font-medium">
           Source
           <input
             type="text"
@@ -252,22 +255,22 @@ export function SubmissionReview({
         </label>
 
         <div>
-          <button
+          <Button
             type="submit"
             disabled={updatePending}
-            className="rounded-md border px-4 py-1.5 text-sm font-medium transition hover:bg-zinc-100 disabled:opacity-60 dark:hover:bg-zinc-800"
+            variant="outline"
           >
             {updatePending ? "Saving…" : "Save edits"}
-          </button>
-          <span className="ml-3 text-xs text-zinc-500">
+          </Button>
+          <span className="ml-3 text-xs text-muted-foreground">
             Edits are stored without publishing — approving publishes exactly
             what this form shows.
           </span>
           {updateState.success ? (
-            <p className="mt-2 text-sm text-green-700">Edits saved.</p>
+            <Alert className="mt-2 border-secondary/30 bg-secondary/10 text-secondary"><AlertDescription className="text-secondary/90">Edits saved.</AlertDescription></Alert>
           ) : null}
           {updateState.error ? (
-            <p className="mt-2 text-sm text-red-600">{updateState.error}</p>
+            <Alert className="mt-2" variant="destructive"><AlertDescription>{updateState.error}</AlertDescription></Alert>
           ) : null}
         </div>
 
@@ -288,16 +291,16 @@ export function SubmissionReview({
                 </option>
               </select>
             </label>
-            <button
+            <Button
               type="submit"
               formAction={approveFormAction}
               disabled={approvePending}
-              className="rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-600 disabled:opacity-60"
+              variant="secondary"
             >
               {approvePending ? "Approving…" : "Approve"}
-            </button>
+            </Button>
             {approveState.error ? (
-              <p className="text-sm text-red-600">{approveState.error}</p>
+              <Alert className="mt-2" variant="destructive"><AlertDescription>{approveState.error}</AlertDescription></Alert>
             ) : null}
           </div>
 
@@ -311,17 +314,17 @@ export function SubmissionReview({
                 className="mt-1 w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
               />
             </label>
-            <button
+            <Button
               type="submit"
               formAction={rejectFormAction}
               formNoValidate
               disabled={rejectPending}
-              className="rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-60"
+              variant="destructive"
             >
               {rejectPending ? "Rejecting…" : "Reject"}
-            </button>
+            </Button>
             {rejectState.error ? (
-              <p className="text-sm text-red-600">{rejectState.error}</p>
+                <Alert className="mt-2" variant="destructive"><AlertDescription>{rejectState.error}</AlertDescription></Alert>
             ) : null}
           </div>
         </div>

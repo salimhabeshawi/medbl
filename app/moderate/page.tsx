@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { ArrowRight, FileCheck2, Flag } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata = { title: "Moderation" };
 
@@ -45,19 +47,19 @@ export default async function ModerateOverviewPage() {
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-semibold">Overview</h2>
+      <h2 className="mb-6 font-serif text-2xl font-semibold">Overview</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         {cards.map((card) => (
-          <Link
-            key={card.href}
-            href={card.href}
-            className="rounded-lg border p-6 transition hover:shadow-sm"
-          >
-            <p className="text-3xl font-bold">
+          <Link key={card.href} href={card.href}>
+            <Card className="h-full border-primary/15 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg"><CardContent className="p-6">
+            <div className="mb-5 flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">{card.href.includes("reports") ? <Flag className="size-5" /> : <FileCheck2 className="size-5" />}</div>
+            <p className="text-4xl font-semibold tracking-tight">
               {card.value === null ? "–" : card.value}
             </p>
-            <p className="mt-1 font-medium">{card.label}</p>
-            <p className="mt-1 text-sm text-zinc-500">{card.hint}</p>
+            <p className="mt-2 font-medium">{card.label}</p>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">{card.hint}</p>
+            <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary">Open queue <ArrowRight className="size-4" /></span>
+            </CardContent></Card>
           </Link>
         ))}
       </div>

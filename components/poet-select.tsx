@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { searchPoets, type PoetResult } from "@/app/actions";
+import { X, Search, UserRoundPlus } from "lucide-react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 export function PoetSelect({
   value,
@@ -86,23 +89,24 @@ export function PoetSelect({
       <input type="hidden" name="poet_id" value={value?.id ?? ""} />
 
       {value ? (
-        <div className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-accent/30 px-3 py-2.5 text-sm">
           <span>
             {value.name_am}
             {value.name_en ? ` (${value.name_en})` : ""}
           </span>
-          <button
+          <Button
             type="button"
             onClick={deselect}
-            className="rounded-full px-2 py-0.5 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800"
+            variant="ghost"
+            size="icon-sm"
             aria-label="Clear selected poet"
           >
-            ✕
-          </button>
+            <X className="size-4" />
+          </Button>
         </div>
       ) : (
         <>
-          <input
+          <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -113,16 +117,16 @@ export function PoetSelect({
             placeholder="Search poets by name (Amharic or English)…"
             autoComplete="off"
             aria-label="Search poets"
-            className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
-          />
+            className="h-11 pl-9"
+          /></div>
           {open ? (
-            <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-md border bg-white shadow-lg dark:bg-zinc-900">
+            <ul className="absolute z-10 mt-2 w-full overflow-hidden rounded-lg border border-primary/20 bg-card shadow-xl">
               {searching ? (
-                <li className="px-3 py-2 text-sm text-zinc-500">
+                <li className="px-3 py-3 text-sm text-muted-foreground">
                   Searching…
                 </li>
               ) : results.length === 0 ? (
-                <li className="px-3 py-2 text-sm text-zinc-500">
+                <li className="px-3 py-3 text-sm text-muted-foreground">
                   {triedEmpty ? "No poets found." : "Type to search."}
                 </li>
               ) : (
@@ -131,27 +135,27 @@ export function PoetSelect({
                     <button
                       type="button"
                       onClick={() => choose(poet)}
-                      className="flex w-full items-baseline gap-2 px-3 py-2 text-left text-sm transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      className="flex w-full items-baseline gap-2 px-3 py-3 text-left text-sm transition hover:bg-accent"
                     >
                       <span className="font-medium">{poet.name_am}</span>
                       {poet.name_en ? (
-                        <span className="text-zinc-500">{poet.name_en}</span>
+                        <span className="text-muted-foreground">{poet.name_en}</span>
                       ) : null}
                     </button>
                   </li>
                 ))
               )}
               {onRequestNew ? (
-                <li className="border-t px-3 py-2">
+                <li className="border-t border-border/70 px-3 py-2">
                   <button
                     type="button"
                     onClick={() => {
                       setOpen(false);
                       onRequestNew();
                     }}
-                    className="text-xs text-zinc-500 underline hover:text-zinc-800 dark:hover:text-zinc-200"
+                    className="inline-flex items-center gap-2 text-xs font-medium text-primary hover:underline"
                   >
-                    Can&apos;t find this poet? + Add poet details
+                    <UserRoundPlus className="size-3.5" /> Can&apos;t find this poet? Add details
                   </button>
                 </li>
               ) : null}

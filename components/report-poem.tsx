@@ -2,6 +2,9 @@
 
 import { useActionState, useState } from "react";
 import { reportPoem } from "@/app/actions";
+import { Alert, AlertDescription } from "./ui/alert";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
 
 export function ReportPoem({
   poemId,
@@ -24,7 +27,7 @@ export function ReportPoem({
 
   if (reported) {
     return (
-      <p className="text-xs text-zinc-400">
+      <p className="text-xs text-muted-foreground">
         {state.success
           ? "Your report was received and will be reviewed by our moderators. The poem stays visible unless they act on it."
           : "You've already reported this poem."}
@@ -37,7 +40,7 @@ export function ReportPoem({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs text-zinc-400 underline hover:text-zinc-600 dark:hover:text-zinc-200"
+        className="text-xs text-muted-foreground underline hover:text-foreground"
       >
         Report this poem
       </button>
@@ -45,40 +48,41 @@ export function ReportPoem({
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-2">
+    <form action={formAction} className="form-stack">
       <input type="hidden" name="poem_id" value={poemId} />
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+      <p className="text-xs text-muted-foreground">
         Use this to flag wrong attribution, a copyright concern, or another
         issue with this poem. A moderator will review your report — the poem
         is not removed automatically.
       </p>
-      <textarea
+      <Textarea
         name="reason"
         required
         rows={3}
         value={reason}
         onChange={(e) => setReason(e.target.value)}
         placeholder="What's wrong with this poem?"
-        className="whitespace-pre-wrap rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
+        className="whitespace-pre-wrap"
       />
       {state.error ? (
-        <p className="text-sm text-red-600">{state.error}</p>
+        <Alert variant="destructive"><AlertDescription>{state.error}</AlertDescription></Alert>
       ) : null}
       <div className="flex gap-2">
-        <button
+        <Button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-zinc-900 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-60"
+          size="sm"
         >
           {pending ? "Sending…" : "Send report"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-md border px-4 py-1.5 text-sm font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          variant="outline"
+          size="sm"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

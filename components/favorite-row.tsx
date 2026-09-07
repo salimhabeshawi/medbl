@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FavoriteToggle } from "./favorite-toggle";
+import { Badge } from "./ui/badge";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 export function FavoriteRow({
   poem,
@@ -21,37 +23,32 @@ export function FavoriteRow({
   if (hidden) return null;
 
   return (
-    <li className="flex items-center justify-between gap-4 py-3">
-      <div className="min-w-0">
+    <Card className="border-primary/15 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg">
+      <CardHeader>
+        <CardTitle className="font-sans text-base"><Link href={`/poems/${poem.id}`} className="hover:text-primary">{poem.title}</Link></CardTitle>
+        <CardAction><FavoriteToggle poemId={poem.id} initialFavorited={true} onUnfavorited={() => setHidden(true)} /></CardAction>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="min-w-0">
         <Link
           href={`/poems/${poem.id}`}
-          className="font-medium hover:underline"
+          className="font-serif text-lg hover:text-primary"
         >
           {poem.title}
         </Link>
         {poet ? (
-          <span className="ml-2 text-sm text-zinc-500">
-            — {poet.name_am ?? poet.name_en}
-          </span>
+          <p className="mt-1 text-sm text-muted-foreground">by {poet.name_am ?? poet.name_en}</p>
         ) : null}
-        {poem.category ? (
-          <span className="ml-2 text-sm text-zinc-500">{poem.category}</span>
-        ) : null}
-        {Array.isArray(poem.tags) && poem.tags.length > 0 ? (
-          <span className="ml-2 text-sm text-zinc-400">
-            {poem.tags.map((t: string) => (
-              <span key={t} className="mr-1">
-                #{t}
-              </span>
-            ))}
-          </span>
-        ) : null}
-      </div>
-      <FavoriteToggle
-        poemId={poem.id}
-        initialFavorited={true}
-        onUnfavorited={() => setHidden(true)}
-      />
-    </li>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {poem.category ? <Badge variant="outline">{poem.category}</Badge> : null}
+          {Array.isArray(poem.tags) && poem.tags.length > 0 ? (
+            poem.tags.map((t: string) => (
+              <Badge key={t} variant="secondary">#{t}</Badge>
+            ))
+          ) : null}
+        </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

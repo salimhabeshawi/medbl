@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { DisputedTag } from "@/components/disputed-tag";
+import { EmptyState } from "@/components/empty-state";
+import { Card, CardContent } from "@/components/ui/card";
 
 export async function generateMetadata({
   params,
@@ -55,12 +57,12 @@ export default async function PoetPage({
     <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="mb-1 text-3xl font-bold">{poet.name_am}</h1>
       {poet.name_en ? (
-        <p className="text-zinc-500">{poet.name_en}</p>
+        <p className="text-muted-foreground">{poet.name_en}</p>
       ) : null}
-      {years ? <p className="mt-1 text-sm text-zinc-500">{years}</p> : null}
+      {years ? <p className="mt-1 text-sm text-muted-foreground">{years}</p> : null}
 
       {poet.bio ? (
-        <p className="mt-6 whitespace-pre-line leading-7 text-zinc-700 dark:text-zinc-300">
+        <p className="mt-6 whitespace-pre-line leading-7 text-muted-foreground">
           {poet.bio}
         </p>
       ) : null}
@@ -68,13 +70,13 @@ export default async function PoetPage({
       <section className="mt-12">
         <h2 className="mb-4 text-2xl font-semibold">Poems</h2>
         {poems && poems.length > 0 ? (
-          <ul className="divide-y">
+          <div className="grid gap-4 sm:grid-cols-2">
             {poems.map((poem) => (
-              <li
+              <Card
                 key={poem.id}
-                className="flex items-center justify-between gap-4 py-3"
+                className="border-primary/15 shadow-sm transition hover:-translate-y-1 hover:border-primary/50 hover:bg-accent/40 hover:shadow-lg"
               >
-                <div className="min-w-0">
+                <CardContent className="flex items-center justify-between gap-4 p-5"><div className="min-w-0">
                   <Link
                     href={`/poems/${poem.id}`}
                     className="font-medium hover:underline"
@@ -85,7 +87,7 @@ export default async function PoetPage({
                     <DisputedTag />
                   ) : null}
                   {poem.category ? (
-                    <span className="ml-2 text-sm text-zinc-500">
+                    <span className="ml-2 text-sm text-muted-foreground">
                       {poem.category}
                     </span>
                   ) : null}
@@ -96,13 +98,12 @@ export default async function PoetPage({
                     initialFavorited={favIds.has(poem.id)}
                   />
                 ) : null}
-              </li>
+                </CardContent>
+              </Card>
             ))}
-          </ul>
+          </div>
         ) : (
-          <p className="rounded-md border border-dashed px-4 py-10 text-center text-sm text-zinc-500">
-            No published poems for this poet yet.
-          </p>
+          <EmptyState title="No published poems yet" description="This poet does not have any published poems in the anthology." />
         )}
       </section>
     </div>

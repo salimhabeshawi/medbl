@@ -6,6 +6,8 @@ import {
   removeDisputedPoem,
   republishDisputedPoem,
 } from "@/app/actions";
+import { Alert, AlertDescription } from "./ui/alert";
+import { Button } from "./ui/button";
 
 type Props = {
   id: string;
@@ -42,7 +44,7 @@ export function ReportReview({
   const disputed = poemStatus === "disputed";
 
   return (
-    <li className="rounded-lg border p-6">
+    <li className="rounded-xl border border-primary/15 bg-card p-6 shadow-sm">
       <div className="mb-2 flex items-baseline justify-between gap-4">
         <h3 className="font-semibold">
           Poem: <span className="font-normal">{poemTitle}</span>
@@ -52,17 +54,17 @@ export function ReportReview({
             </span>
           ) : null}
         </h3>
-        <span className="shrink-0 text-xs text-zinc-400">
+        <span className="shrink-0 text-xs text-muted-foreground">
           {new Date(createdAt).toLocaleDateString()}
         </span>
       </div>
-      <p className="text-sm text-zinc-600 dark:text-zinc-300">{reason}</p>
+      <p className="rounded-lg bg-accent/30 p-4 text-sm leading-6 text-muted-foreground">{reason}</p>
 
-      <p className="mt-2 text-xs text-zinc-400">
+      <p className="mt-2 text-xs text-muted-foreground">
         <a
           href={`/poems/${poemId}`}
           target="_blank"
-          className="text-zinc-600 underline dark:text-zinc-300"
+          className="text-muted-foreground underline hover:text-foreground"
         >
           View poem
         </a>
@@ -70,25 +72,23 @@ export function ReportReview({
 
       {disputed ? (
         <div className="mt-4">
-          <p className="mb-3 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
+          <Alert variant="destructive" className="mb-3"><AlertDescription>
             This poem is publicly flagged as disputed. Decide its fate:
-          </p>
+          </AlertDescription></Alert>
           <div className="grid gap-4 sm:grid-cols-2">
             <form action={republishAction}>
               <input type="hidden" name="report_id" value={id} />
-              <button
+              <Button
                 type="submit"
                 disabled={republishPending}
-                className="rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-600 disabled:opacity-60"
+                variant="secondary"
               >
                 {republishPending
                   ? "Republishing…"
                   : `Republish${formerStatus ? ` as ${formerStatus}` : ""}`}
-              </button>
+              </Button>
               {republishState.error ? (
-                <p className="mt-2 text-sm text-red-600">
-                  {republishState.error}
-                </p>
+                <Alert className="mt-2" variant="destructive"><AlertDescription>{republishState.error}</AlertDescription></Alert>
               ) : null}
             </form>
             <form
@@ -104,37 +104,37 @@ export function ReportReview({
               }}
             >
               <input type="hidden" name="report_id" value={id} />
-              <button
+              <Button
                 type="submit"
                 disabled={removePending}
-                className="rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-60"
+                variant="destructive"
               >
                 {removePending ? "Removing…" : "Remove"}
-              </button>
+              </Button>
               {removeState.error ? (
-                <p className="mt-2 text-sm text-red-600">{removeState.error}</p>
+                <Alert className="mt-2" variant="destructive"><AlertDescription>{removeState.error}</AlertDescription></Alert>
               ) : null}
             </form>
           </div>
         </div>
       ) : (
         <div className="mt-4">
-          <p className="mb-3 text-xs text-zinc-400">
+          <p className="mb-3 text-xs text-muted-foreground">
             Marking as disputed adds a public red tag to the poem — it stays
             visible to everyone. You can then republish or permanently remove
             it.
           </p>
           <form action={markAction}>
             <input type="hidden" name="report_id" value={id} />
-            <button
+            <Button
               type="submit"
               disabled={markPending}
-              className="rounded-md bg-amber-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:opacity-60"
+              variant="outline"
             >
               {markPending ? "Marking…" : "Mark as disputed"}
-            </button>
+            </Button>
             {markState.error ? (
-              <p className="mt-2 text-sm text-red-600">{markState.error}</p>
+              <Alert className="mt-2" variant="destructive"><AlertDescription>{markState.error}</AlertDescription></Alert>
             ) : null}
           </form>
         </div>

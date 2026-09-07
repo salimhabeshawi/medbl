@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 
 export function GoogleAuthButton({
   next,
@@ -40,11 +41,12 @@ export function GoogleAuthButton({
 
   return (
     <div className={className}>
-      <button
+      <Button
         type="button"
         onClick={handleGoogleSignIn}
         disabled={pending}
-        className="flex w-full items-center justify-center gap-2 rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-wait disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+        variant="outline"
+        className="w-full"
       >
         <svg viewBox="0 0 48 48" aria-hidden="true" className="h-4 w-4">
           <path
@@ -65,7 +67,7 @@ export function GoogleAuthButton({
           />
         </svg>
         {pending ? "Redirecting to Google…" : "Continue with Google"}
-      </button>
+      </Button>
       {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
     </div>
   );

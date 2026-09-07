@@ -25,6 +25,8 @@ A site where:
 ## Tech stack (do not deviate)
 
 - Frontend: Next.js (App Router), TypeScript, Tailwind CSS
+- UI components: shadcn/ui, built on top of Tailwind — see "Design
+  system" below for tokens/fonts
 - Backend: Supabase (Postgres + Auth + Storage), free tier
 - Hosting: Vercel (frontend), Supabase (backend) — both free tier, live
   in production
@@ -32,30 +34,63 @@ A site where:
   font in the root layout — do not override per-component
 - Search: Postgres trigram (pg_trgm) / ilike search via Supabase — no
   external search service
-- Auth: Supabase Auth via @supabase/ssr, with browser + server client
-  utilities and session-refresh middleware already in place
+- Auth: Supabase Auth via @supabase/ssr (email/password + Google OAuth),
+  with browser + server client utilities and session-refresh middleware
+  already in place
+
+## Design system
+
+Visual direction: **warm & traditional** — earthy, parchment/manuscript
+feel, not a generic gray SaaS dashboard look. Any new UI work must use
+these tokens, not shadcn's default gray theme.
+
+**Colors** (define as CSS variables in globals.css, wired into
+Tailwind/shadcn theme config — do not hardcode hex values inline in
+components):
+- Background: `#FBF3E6` (warm parchment cream)
+- Foreground/text: `#2E2018` (deep coffee brown)
+- Primary: `#B5651D` (burnt terracotta/ochre) — primary buttons, links,
+  active nav states
+- Secondary: `#5B6B3F` (muted olive green) — secondary actions, badges
+  (e.g. "verified" attribution badge)
+- Muted/border: `#D9C7AC` (warm tan)
+- Destructive: `#8B3A3A` (muted brick red) — reject/delete/report
+  actions, error states
+
+**Typography:**
+- Amharic text: **Noto Sans Ethiopic** (already configured via
+  next/font/google) — always used for any Amharic content, never
+  overridden per-component.
+- Latin headings: **Lora** (serif)
+- Latin body/UI text: **Inter** (sans)
+
+**Layout principle: mobile-first.** Write base (unprefixed) Tailwind
+classes for the smallest viewport first, then layer on `sm:`/`md:`/
+`lg:` overrides for larger screens — never the reverse. Navigation uses
+a hamburger menu (shadcn `Sheet` component) below the `md` breakpoint,
+switching to a horizontal nav bar at `md` and above.
+
+**Component library usage:** use shadcn/ui components (Button, Input,
+Textarea, Label, Card, Dialog, Sheet, DropdownMenu, Avatar, Badge, Tabs,
+Select, Alert, Skeleton, Separator, Sonner for toasts) rather than
+hand-rolled equivalents, so the app stays visually consistent as new
+features are added. Install additional shadcn components as needed
+rather than building custom versions of things shadcn already provides.
 
 ## Signup / login — keep these simple, always
 
-Signup and login collect ONLY email and password. Do not add poet
-fields, profile fields, or any other fields to signup or login, ever.
-This was tried and deliberately reverted — friction on the core
-auth funnel is not worth it. Anything related to "who is this user as a
-poet" belongs exclusively on `/profile`, filled in after signup, only
-if and when the user actually wants to submit their own poem.
-
-A Google OAuth sign-in option is also available on `/login` and
-`/signup` (a "Continue with Google" button). This is a pure
-alternative sign-in method — it adds no fields to the email/password
-forms. The flow: the browser client calls
-`signInWithOAuth({ provider: 'google', redirectTo: <origin>/auth/callback })`,
-and `app/auth/callback/route.ts` exchanges the PKCE code for a session
-server-side, honoring a `next` query param if present.
+Signup and login collect ONLY email and password (plus the Google OAuth
+option as an alternative sign-in method — this doesn't count as "adding
+a field", it's a separate button). Do not add poet fields, profile
+fields, or any other input fields to signup or login, ever. Anything
+related to "who is this user as a poet" belongs exclusively on
+`/profile`, filled in after signup, only if and when the user actually
+wants to submit their own poem.
 
 The `handle_new_user()` trigger on `auth.users` only creates a
-`profiles` row (`role` default `member`, `poet_id` null). It does not
-read any poet-related metadata and does not create a `poets` row. Do
-not change this.
+`profiles` row (`role` default `member`, `poet_id` null). It fires
+identically regardless of sign-in method (email/password or Google).
+Do not change this.
 
 ## Data model (current)
 
@@ -139,136 +174,99 @@ poet profile on `/profile`.
 
 ## Profile page (`/profile`)
 
-Requires auth (redirect to `/login` if not logged in). Contains two
-independent sections:
+Requires auth (redirect to `/login` if not logged in). Two independent
+sections:
 
 **1. Poet details** — name_am (required to save), name_en, birth_year,
 bio (all optional except name_am). Prefilled from the user's linked
 `poets` row if `profiles.poet_id` is set, otherwise blank. Saving calls
-`upsert_my_poet_profile(...)` (security definer function — see below),
-which creates the poet row and links it on first save, or updates the
-existing linked poet row on subsequent saves. A user can only ever
-create/edit their OWN linked poet record this way, never anyone else's.
+`upsert_my_poet_profile(...)` (security definer function), which
+creates the poet row and links it on first save, or updates the
+existing linked poet row on subsequent saves.
 
 **2. Account settings** — change email, change password.
-- Email change: call `supabase.auth.updateUser({ email })`. Supabase's
-  default behavior sends a confirmation link to both the current and
-  new email addresses — do not disable "Secure email change" in
-  Supabase Auth settings, and do not build a custom confirmation flow;
-  rely on this built-in behavior. Show the user a "check your email to
-  confirm" message after calling it.
-- Password change: INTERIM simple flow — current password + new password
-  (`updateUser({ password, current_password })`), no email step. The
-  emailed-code verification (send OTP via `signInWithOtp`, verify with
-  `verifyOtp(type: 'email')`, then update) is deliberately deferred until
-  the project has a domain + custom SMTP; it was fully designed and works
-  — restore it from git history when SMTP exists. Do NOT rely on the
-  "Secure password change" + nonce mechanism as a substitute: GoTrue only
-  verifies the nonce for sessions older than 24 hours, making the check
-  fake for fresh sessions. The current-password field is required because
-  "Require current password when updating" is enabled in Supabase Auth.
+- Email change: `supabase.auth.updateUser({ email })`. Supabase's
+  default behavior sends a confirmation link to both current and new
+  email — rely on this, don't build a custom flow.
+- Password change: uses the **current-password confirmation** method
+  (not the reauthentication/nonce method):
+  ```
+  supabase.auth.updateUser({
+    password: newPassword,
+    current_password: currentPassword
+  })
+  ```
+  This requires "Require current password when changing password" to
+  be enabled in Supabase Auth settings (Authentication → Sign In /
+  Providers → Email) — already enabled in this project.
 
-**Redirect-after-save behavior** (important, don't default to always
-redirecting to poem submission):
-- Every link/button in the app that sends a user to `/profile` must
-  append a `redirect` query param set to where they should return to
-  after saving. In the normal case (e.g. a "My Profile" link in the
-  account menu), this should be the current page the user is
-  navigating away from.
-- The ONLY case where `redirect` should point at the "submit my own
-  poem" flow is when the user is sent to `/profile` specifically
-  because they tried to submit their own poem without a poet profile
-  set up yet (see submission flow below).
-- After a successful poet-details save, redirect to the `redirect`
-  query param's target if present, otherwise fall back to the page the
-  user came from (or home if that's unavailable). Saving account
-  settings (email/password) does not need to trigger this redirect —
-  the user stays on `/profile` since those actions involve a
-  confirmation step anyway.
+**Redirect-after-save behavior:** every link/button that sends a user
+to `/profile` must append a `redirect` query param set to where they
+should return to after saving. The only case where `redirect` points
+at the "submit my own poem" flow is when the user was sent to `/profile`
+specifically because they tried to submit their own poem without a
+poet profile set up yet. Saving account settings does not trigger this
+redirect — the user stays on `/profile`.
 
 ## Poem submission flow (current)
 
-`/submit` is the ONLY entry point for adding a poem. There is no
-separate "request a poet" page. On landing, the user chooses one of two
-paths:
+`/submit` is the ONLY entry point for adding a poem. On landing, the
+user chooses one of two paths:
 
 **1. "This is my own poem"**
-- Check the current user's `profiles.poet_id` server-side.
-- If it's set: no poet search, no poet fields — proceed straight to the
-  poem-only fields (title, body, category/tags, source), using that
-  `poet_id` for the submission.
-- If it's null: do NOT show any inline poet form here. Instead, redirect
-  the user to `/profile?redirect=/submit/own` (or equivalent) with a
-  clear message like "Set up your poet profile first so your poems can
-  be properly attributed to you." Once they save their poet details on
-  `/profile`, they're sent back to finish the "my own poem" submission,
-  which now proceeds as the "poet_id is set" case above.
+- If `profiles.poet_id` is set: no poet fields shown — proceed straight
+  to poem fields (title, body, category/tags, source), using that
+  `poet_id`.
+- If null: redirect to `/profile?redirect=...` with a message
+  explaining they need to set up their poet profile first. Once saved,
+  they're sent back to finish the submission.
 
 **2. "This is another poet's poem"**
-- Unchanged: search-and-select an existing poet by name, or expand the
-  inline "didn't find the poet? add details" form to propose a new one
+- Search-and-select an existing poet by name, or expand the inline
+  "didn't find the poet? add details" form to propose a new one
   (populates `proposed_poet_name_am`/`name_en`/`bio` instead of
-  `poet_id`). This path never touches the user's own profile or
-  `profiles.poet_id`.
+  `poet_id`). Never touches the user's own profile.
 
 Either path inserts one row into `poem_submissions` with `status =
-'pending'`. Self-submitted poems are NOT auto-approved — they go
-through the same moderation queue as everything else.
+'pending'`. Self-submitted poems are NOT auto-approved.
 
 ## Moderation workflow (current)
 
 1. Submission appears in `/moderate/submissions` with status `pending`.
-2. If `poet_id` is already set (existing poet OR a self-submission
-   already linked to the submitter's own poet record): moderator just
-   reviews poem content/source and approves or rejects. No poet
-   resolution needed.
-3. If `proposed_poet_name_am` is set instead: moderator sees it labeled
-   "New poet proposed", plus the top 3 existing poets most similar by
-   `pg_trgm` similarity on `name_am`, to catch near-duplicates before
-   creating a new poet record. Moderator can either pick one of those
-   matches or proceed with creating the new poet as proposed.
+2. If `poet_id` is already set: moderator reviews poem content/source
+   and approves or rejects. No poet resolution needed.
+3. If `proposed_poet_name_am` is set: moderator sees it labeled "New
+   poet proposed", plus the top 3 existing poets most similar by
+   `pg_trgm` similarity on `name_am`. Moderator can pick a match or
+   proceed with creating the new poet as proposed.
 4. Moderator can edit poem fields and proposed-poet fields inline
-   before approving (typo fixes, etc.) via a direct update to the
-   `poem_submissions` row.
+   before approving.
 5. Approval calls `approve_poem_submission(p_submission_id,
-   p_attribution_status, p_poet_id)`:
-   - `p_poet_id` provided → use it directly (covers: original poet_id,
-     self-submission's linked poet, or a moderator-picked fuzzy match).
-   - `p_poet_id` null + `proposed_poet_name_am` set → create the new
-     poet row, then use its id.
-   - `p_poet_id` null + submission already had its own `poet_id` →
-     fall back to that.
-   - Inserts into `poems`, marks the submission `approved`.
-6. Rejection: `status = 'rejected'` with a required `rejection_reason`,
-   via `poem_submissions_update_staff_all` RLS policy directly — no
-   special function needed.
-7. `poet_requests` and `/poets/request` do not exist — do not reference
-   them anywhere.
+   p_attribution_status, p_poet_id)` — resolves poet_id (provided,
+   newly created from proposed fields, or the submission's own),
+   inserts into `poems`, marks the submission `approved`.
+6. Rejection: `status = 'rejected'` with a required `rejection_reason`.
+7. `poet_requests` and `/poets/request` do not exist.
 8. Reports: any authenticated user can file one from a poem's page.
    Moderators resolve them and can set a poem's `attribution_status` to
-   `disputed` from `/moderate/reports`, which hides it from public
-   browse/search until resolved.
+   `disputed`, hiding it from public browse/search until resolved.
 
 ## Row-Level Security — key points (do not weaken any of these)
 
 - `poets`: public read. Insert/update/delete restricted to
-  moderator/admin via RLS policy for direct access. The ONLY way a
-  regular user affects `poets` is indirectly, through the
-  `security definer` function `upsert_my_poet_profile()`, which only
-  ever touches the calling user's own linked poet row — never add a
-  direct RLS policy letting regular users insert/update `poets`
-  themselves.
+  moderator/admin via RLS policy for direct access. The only way a
+  regular user affects `poets` is indirectly, through the security
+  definer function `upsert_my_poet_profile()`, which only ever touches
+  the calling user's own linked poet row.
 - `poem_submissions`: users read/insert only their own rows. Staff read
   and update all.
 - `poems`: public read where `attribution_status != 'disputed'`. NO
   insert grant for `anon`/`authenticated` at all — only
-  `approve_poem_submission()` (security definer) can create rows here.
-  Staff can update (e.g. change attribution_status).
+  `approve_poem_submission()` can create rows here.
 - `favorites`, `reports`: standard own-row policies for
   insert/read/delete, staff-only read/update on `reports`.
 - `profiles`: users read/update their own row but cannot change their
-  own `role` (self-promotion blocked via `with check`). Admins can
-  update any profile. Staff can read all profiles.
+  own `role`. Admins can update any profile. Staff can read all profiles.
 
 ## Copyright / rights notes for the agent
 
@@ -282,36 +280,33 @@ through the same moderation queue as everything else.
 
 1. Next.js + Tailwind scaffold, layout, Noto Sans Ethiopic font — done
 2. Supabase schema + RLS (all tables above) — done
-3. Supabase Auth (signup/login/logout, email+password only) — done
+3. Supabase Auth (email/password + Google OAuth) — done
 4. Public browse/search pages (poets, poems, categories) — done
 5. Favorites — done
-6. Poem submission flow (merged, inline poet proposal + fuzzy match on
-   the "another poet's poem" path) — done
+6. Poem submission flow (merged, inline poet proposal + fuzzy match) — done
 7. Moderator dashboard (submissions, poet resolution, reports) — done
 8. Report/flagging UI on poem pages — done
 9. Deployed to Vercel, live — done
 10. `/profile` page (poet details + account settings) and the "my own
-    poem" redirect-to-complete-profile flow — IN PROGRESS (see prompt
-    used to implement this; once done, mark this line "done")
-11. Google OAuth sign-in (button on login/signup + `/auth/callback`
-    PKCE exchange) — done
+    poem" redirect-to-complete-profile flow — done
+11. Google OAuth sign-in — done
+12. Full UI rebuild with shadcn/ui, mobile-first, hamburger nav — done
 
 ## Guidelines for future changes
 
 - Add new migrations as new files under `supabase/migrations/` — never
   edit a migration that's already been applied to the live database.
-- Any new privileged database operation (something only a moderator/
-  admin, or only the record's own owner, should be able to do) should
-  be a `security definer` Postgres function with an explicit
-  authorization check inside it, following the pattern of
-  `approve_poem_submission()` and `upsert_my_poet_profile()` — don't
-  rely on RLS policies alone for operations more complex than "a user
-  can read/write their own row."
+- Any new privileged database operation should be a `security definer`
+  Postgres function with an explicit authorization check inside it,
+  following the pattern of `approve_poem_submission()` and
+  `upsert_my_poet_profile()`.
 - Prefer withholding a GRANT entirely over relying only on an RLS
-  policy when a table should never be writable by regular users at all
-  (see `poems` insert as the model for this).
+  policy when a table should never be writable by regular users at all.
 - Keep signup/login minimal. Any future "collect more info about the
   user" idea belongs on `/profile`, opt-in, not on the signup form.
+- Any new UI must follow the "Design system" section above — warm
+  palette tokens, Lora/Inter/Noto Sans Ethiopic, mobile-first, shadcn
+  components — not ad hoc styling.
 - Keep this file in sync with reality at the end of every feature step
   — update the relevant section(s) above rather than appending a change
   log at the bottom.
