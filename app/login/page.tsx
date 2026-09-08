@@ -4,6 +4,8 @@ import { GoogleAuthButton } from "@/components/google-auth-button";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { BackLink } from "@/components/back-link";
+import { getTranslations } from "next-intl/server";
 
 export default async function LoginPage({
   searchParams,
@@ -11,11 +13,14 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; message?: string; next?: string }>;
 }) {
   const { error, message, next } = await searchParams;
+  const tAuth = await getTranslations("Auth");
 
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
-      <Card className="w-full max-w-sm border-primary/15 shadow-lg"><CardContent className="p-8">
-        <h1 className="mb-6 text-2xl font-bold">Log in</h1>
+      <div className="w-full max-w-sm">
+      <BackLink href="/">{tAuth("backHome")}</BackLink>
+      <Card className="w-full border-primary/15 shadow-lg"><CardContent className="p-8">
+        <h1 className="mb-6 text-2xl font-bold">{tAuth("loginTitle")}</h1>
 
         {error ? (
           <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -58,17 +63,18 @@ export default async function LoginPage({
             />
           </label>
           <Button type="submit" className="w-full">
-            Log in
+              {tAuth("loginBtn")}
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          No account?{" "}
+          {tAuth("noAccount")} {" "}
           <Link href="/signup" className="font-medium underline">
             Sign up
           </Link>
         </p>
       </CardContent></Card>
+      </div>
     </div>
   );
 }

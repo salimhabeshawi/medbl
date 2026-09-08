@@ -6,19 +6,22 @@ import { firstRelation } from "@/lib/relations";
 import { EmptyState } from "@/components/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { BackLink } from "@/components/back-link";
+import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = { title: "My submissions" };
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, label }: { status: string; label: string }) {
   return (
-    <Badge variant={status === "approved" ? "secondary" : status === "rejected" ? "destructive" : "outline"} className="capitalize">
-      {status}
+    <Badge variant={status === "approved" ? "secondary" : status === "rejected" ? "destructive" : "outline"}>
+      {label}
     </Badge>
   );
 }
 
 export default async function MySubmissionsPage() {
   const supabase = await createClient();
+  const tSubs = await getTranslations("MySubmissions");
 
   const {
     data: { user },
@@ -35,13 +38,14 @@ export default async function MySubmissionsPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <div className="mb-10"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Your contribution</p><h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">My submissions</h1><p className="text-sm leading-7 text-muted-foreground">Follow each poem from submission through moderator review.</p></div>
+      <BackLink href="/">{tSubs("back")}</BackLink>
+      <div className="mb-10"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">{tSubs("eyebrow")}</p><h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">{tSubs("title")}</h1><p className="text-sm leading-7 text-muted-foreground">{tSubs("subtitle")}</p></div>
 
       <section>
-        <h2 className="mb-4 font-serif text-2xl font-semibold">Poem submissions</h2>
-        <Link href="/submit" className="mb-4 inline-flex text-sm font-medium text-primary hover:underline">Submit a new poem</Link>
+        <h2 className="mb-4 font-serif text-2xl font-semibold">{tSubs("sectionTitle")}</h2>
+        <Link href="/submit" className="mb-4 inline-flex text-sm font-medium text-primary hover:underline">{tSubs("submitNew")}</Link>
         {submissionsError ? (
-          <EmptyState title="Could not load submissions" description={submissionsError.message} />
+          <EmptyState title={tSubs("errorTitle")} description={submissionsError.message} />
         ) : submissions && submissions.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2">
             {submissions.map((sub) => {
@@ -55,16 +59,16 @@ export default async function MySubmissionsPage() {
                       <p className="font-medium">{sub.title}</p>
                       <p className="text-sm text-muted-foreground">
                         {sub.proposed_poet_name_am
-                          ? `Proposed new poet: ${sub.proposed_poet_name_am}`
-                          : poet?.name_am ?? poet?.name_en ?? "Unknown poet"}{" "}
+                          ? tSubs("proposedPoet", { name: sub.proposed_poet_name_am })
+                          : poet?.name_am ?? poet?.name_en ?? tSubs("unknownPoet")}{" "}
                         · {new Date(sub.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <StatusBadge status={sub.status} />
+                    <StatusBadge status={sub.status} label={sub.status === "approved" ? tSubs("approved") : sub.status === "rejected" ? tSubs("rejected") : tSubs("pending")} />
                   </div>
                   {sub.status === "rejected" && sub.rejection_reason ? (
                     <p className="mt-3 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                      Reason: {sub.rejection_reason}
+                      {tSubs("reason")}: {sub.rejection_reason}
                     </p>
                   ) : null}
                 </CardContent></Card>
@@ -72,7 +76,7 @@ export default async function MySubmissionsPage() {
             })}
           </div>
         ) : (
-          <EmptyState title="You have not submitted any poems" description="Your contributions will appear here after you submit them for review." />
+          <EmptyState title={tSubs("emptyTitle")} description={tSubs("emptyDesc")} />
         )}
       </section>
     </div>

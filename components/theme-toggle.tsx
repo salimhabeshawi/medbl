@@ -11,11 +11,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Monitor, Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const options = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "Device", icon: Monitor },
+  { value: "light", key: "light", icon: Sun },
+  { value: "dark", key: "dark", icon: Moon },
+  { value: "system", key: "device", icon: Monitor },
 ];
 
 export function ThemeToggle({
@@ -24,13 +25,14 @@ export function ThemeToggle({
   variant?: "desktop" | "mobile";
 }) {
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("Common");
   const value = theme ?? "system";
 
   if (variant === "mobile") {
     return (
       <div className="space-y-2 px-4 py-2">
         <p className="text-xs font-medium uppercase text-background/60">
-          Theme
+          {t("theme")}
         </p>
         <div className="grid grid-cols-3 gap-1 rounded-lg border border-background/15 bg-background/5 p-1">
           {options.map((option) => {
@@ -49,7 +51,7 @@ export function ThemeToggle({
                 }
               >
                 <Icon className="size-3.5" aria-hidden="true" />
-                {option.label}
+                {t(option.key)}
               </button>
             );
           })}
@@ -72,7 +74,7 @@ export function ThemeToggle({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40 border-border bg-popover">
-        <DropdownMenuLabel>Theme</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("theme")}</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={value} onValueChange={setTheme}>
           {options.map((option) => {
             const Icon = option.icon;
@@ -80,7 +82,7 @@ export function ThemeToggle({
             return (
               <DropdownMenuRadioItem key={option.value} value={option.value}>
                 <Icon className="text-primary" aria-hidden="true" />
-                {option.label}
+                {t(option.key)}
               </DropdownMenuRadioItem>
             );
           })}

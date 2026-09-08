@@ -9,6 +9,7 @@ reflects the CURRENT state of the app, not the original plan.
 ## Project summary
 
 A site where:
+
 - Visitors browse poems by poet, category, or search.
 - Registered users can favorite poems.
 - Registered users can submit poems — either their OWN poems (they are
@@ -47,6 +48,7 @@ these tokens, not shadcn's default gray theme.
 **Colors** (define as CSS variables in globals.css, wired into
 Tailwind/shadcn theme config — do not hardcode hex values inline in
 components):
+
 - Background: `#FBF3E6` (warm parchment cream)
 - Foreground/text: `#2E2018` (deep coffee brown)
 - Primary: `#B5651D` (burnt terracotta/ochre) — primary buttons, links,
@@ -58,6 +60,7 @@ components):
   actions, error states
 
 **Typography:**
+
 - Amharic text: **Noto Sans Ethiopic** (already configured via
   next/font/google) — always used for any Amharic content, never
   overridden per-component.
@@ -95,8 +98,10 @@ Do not change this.
 ## Data model (current)
 
 ### `profiles`
+
 One row per Supabase Auth user, created automatically via the
 `handle_new_user()` trigger on `auth.users` insert.
+
 - `id` (= auth.users.id)
 - `role`: `member` | `moderator` | `admin`, default `member`
 - `poet_id` (nullable FK to `poets`, unique) — this user's own linked
@@ -105,7 +110,9 @@ One row per Supabase Auth user, created automatically via the
 - `created_at`, `updated_at`
 
 ### `poets`
+
 Registry of poets. A poet row can originate from three paths:
+
 1. Seeded/created directly by an admin/moderator.
 2. Created via the `upsert_my_poet_profile()` function when a user
    saves their poet details on `/profile` (`created_by` = that user,
@@ -113,6 +120,7 @@ Registry of poets. A poet row can originate from three paths:
 3. Created by a moderator on approval of a poem submission that
    proposed a new poet (`created_by` = the submitter, `verified` =
    false).
+
 - `id`
 - `name_am` (Amharic name, required)
 - `name_en` (transliteration, optional)
@@ -125,7 +133,9 @@ Registry of poets. A poet row can originate from three paths:
   matching — see moderation workflow below
 
 ### `poem_submissions`
+
 Where all new poems land first. Nothing here is public until approved.
+
 - `id`
 - `submitted_by` (user id)
 - `poet_id` (nullable FK to `poets`) — set when the poem is linked to
@@ -145,10 +155,12 @@ Where all new poems land first. Nothing here is public until approved.
 - `created_at`
 
 ### `poems`
+
 Public, published poems only. Rows are created EXCLUSIVELY by the
 `approve_poem_submission()` function — there is no INSERT grant for
 `anon`/`authenticated` on this table, not even gated by a policy; the
 grant itself is withheld.
+
 - `id`
 - `poet_id` (FK to `poets`, required)
 - `title`, `body`, `category`, `tags`
@@ -157,15 +169,31 @@ grant itself is withheld.
 - `created_at`
 
 ### `favorites`
+
 - `id`, `user_id`, `poem_id`, `created_at`
 - unique (`user_id`, `poem_id`)
 
 ### `reports`
+
 - `id`, `poem_id`, `reported_by` (nullable), `reason`
 - `status`: `open` | `resolved`
 - `resolved_by` (nullable), `created_at`
 
+### `categories` (final bilingual structure)
+
+- `id` (uuid primary key), `name_am` (nullable text), `name_en` (text,
+  unique), `created_by` (nullable auth user id), and `created_at`.
+- `poems.category_id` and `poem_submissions.category_id` are nullable
+  foreign keys to `categories.id`; legacy copied category text is
+  matched before removal, and unmatched values stop the migration rather
+  than being silently discarded.
+- Category labels use the selected UI locale with fallback to the other
+  non-null name. User-generated content is never translated: poem titles,
+  bodies, tags, poet names and bios, sources, rejection reasons, and report
+  reasons are displayed exactly as stored.
+
 ### Removed: `poet_requests`
+
 This table existed early on as a standalone "request a new poet"
 feature, decoupled from poem submission. It has been REMOVED. Do not
 recreate it. Proposing a new poet only happens inline as part of a
@@ -185,6 +213,7 @@ creates the poet row and links it on first save, or updates the
 existing linked poet row on subsequent saves.
 
 **2. Account settings** — change email, change password.
+
 - Email change: `supabase.auth.updateUser({ email })`. Supabase's
   default behavior sends a confirmation link to both current and new
   email — rely on this, don't build a custom flow.
@@ -214,6 +243,7 @@ redirect — the user stays on `/profile`.
 user chooses one of two paths:
 
 **1. "This is my own poem"**
+
 - If `profiles.poet_id` is set: no poet fields shown — proceed straight
   to poem fields (title, body, category/tags, source), using that
   `poet_id`.
@@ -222,6 +252,7 @@ user chooses one of two paths:
   they're sent back to finish the submission.
 
 **2. "This is another poet's poem"**
+
 - Search-and-select an existing poet by name, or expand the inline
   "didn't find the poet? add details" form to propose a new one
   (populates `proposed_poet_name_am`/`name_en`/`bio` instead of
@@ -242,7 +273,7 @@ Either path inserts one row into `poem_submissions` with `status =
 4. Moderator can edit poem fields and proposed-poet fields inline
    before approving.
 5. Approval calls `approve_poem_submission(p_submission_id,
-   p_attribution_status, p_poet_id)` — resolves poet_id (provided,
+p_attribution_status, p_poet_id)` — resolves poet_id (provided,
    newly created from proposed fields, or the submission's own),
    inserts into `poems`, marks the submission `approved`.
 6. Rejection: `status = 'rejected'` with a required `rejection_reason`.
@@ -291,6 +322,8 @@ Either path inserts one row into `poem_submissions` with `status =
     poem" redirect-to-complete-profile flow — done
 11. Google OAuth sign-in — done
 12. Full UI rebuild with shadcn/ui, mobile-first, hamburger nav — done
+13. Terms of Service and Privacy Policy pages, linked from footer/signup/submit — done
+14. Amharic/English UI translation (next-intl, cookie-based) + bilingual category names — done
 
 ## Guidelines for future changes
 

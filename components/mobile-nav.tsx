@@ -28,6 +28,7 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type LinkDef = {
   href: string;
@@ -72,6 +73,9 @@ export function MobileNav({
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const redirectParam = encodeURIComponent(pathname);
+  const tNav = useTranslations("Nav");
+  const tSubmit = useTranslations("Submit");
+  const tSubmissions = useTranslations("MySubmissions");
 
   const primaryLinks = links.filter((l) => l.href !== "/profile" && l.href !== "/submit" && l.href !== "/my-submissions");
   const profileLink = links.find((l) => l.href === "/profile");
@@ -83,7 +87,7 @@ export function MobileNav({
           variant="outline"
           size="icon-sm"
           className="border-border bg-background text-foreground md:hidden"
-          aria-label="Open menu"
+          aria-label={tNav("menu")}
         >
           <Menu />
         </Button>
@@ -102,7 +106,7 @@ export function MobileNav({
               variant="ghost"
               size="icon-sm"
               className="text-foreground hover:bg-background/10 hover:text-foreground"
-              aria-label="Close menu"
+              aria-label={tNav("closeMenu")}
             >
               <X />
             </Button>
@@ -145,13 +149,31 @@ export function MobileNav({
                     className="size-4 text-primary"
                     aria-hidden="true"
                   />
-                  Profile
+                  {tNav("profile")}
                 </Link>
               </SheetClose>
             </>
           ) : null}
         </nav>
-        {role ? <div className="border-t border-background/15 px-4 py-3"><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Submissions</p><div className="flex flex-col gap-1"><SheetClose asChild><Link href="/submit" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10"><Plus className="size-4 text-primary" /> Submit a poem</Link></SheetClose><SheetClose asChild><Link href="/my-submissions" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10"><ClipboardList className="size-4 text-primary" /> My submissions</Link></SheetClose></div></div> : null}
+        {role ? (
+          <div className="border-t border-background/15 px-4 py-3">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {tNav("submit")}
+            </p>
+            <div className="flex flex-col gap-1">
+              <SheetClose asChild>
+                <Link href="/submit" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10">
+                  <Plus className="size-4 text-primary" /> {tSubmit("title")}
+                </Link>
+              </SheetClose>
+              <SheetClose asChild>
+                <Link href="/my-submissions" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10">
+                  <ClipboardList className="size-4 text-primary" /> {tSubmissions("title")}
+                </Link>
+              </SheetClose>
+            </div>
+          </div>
+        ) : null}
         <ThemeToggle variant="mobile" />
         <div className="mt-auto flex flex-col gap-2 border-t border-background/15 p-4">
           {role ? (
@@ -162,7 +184,7 @@ export function MobileNav({
                 className="w-full cursor-pointer justify-start text-destructive hover:bg-background/10 hover:text-destructive"
               >
                 <LogOut className="size-4" />
-                Log out
+                {tNav("logout")}
               </Button>
             </form>
           ) : (
@@ -175,7 +197,7 @@ export function MobileNav({
                 >
                   <Link href="/login">
                     <LogIn className="size-4" />
-                    Log in
+                    {tNav("login")}
                   </Link>
                 </Button>
               </SheetClose>
@@ -183,7 +205,7 @@ export function MobileNav({
                 <Button asChild className="w-full">
                   <Link href="/signup">
                     <Plus className="size-4" />
-                    Sign up
+                    {tNav("signup")}
                   </Link>
                 </Button>
               </SheetClose>

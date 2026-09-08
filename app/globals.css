@@ -93,6 +93,17 @@ button:disabled {
   cursor: not-allowed;
 }
 
+@media (max-width: 639px) {
+  .mobile-filter-trigger[data-state="closed"] [data-slot="select-value"],
+  .mobile-filter-trigger[data-state="closed"] > svg {
+    display: none;
+  }
+
+  .mobile-filter-trigger[data-state="open"] > svg {
+    display: none;
+  }
+}
+
 .form-stack {
   display: flex;
   flex-direction: column;

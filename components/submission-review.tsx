@@ -9,8 +9,9 @@ import {
 import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import { CardHeader, CardTitle } from "./ui/card";
-import { CategorySelect } from "./category-select";
+import { CategorySelect, type CategorySelectRecord } from "./category-select";
 import { TagInput } from "./tag-input";
+import { useTranslations } from "next-intl";
 
 type PoetMatch = {
   id: string;
@@ -23,14 +24,14 @@ type Props = {
   title: string;
   body: string;
   source: string;
-  category: string | null;
+  categoryId: string | null;
   tags: string[] | null;
   poetId: string | null;
   poetName: string | null;
   proposal: { nameAm: string; nameEn: string | null; bio: string | null } | null;
   matches: PoetMatch[];
   createdAt: string;
-  categories: string[];
+  categories: CategorySelectRecord[];
 };
 
 const inputClass =
@@ -41,7 +42,7 @@ export function SubmissionReview({
   title: initialTitle,
   body: initialBody,
   source: initialSource,
-  category: initialCategory,
+  categoryId: initialCategoryId,
   tags,
   poetId,
   poetName,
@@ -50,6 +51,10 @@ export function SubmissionReview({
   createdAt,
   categories,
 }: Props) {
+  const tMod = useTranslations("Moderate");
+  const tCommon = useTranslations("Common");
+  const tPoems = useTranslations("Poems");
+
   const [updateState, updateFormAction, updatePending] = useActionState(
     updateSubmission,
     {} as { error?: string; success?: boolean },
@@ -81,7 +86,7 @@ export function SubmissionReview({
     return (
       <li className="rounded-xl border border-secondary/30 bg-secondary/10 p-6">
         <p className="text-sm font-medium text-secondary">
-          Submission reviewed.
+          {tMod("reviewed")}
         </p>
       </li>
     );
@@ -89,14 +94,17 @@ export function SubmissionReview({
 
   return (
     <li className="overflow-hidden rounded-xl border border-primary/15 bg-card shadow-sm">
-      <CardHeader className="border-b border-border/70 bg-accent/20"><div className="text-xs text-muted-foreground">
-        {new Date(createdAt).toLocaleDateString()}
-      </div><CardTitle className="mt-1 font-serif text-xl">Review submission</CardTitle></CardHeader>
+      <CardHeader className="border-b border-border/70 bg-accent/20">
+        <div className="text-xs text-muted-foreground">
+          {new Date(createdAt).toLocaleDateString()}
+        </div>
+        <CardTitle className="mt-1 font-serif text-xl">{tCommon("reviewSubmission")}</CardTitle>
+      </CardHeader>
 
       {/* ONE shared form: every button below submits the CURRENT field
           values. "Save edits" stores them; "Approve" persists them and then
           publishes via approve_poem_submission; "Reject" ignores them. */}
-      <form action={updateFormAction} className="flex flex-col gap-4">
+      <form action={updateFormAction} className="flex flex-col gap-4 p-6">
         <input type="hidden" name="submission_id" value={id} />
         {/* Resolved poet for approval: a fuzzy match beats the proposal;
             empty lets approve_poem_submission fall back (own poet_id or
@@ -109,19 +117,19 @@ export function SubmissionReview({
 
         {poetId ? (
           <div className="text-sm">
-            <span className="font-medium">Poet:</span>{" "}
+            <span className="font-medium">{tMod("poemLabel")}:</span>{" "}
             <span className="text-muted-foreground">
-              {poetName ?? "Unknown poet"}
+              {poetName ?? tCommon("unknownPoet")}
             </span>
           </div>
         ) : (
           <fieldset className="rounded-lg border border-dashed border-primary/40 bg-accent/20 p-4">
             <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
-              New poet proposed
+              {tMod("newPoetProposed")}
             </legend>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="flex flex-col gap-1 text-xs font-medium">
-                Name (Amharic)
+                {tMod("nameAmharic")}
                 <input
                   type="text"
                   name="proposed_poet_name_am"
@@ -132,7 +140,7 @@ export function SubmissionReview({
                 />
               </label>
               <label className="flex flex-col gap-1 text-xs font-medium">
-                Name (English)
+                {tMod("nameEnglish")}
                 <input
                   type="text"
                   name="proposed_poet_name_en"
@@ -143,7 +151,7 @@ export function SubmissionReview({
               </label>
             </div>
             <label className="mt-3 flex flex-col gap-1 text-xs font-medium">
-              Bio
+              {tMod("bio")}
               <textarea
                 name="proposed_poet_bio"
                 rows={2}
@@ -155,8 +163,7 @@ export function SubmissionReview({
 
             <div className="mt-3 text-xs">
               <p className="font-medium">
-                Similar existing poets
-                {matches.length === 0 ? " — none found" : ":"}
+                {tMod("similarPoetsBaseLabel")}{matches.length === 0 ? ` — ${tMod("noneFound")}` : ":"}
               </p>
               {matches.length > 0 ? (
                 <ul className="mt-1 flex flex-col gap-1">
@@ -169,8 +176,7 @@ export function SubmissionReview({
                         onChange={() => setMatchChoice("")}
                       />
                       <span>
-                        Create new poet as proposed ({" "}
-                        {proposedNameAm || proposal?.nameAm} )
+                        {tMod("createNewPoetAsProposed", { name: proposedNameAm || proposal?.nameAm || "" })}
                       </span>
                     </label>
                   </li>
@@ -184,7 +190,7 @@ export function SubmissionReview({
                           onChange={() => setMatchChoice(m.id)}
                         />
                         <span>
-                          Use existing:{" "}
+                          {tMod("useExistingLabel")}{" "}
                           <strong>{m.name_am}</strong>
                           {m.name_en ? ` (${m.name_en})` : ""}
                         </span>
@@ -198,7 +204,7 @@ export function SubmissionReview({
         )}
 
         <label className="flex flex-col gap-2 text-sm font-medium">
-          Title
+          {tMod("titleLabel")}
           <input
             type="text"
             name="title"
@@ -210,7 +216,7 @@ export function SubmissionReview({
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium">
-          Poem text
+          {tMod("poemText")}
           <textarea
             name="body"
             rows={10}
@@ -223,17 +229,17 @@ export function SubmissionReview({
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-2 text-sm font-medium">
-            Category
-            <CategorySelect categories={categories} defaultValue={initialCategory ?? ""} />
+            {tPoems("category")}
+            <CategorySelect categories={categories} defaultValue={initialCategoryId ?? ""} />
           </label>
           <label className="flex flex-col gap-2 text-sm font-medium">
-            Tags (space separated)
+            {tMod("tagsSpaceSep")}
             <TagInput name="tags" initialTags={tags ?? []} />
           </label>
         </div>
 
         <label className="flex flex-col gap-2 text-sm font-medium">
-          Source
+          {tPoems("source")}
           <input
             type="text"
             name="source"
@@ -250,34 +256,37 @@ export function SubmissionReview({
             disabled={updatePending}
             variant="outline"
           >
-            {updatePending ? "Saving…" : "Save edits"}
+            {updatePending ? tCommon("saving") : tCommon("saveEdits")}
           </Button>
           <span className="ml-3 text-xs text-muted-foreground">
-            Edits are stored without publishing — approving publishes exactly
-            what this form shows.
+            {tMod("saveEditsHint")}
           </span>
           {updateState.success ? (
-            <Alert className="mt-2 border-secondary/30 bg-secondary/10 text-secondary"><AlertDescription className="text-secondary/90">Edits saved.</AlertDescription></Alert>
+            <Alert className="mt-2 border-secondary/30 bg-secondary/10 text-secondary">
+              <AlertDescription className="text-secondary/90">{tCommon("editsSaved")}</AlertDescription>
+            </Alert>
           ) : null}
           {updateState.error ? (
-            <Alert className="mt-2" variant="destructive"><AlertDescription>{updateState.error}</AlertDescription></Alert>
+            <Alert className="mt-2" variant="destructive">
+              <AlertDescription>{updateState.error}</AlertDescription>
+            </Alert>
           ) : null}
         </div>
 
         <div className="mt-2 grid gap-4 border-t pt-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <label className="text-sm">
-              Attribution
+              {tMod("attribution")}
               <select
                 name="attribution_status"
                 defaultValue="community"
                 className="mt-1 w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
               >
                 <option value="community">
-                  community — accepted, not independently verified
+                  {tMod("attributionCommunity")}
                 </option>
                 <option value="verified">
-                  verified — confirmed against a reliable source
+                  {tMod("attributionVerified")}
                 </option>
               </select>
             </label>
@@ -287,20 +296,22 @@ export function SubmissionReview({
               disabled={approvePending}
               variant="secondary"
             >
-              {approvePending ? "Approving…" : "Approve"}
+              {approvePending ? tMod("approvingEllipsis") : tMod("approve")}
             </Button>
             {approveState.error ? (
-              <Alert className="mt-2" variant="destructive"><AlertDescription>{approveState.error}</AlertDescription></Alert>
+              <Alert className="mt-2" variant="destructive">
+                <AlertDescription>{approveState.error}</AlertDescription>
+              </Alert>
             ) : null}
           </div>
 
           <div className="flex flex-col gap-2">
             <label className="text-sm">
-              Rejection reason
+              {tMod("rejectionReasonLabel")}
               <input
                 type="text"
                 name="rejection_reason"
-                placeholder="Required to reject — the submitter will see this"
+                placeholder={tMod("rejectionReasonPlaceholder")}
                 className="mt-1 w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
               />
             </label>
@@ -311,10 +322,12 @@ export function SubmissionReview({
               disabled={rejectPending}
               variant="destructive"
             >
-              {rejectPending ? "Rejecting…" : "Reject"}
+              {rejectPending ? tMod("rejectingEllipsis") : tMod("reject")}
             </Button>
             {rejectState.error ? (
-                <Alert className="mt-2" variant="destructive"><AlertDescription>{rejectState.error}</AlertDescription></Alert>
+              <Alert className="mt-2" variant="destructive">
+                <AlertDescription>{rejectState.error}</AlertDescription>
+              </Alert>
             ) : null}
           </div>
         </div>

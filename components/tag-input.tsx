@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 
 export function TagInput({
   name = "tags",
@@ -13,6 +14,7 @@ export function TagInput({
 }) {
   const [tags, setTags] = useState(initialTags);
   const [draft, setDraft] = useState("");
+  const tSubmit = useTranslations("Submit");
 
   function addDraft() {
     const next = draft.trim();
@@ -31,7 +33,7 @@ export function TagInput({
         {tags.map((tag) => (
           <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-accent px-4 py-2 text-sm font-medium text-accent-foreground">
             #{tag}
-            <button type="button" onClick={() => removeTag(tag)} className="cursor-pointer rounded-full p-0.5 hover:bg-background/50" aria-label={`Remove ${tag}`}>
+            <button type="button" onClick={() => removeTag(tag)} className="cursor-pointer rounded-full p-0.5 hover:bg-background/50" aria-label={`${tSubmit("removeTag")} ${tag}`}>
               <X className="size-3" />
             </button>
           </span>
@@ -49,9 +51,9 @@ export function TagInput({
             }
           }}
           onBlur={addDraft}
-          placeholder={tags.length ? "Add another tag" : "Type a tag, then press space"}
+          placeholder={tags.length ? tSubmit("addAnotherTag") : tSubmit("tagPlaceholder")}
           className="h-7 min-w-32 flex-1 border-0 p-0 shadow-none focus-visible:ring-0"
-          aria-label="Add tag"
+          aria-label={tSubmit("addTag")}
         />
       </div>
       <input type="hidden" name={name} value={tags.join(" ")} />

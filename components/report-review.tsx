@@ -8,6 +8,7 @@ import {
 } from "@/app/actions";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
+import { useTranslations } from "next-intl";
 
 type Props = {
   id: string;
@@ -28,6 +29,8 @@ export function ReportReview({
   reason,
   createdAt,
 }: Props) {
+  const tMod = useTranslations("Moderate");
+
   const [markState, markAction, markPending] = useActionState(
     markReportDisputed,
     {} as { error?: string; success?: boolean },
@@ -47,10 +50,10 @@ export function ReportReview({
     <li className="rounded-xl border border-primary/15 bg-card p-6 shadow-sm">
       <div className="mb-2 flex items-baseline justify-between gap-4">
         <h3 className="font-semibold">
-          Poem: <span className="font-normal">{poemTitle}</span>
+          {tMod("poemLabel")}: <span className="font-normal">{poemTitle}</span>
           {disputed ? (
             <span className="ml-2 inline-block rounded-full bg-red-100 px-2 py-0.5 align-middle text-[11px] font-medium text-red-700">
-              disputed
+              {tMod("disputedLabel")}
             </span>
           ) : null}
         </h3>
@@ -66,15 +69,17 @@ export function ReportReview({
           target="_blank"
           className="text-muted-foreground underline hover:text-foreground"
         >
-          View poem
+          {tMod("viewPoem")}
         </a>
       </p>
 
       {disputed ? (
         <div className="mt-4">
-          <Alert variant="destructive" className="mb-3"><AlertDescription>
-            This poem is publicly flagged as disputed. Decide its fate:
-          </AlertDescription></Alert>
+          <Alert variant="destructive" className="mb-3">
+            <AlertDescription>
+              {tMod("disputedPoemAlert")}
+            </AlertDescription>
+          </Alert>
           <div className="grid gap-4 sm:grid-cols-2">
             <form action={republishAction}>
               <input type="hidden" name="report_id" value={id} />
@@ -84,21 +89,21 @@ export function ReportReview({
                 variant="secondary"
               >
                 {republishPending
-                  ? "Republishing…"
-                  : `Republish${formerStatus ? ` as ${formerStatus}` : ""}`}
+                  ? tMod("republishingEllipsis")
+                  : formerStatus
+                    ? tMod("republishAs", { status: formerStatus })
+                    : tMod("republish")}
               </Button>
               {republishState.error ? (
-                <Alert className="mt-2" variant="destructive"><AlertDescription>{republishState.error}</AlertDescription></Alert>
+                <Alert className="mt-2" variant="destructive">
+                  <AlertDescription>{republishState.error}</AlertDescription>
+                </Alert>
               ) : null}
             </form>
             <form
               action={removeAction}
               onSubmit={(e) => {
-                if (
-                  !window.confirm(
-                    "Permanently delete this poem from the database, including all favorites and reports? This cannot be undone.",
-                  )
-                ) {
+                if (!window.confirm(tMod("deleteConfirm"))) {
                   e.preventDefault();
                 }
               }}
@@ -109,10 +114,12 @@ export function ReportReview({
                 disabled={removePending}
                 variant="destructive"
               >
-                {removePending ? "Removing…" : "Remove"}
+                {removePending ? tMod("removingEllipsis") : tMod("removePoem")}
               </Button>
               {removeState.error ? (
-                <Alert className="mt-2" variant="destructive"><AlertDescription>{removeState.error}</AlertDescription></Alert>
+                <Alert className="mt-2" variant="destructive">
+                  <AlertDescription>{removeState.error}</AlertDescription>
+                </Alert>
               ) : null}
             </form>
           </div>
@@ -120,9 +127,7 @@ export function ReportReview({
       ) : (
         <div className="mt-4">
           <p className="mb-3 text-xs text-muted-foreground">
-            Marking as disputed adds a public red tag to the poem — it stays
-            visible to everyone. You can then republish or permanently remove
-            it.
+            {tMod("markDisputedDesc")}
           </p>
           <form action={markAction}>
             <input type="hidden" name="report_id" value={id} />
@@ -131,10 +136,12 @@ export function ReportReview({
               disabled={markPending}
               variant="outline"
             >
-              {markPending ? "Marking…" : "Mark as disputed"}
+              {markPending ? tMod("markingEllipsis") : tMod("markDisputed")}
             </Button>
             {markState.error ? (
-              <Alert className="mt-2" variant="destructive"><AlertDescription>{markState.error}</AlertDescription></Alert>
+              <Alert className="mt-2" variant="destructive">
+                <AlertDescription>{markState.error}</AlertDescription>
+              </Alert>
             ) : null}
           </form>
         </div>

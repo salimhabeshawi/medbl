@@ -3,11 +3,14 @@ import { firstRelation } from "@/lib/relations";
 import { ReportReview } from "@/components/report-review";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyState } from "@/components/empty-state";
+import { BackLink } from "@/components/back-link";
+import { getTranslations } from "next-intl/server";
 
 export const metadata = { title: "Moderation — reports" };
 
 export default async function ModerateReportsPage() {
   const supabase = await createClient();
+  const tMod = await getTranslations("Moderate");
   const { data, error } = await supabase
     .from("reports")
     .select(
@@ -18,9 +21,10 @@ export default async function ModerateReportsPage() {
 
   return (
     <div>
-      <h2 className="mb-6 font-serif text-2xl font-semibold">Open reports</h2>
+      <BackLink href="/moderate">{tMod("backModeration")}</BackLink>
+      <h2 className="mb-6 font-serif text-2xl font-semibold">{tMod("reportsHeadingSimple")}</h2>
       {error ? (
-        <Alert variant="destructive"><AlertTitle>Could not load reports</AlertTitle><AlertDescription>{error.message}</AlertDescription></Alert>
+        <Alert variant="destructive"><AlertTitle>{tMod("loadReportsError")}</AlertTitle><AlertDescription>{error.message}</AlertDescription></Alert>
       ) : data && data.length > 0 ? (
         <ul className="flex flex-col gap-4">
           {data.map((report) => {
@@ -33,7 +37,7 @@ export default async function ModerateReportsPage() {
               <ReportReview
                 key={report.id}
                 id={report.id}
-                poemTitle={poem?.title ?? "Unknown poem"}
+                poemTitle={poem?.title ?? tMod("unknownPoem")}
                 poemId={report.poem_id}
                 poemStatus={poem?.attribution_status ?? "community"}
                 formerStatus={report.former_attribution_status}
@@ -44,7 +48,7 @@ export default async function ModerateReportsPage() {
           })}
         </ul>
       ) : (
-        <EmptyState title="No open reports" description="The reports queue is clear." />
+        <EmptyState title={tMod("noOpenReports")} description={tMod("noOpenReportsDesc")} />
       )}
     </div>
   );

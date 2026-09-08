@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FavoriteToggle } from "./favorite-toggle";
 import { Badge } from "./ui/badge";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useTranslations } from "next-intl";
 
 export function FavoriteRow({
   poem,
@@ -22,12 +23,13 @@ export function FavoriteRow({
   favoriteCount?: number;
 }) {
   const [hidden, setHidden] = useState(false);
+  const tPoems = useTranslations("Poems");
 
   if (hidden) return null;
 
   return (
     <Card className="content-card relative border-primary/15">
-      <Link href={`/poems/${poem.id}`} className="absolute inset-0 z-0 rounded-xl" aria-label={`Open ${poem.title}`} />
+      <Link href={`/poems/${poem.id}`} className="absolute inset-0 z-0 rounded-xl" aria-label={`${tPoems("openPoem")}: ${poem.title}`} />
       <CardHeader>
         <CardTitle className="relative z-10 font-sans text-base pointer-events-none">{poem.title}</CardTitle>
         <CardAction className="relative z-10 pointer-events-auto"><FavoriteToggle poemId={poem.id} initialFavorited={true} initialFavoriteCount={favoriteCount} onUnfavorited={() => setHidden(true)} /></CardAction>
@@ -41,7 +43,7 @@ export function FavoriteRow({
           {poem.title}
         </Link>
         {poet ? (
-          <p className="mt-1 text-sm text-muted-foreground">by {poet.name_am ?? poet.name_en}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{tPoems("by")} {poet.name_am ?? poet.name_en}</p>
         ) : null}
         <p className="whitespace-pre-line text-sm leading-6 text-muted-foreground">{poem.body.split(/\r?\n/).slice(0, 4).join("\n").trim()}</p>
         <div className="mt-3 flex flex-wrap gap-2">

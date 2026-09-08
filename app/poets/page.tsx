@@ -7,6 +7,7 @@ import {
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
+import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = { title: "Poets" };
 
@@ -17,6 +18,7 @@ export default async function PoetsPage({
 }) {
   const params = await searchParams;
   const q = (Array.isArray(params.q) ? params.q[0] : params.q ?? "").trim();
+  const tPoets = await getTranslations("Poets");
 
   const supabase = await createClient();
 
@@ -33,14 +35,13 @@ export default async function PoetsPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <div className="mb-8"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">The registry</p><h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">Poets</h1><p className="text-sm leading-7 text-muted-foreground">Discover the voices gathered in the Medbl anthology.</p></div>
+      <div className="mb-8"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">{tPoets("registry")}</p><h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">{tPoets("heading")}</h1><p className="text-sm leading-7 text-muted-foreground">{tPoets("subheading")}</p></div>
 
-      <div className="mb-8"><UniversalSearch mode="poets" defaultValue={q} placeholder="Search poets by name..." /></div>
-<div className="mb-8"><UniversalSearch mode="poets" defaultValue={q} placeholder="Search poets by name..." /></div>
+      <div className="mb-8"><UniversalSearch mode="poets" defaultValue={q} placeholder={tPoets("searchPlaceholder")} /></div>
 
       {error ? (
         <p className="rounded-md border border-red-200 bg-red-50 px-4 py-6 text-center text-sm text-red-700">
-          Could not load poets.
+          {tPoets("loadError")}
         </p>
       ) : poets && poets.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -58,13 +59,13 @@ export default async function PoetsPage({
                     {poet.name_en}
                   </div>
                 ) : null}
-                {poet.verified ? <Badge variant="secondary" className="mt-4">Verified</Badge> : null}
+                {poet.verified ? <Badge variant="secondary" className="mt-4">{tPoets("verified")}</Badge> : null}
               </Link>
             </Card>
           ))}
         </div>
       ) : (
-        <EmptyState title={q ? "No poets match your search" : "No poets yet"} description={q ? "Try another spelling or transliteration." : "Poets will appear here as the registry grows."} />
+        <EmptyState title={q ? tPoets("noPoetsTitle") : tPoets("noPoetsYet")} description={q ? tPoets("noPoetsDesc") : tPoets("noPoetsYetDesc")} />
       )}
     </div>
   );

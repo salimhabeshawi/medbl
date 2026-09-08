@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,6 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function InstallAppPrompt() {
+  const t = useTranslations("Common");
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
 
@@ -54,11 +56,11 @@ export function InstallAppPrompt() {
         <Download className="size-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold">Install Medbl</p>
-        <p className="text-xs text-muted-foreground">Add the poetry library to your home screen.</p>
+        <p className="text-sm font-semibold">{t("installApp")}</p>
+        <p className="text-xs text-muted-foreground">{t("installAppDesc")}</p>
       </div>
-      <Button type="button" size="sm" onClick={install}>Install</Button>
-      <Button type="button" variant="ghost" size="icon-sm" onClick={() => setVisible(false)} aria-label="Dismiss install prompt">
+      <Button type="button" size="sm" onClick={install}>{t("install")}</Button>
+      <Button type="button" variant="ghost" size="icon-sm" onClick={() => setVisible(false)} aria-label={t("dismiss")}>
         <X className="size-4" />
       </Button>
     </aside>

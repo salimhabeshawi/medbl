@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { ArrowRight, FileCheck2, Flag } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CategoryManager } from "@/components/category-manager";
+import { BackLink } from "@/components/back-link";
+import type { CategoryRecord } from "@/components/category-manager";
+import { getTranslations } from "next-intl/server";
 
 export const metadata = { title: "Moderation" };
 
@@ -15,6 +18,7 @@ async function count(
 
 export default async function ModerateOverviewPage() {
   const supabase = await createClient();
+  const tMod = await getTranslations("Moderate");
 
   const [pendingSubmissions, openReports] = await Promise.all([
     count(
@@ -30,26 +34,27 @@ export default async function ModerateOverviewPage() {
         .eq("status", "open"),
     ),
   ]);
-  const { data: categoryRows } = await supabase.from("categories").select("id, name").order("name");
+  const { data: categoryRows } = await supabase.from("categories").select("id, name_am, name_en").order("name_en");
 
   const cards = [
     {
       href: "/moderate/submissions",
-      label: "Pending poem submissions",
+      label: tMod("pendingSubmissionsCard"),
       value: pendingSubmissions,
-      hint: "Review poem text, poet link or proposal, and source.",
+      hint: tMod("pendingSubmissionsHint"),
     },
     {
       href: "/moderate/reports",
-      label: "Open reports",
+      label: tMod("openReportsCard"),
       value: openReports,
-      hint: "Wrong attribution, copyright claims and more.",
+      hint: tMod("openReportsHint"),
     },
   ];
 
   return (
     <div>
-      <h2 className="mb-6 font-serif text-2xl font-semibold">Overview</h2>
+      <BackLink href="/">{tMod("backHome")}</BackLink>
+      <h2 className="mb-6 font-serif text-2xl font-semibold">{tMod("overview")}</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         {cards.map((card) => (
           <Link key={card.href} href={card.href}>
@@ -60,12 +65,12 @@ export default async function ModerateOverviewPage() {
             </p>
             <p className="mt-2 font-medium">{card.label}</p>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">{card.hint}</p>
-            <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary">Open queue <ArrowRight className="size-4" /></span>
+            <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary">{tMod("openQueue")} <ArrowRight className="size-4" /></span>
             </CardContent></Card>
           </Link>
         ))}
       </div>
-      <CategoryManager categories={(categoryRows ?? []) as { id: string; name: string }[]} />
+      <CategoryManager categories={(categoryRows ?? []) as CategoryRecord[]} />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { searchPoets, type PoetResult } from "@/app/actions";
 import { X, Search, UserRoundPlus } from "lucide-react";
 import { Button } from "./ui/button";
+import { useTranslations } from "next-intl";
 import { Input } from "./ui/input";
 
 export function PoetSelect({
@@ -15,6 +16,7 @@ export function PoetSelect({
   onChange: (poet: PoetResult | null) => void;
   onRequestNew?: () => void;
 }) {
+  const tSubmit = useTranslations("Submit");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PoetResult[]>([]);
   const [open, setOpen] = useState(false);
@@ -82,7 +84,7 @@ export function PoetSelect({
   }
 
   return (
-    <div ref={boxRef} className="relative">
+    <div ref={boxRef} className="relative z-40">
       {/* The chosen poets.id is what actually gets submitted. There is no
           free-text poet field here — new poets go through the separate
           inline proposal fields rendered by the parent form. */}
@@ -114,20 +116,20 @@ export function PoetSelect({
               if (results.length > 0) setOpen(true);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Search poets by name (Amharic or English)…"
+            placeholder={tSubmit("searchPoetPlaceholder")}
             autoComplete="off"
-            aria-label="Search poets"
+            aria-label={tSubmit("searchPoetPlaceholder")}
             className="h-11 pl-9"
           /></div>
           {open ? (
-            <ul className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-primary/15 bg-card p-1 shadow-xl">
+            <ul className="absolute left-0 right-0 z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-primary/15 bg-card p-1 shadow-xl">
               {searching ? (
                 <li className="px-3 py-3 text-sm text-muted-foreground">
                   Searching…
                 </li>
               ) : results.length === 0 ? (
                 <li className="px-3 py-3 text-sm text-muted-foreground">
-                  {triedEmpty ? "No poets found." : "Type to search."}
+                  {triedEmpty ? tSubmit("noPoetsFound") : tSubmit("typeToSearch")}
                 </li>
               ) : (
                 results.map((poet) => (
@@ -152,7 +154,7 @@ export function PoetSelect({
                     }}
                     className="inline-flex items-center gap-2 text-xs font-medium text-primary hover:underline"
                   >
-                    <UserRoundPlus className="size-3.5" /> Can&apos;t find this poet? Add details
+                    <UserRoundPlus className="size-3.5" /> {tSubmit("proposePoetToggle")}
                   </button>
                 </li>
               ) : null}

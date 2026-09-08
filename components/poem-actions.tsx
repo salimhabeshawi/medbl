@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Copy, Heart, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export function PoemActions({
   poemId,
@@ -27,12 +28,13 @@ export function PoemActions({
   initialFavoriteCount: number;
   canFavorite: boolean;
 }) {
+  const tPoems = useTranslations("Poems");
   async function copyPoem() {
     try {
       await navigator.clipboard.writeText(`${title}\n\n${body}`);
-      toast.success("Poem copied");
+      toast.success(tPoems("poemCopied"));
     } catch {
-      toast.error("Could not copy poem");
+      toast.error(tPoems("copyError"));
     }
   }
 
@@ -46,13 +48,13 @@ export function PoemActions({
       }
 
       await navigator.clipboard.writeText(url);
-      toast.success("Link copied");
+      toast.success(tPoems("linkCopied"));
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         return;
       }
 
-      toast.error("Could not share poem");
+      toast.error(tPoems("shareError"));
     }
   }
 
@@ -74,12 +76,12 @@ export function PoemActions({
                 size="icon"
                 className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
               >
-                <Link href="/login" aria-label="Log in to favorite">
+                <Link href="/login" aria-label={tPoems("loginToFavorite")}>
                   <Heart className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Log in to favorite</TooltipContent>
+            <TooltipContent>{tPoems("loginToFavorite")}</TooltipContent>
           </Tooltip>
         )}
 
@@ -90,13 +92,13 @@ export function PoemActions({
               variant="outline"
               size="icon"
               onClick={copyPoem}
-              aria-label="Copy poem"
+              aria-label={tPoems("copyPoem")}
               className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
             >
               <Copy className="size-4" aria-hidden="true" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Copy poem</TooltipContent>
+          <TooltipContent>{tPoems("copyPoem")}</TooltipContent>
         </Tooltip>
 
         <Tooltip>
@@ -106,13 +108,13 @@ export function PoemActions({
               variant="outline"
               size="icon"
               onClick={sharePoem}
-              aria-label="Share poem"
+              aria-label={tPoems("sharePoem")}
               className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
             >
               <Share2 className="size-4" aria-hidden="true" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Share poem</TooltipContent>
+          <TooltipContent>{tPoems("sharePoem")}</TooltipContent>
         </Tooltip>
       </div>
     </TooltipProvider>

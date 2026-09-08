@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export function FavoriteToggle({
   poemId,
@@ -27,6 +28,7 @@ export function FavoriteToggle({
   const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const tPoems = useTranslations("Poems");
   const inFlight = useRef(false);
 
   async function handleClick() {
@@ -66,7 +68,7 @@ export function FavoriteToggle({
               size="icon"
               aria-pressed={favorited}
               aria-label={
-                favorited ? "Remove from favorites" : "Add to favorites"
+                favorited ? tPoems("favoriteRemoveLabel") : tPoems("favoriteAddLabel")
               }
               className={
                 "rounded-full border-border bg-card shadow-none transition hover:border-primary/60 hover:bg-accent " +
@@ -85,11 +87,11 @@ export function FavoriteToggle({
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            {favorited ? "Remove favorite" : "Add favorite"}
+            {favorited ? tPoems("favoriteRemoveTooltip") : tPoems("favoriteAddTooltip")}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <span className="min-w-5 text-center text-xs font-medium text-muted-foreground" aria-label={`${favoriteCount} likes`}>
+      <span className="min-w-5 text-center text-xs font-medium text-muted-foreground" aria-label={tPoems("likesCount", { count: favoriteCount })}>
         {favoriteCount}
       </span>
       {error ? <span className="sr-only">{error}</span> : null}

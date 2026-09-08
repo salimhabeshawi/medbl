@@ -5,6 +5,7 @@ import { reportPoem } from "@/app/actions";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+import { useTranslations } from "next-intl";
 
 export function ReportPoem({
   poemId,
@@ -13,6 +14,9 @@ export function ReportPoem({
   poemId: string;
   alreadyReported: boolean;
 }) {
+  const tPoems = useTranslations("Poems");
+  const tCommon = useTranslations("Common");
+
   const [state, formAction, pending] = useActionState(
     reportPoem,
     {} as { error?: string; success?: boolean },
@@ -20,17 +24,14 @@ export function ReportPoem({
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
 
-  // `alreadyReported` comes from the has_open_report() RPC on the server and
-  // is accurate across sessions and devices; state.success covers the
-  // just-submitted render before the page reloads.
   const reported = alreadyReported || state.success;
 
   if (reported) {
     return (
       <p className="text-xs text-muted-foreground">
         {state.success
-          ? "Your report was received and will be reviewed by our moderators. The poem stays visible unless they act on it."
-          : "You've already reported this poem."}
+          ? tPoems("reportSubmittedDesc")
+          : tPoems("reportSubmitted")}
       </p>
     );
   }
@@ -42,7 +43,7 @@ export function ReportPoem({
         onClick={() => setOpen(true)}
         className="text-xs text-muted-foreground underline hover:text-foreground"
       >
-        Report this poem
+        {tPoems("report")}
       </button>
     );
   }
@@ -51,9 +52,7 @@ export function ReportPoem({
     <form action={formAction} className="form-stack">
       <input type="hidden" name="poem_id" value={poemId} />
       <p className="text-xs text-muted-foreground">
-        Use this to flag wrong attribution, a copyright concern, or another
-        issue with this poem. A moderator will review your report — the poem
-        is not removed automatically.
+        {tPoems("reportSubmittedDesc")}
       </p>
       <Textarea
         name="reason"
@@ -61,7 +60,7 @@ export function ReportPoem({
         rows={3}
         value={reason}
         onChange={(e) => setReason(e.target.value)}
-        placeholder="What's wrong with this poem?"
+        placeholder={tPoems("reportReasonPlaceholder")}
         className="whitespace-pre-wrap"
       />
       {state.error ? (
@@ -73,7 +72,7 @@ export function ReportPoem({
           disabled={pending}
           size="sm"
         >
-          {pending ? "Sending…" : "Send report"}
+          {pending ? tCommon("loading") : tPoems("submitReport")}
         </Button>
         <Button
           type="button"
@@ -81,7 +80,7 @@ export function ReportPoem({
           variant="outline"
           size="sm"
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
       </div>
     </form>

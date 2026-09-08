@@ -14,6 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { BackLink } from "@/components/back-link";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
   params,
@@ -41,20 +43,35 @@ export default async function PoemPage({
   const { data: poem, error } = await supabase
     .from("poems")
     .select(
-      "id, title, body, category, tags, attribution_status, source, poets(id, name_am, name_en)",
+      "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, source, poets(id, name_am, name_en)",
     )
     .eq("id", id)
     .single();
 
-  // Missing ids 404. Disputed poems stay readable everywhere (public red
-  // tag instead of hiding).
   if (error || !poem) notFound();
+
+  const locale = await getLocale();
+  const tPoems = await getTranslations("Poems");
+  const tCommon = await getTranslations("Common");
 
   const poet = firstRelation<{
     id: string;
     name_am: string;
     name_en: string;
   }>(poem.poets);
+
+  const category = firstRelation<{
+    id: string;
+    name_am: string | null;
+    name_en: string | null;
+  }>(poem.categories);
+
+  const categoryLabel = category
+    ? locale === "am"
+      ? category.name_am || category.name_en
+      : category.name_en || category.name_am
+    : null;
+
   const favoriteCounts = await getFavoriteCounts([poem.id]);
 
   const {
@@ -72,9 +89,6 @@ export default async function PoemPage({
       .maybeSingle();
     initialFavorited = Boolean(fav);
 
-    // Members cannot read reports rows (RLS is staff-only by design), so
-    // this narrow RPC answers "does the caller already have an open report
-    // on this poem?" for any authenticated user, across sessions/devices.
     const { data: hasOpenReport } = await supabase.rpc("has_open_report", {
       p_poem_id: id,
     });
@@ -83,6 +97,7 @@ export default async function PoemPage({
 
   return (
     <article className="mx-auto max-w-4xl px-4 py-10 sm:py-14">
+      <BackLink href="/poems">{tCommon("back")}</BackLink>
       <Card className="border border-border bg-card shadow-none">
         <CardHeader className="gap-5 border-b border-border bg-accent/45 px-5 py-5 sm:px-8 sm:py-7">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
@@ -92,7 +107,7 @@ export default async function PoemPage({
               </CardTitle>
               {poet?.name_am || poet?.name_en ? (
                 <p className="text-sm text-secondary">
-                  by{" "}
+                  {tPoems("submittedBy")}{" "}
                   <Link
                     href={`/poets/${poet.id}`}
                     className="font-medium underline underline-offset-4 hover:text-primary"
@@ -114,16 +129,16 @@ export default async function PoemPage({
 
           <div className="flex flex-wrap gap-2">
             {poem.attribution_status === "disputed" ? (
-              <Badge variant="destructive">disputed</Badge>
+              <Badge variant="destructive">{tPoems("disputedBadge")}</Badge>
             ) : poem.attribution_status === "community" ? (
-              <Badge variant="secondary">community</Badge>
+              <Badge variant="secondary">{tPoems("communityBadge")}</Badge>
             ) : (
-              <Badge>{poem.attribution_status}</Badge>
+              <Badge>{tPoems("verifiedBadge")}</Badge>
             )}
-            {poem.category ? (
+            {category && categoryLabel ? (
               <Badge asChild variant="outline">
-                <Link href={`/poems?category=${encodeURIComponent(poem.category)}`}>
-                  {poem.category}
+                <Link href={`/poems?category=${category.id}`}>
+                  {categoryLabel}
                 </Link>
               </Badge>
             ) : null}
@@ -139,7 +154,7 @@ export default async function PoemPage({
           </div>
           {poem.attribution_status === "disputed" ? (
             <p className="text-xs text-destructive">
-              The attribution of this poem is under review.
+              {tPoems("disputedNotice")}
             </p>
           ) : null}
         </CardHeader>
@@ -153,7 +168,7 @@ export default async function PoemPage({
 
           {poem.source ? (
             <p className="text-xs text-muted-foreground">
-              Source: {poem.source}
+              {tPoems("source")}: {poem.source}
             </p>
           ) : null}
 
@@ -163,9 +178,8 @@ export default async function PoemPage({
             ) : (
               <p className="text-xs text-muted-foreground">
                 <Link href="/login" className="underline hover:text-primary">
-                  Log in
+                  {tPoems("loginToReport")}
                 </Link>{" "}
-                to report issues with this poem
               </p>
             )}
           </div>

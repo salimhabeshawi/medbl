@@ -6,6 +6,8 @@ import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 import { Button } from "@/components/ui/button";
 import { SubmissionMenu } from "./submission-menu";
+import { LanguageToggle } from "./language-toggle";
+import { getTranslations } from "next-intl/server";
 
 type NavIcon =
   | "home"
@@ -27,31 +29,28 @@ export async function SiteHeader() {
   const user = await getCurrentUserWithRole();
   const isStaff = user ? isModerator(user.role) : false;
   const role = user?.role ?? null;
+  const tNav = await getTranslations("Nav");
 
-  // Full set of nav links, gated by auth state. The mobile Sheet renders
-  // them vertically; the desktop bar and dropdown split them inline.
   const links: NavLink[] = [
-    { href: "/", label: "Home", icon: "home" },
-    { href: "/poems", label: "Poems", icon: "poems" },
-    { href: "/poets", label: "Poets", icon: "poets" },
-    ...(user ? [{ href: "/favorites", label: "Favorites", icon: "favorites" as const }] : []),
+    { href: "/", label: tNav("home"), icon: "home" },
+    { href: "/poems", label: tNav("poems"), icon: "poems" },
+    { href: "/poets", label: tNav("poets"), icon: "poets" },
+    ...(user ? [{ href: "/favorites", label: tNav("favorites"), icon: "favorites" as const }] : []),
     ...(user
-      ? [{ href: "/profile", label: "Profile", icon: "profile" as const }]
+      ? [{ href: "/profile", label: tNav("profile"), icon: "profile" as const }]
       : []),
     ...(isStaff
-      ? [{ href: "/moderate", label: "Moderate", icon: "moderate" as const }]
+      ? [{ href: "/moderate", label: tNav("moderate"), icon: "moderate" as const }]
       : []),
   ];
 
-  // Public browse links shown always; account/profile links live in the
-  // avatar dropdown on desktop.
   const browseLinks: NavLink[] = [
-    { href: "/", label: "Home", icon: "home" },
-    { href: "/poems", label: "Poems", icon: "poems" },
-    { href: "/poets", label: "Poets", icon: "poets" },
-    ...(user ? [{ href: "/favorites", label: "Favorites", icon: "favorites" as const }] : []),
+    { href: "/", label: tNav("home"), icon: "home" },
+    { href: "/poems", label: tNav("poems"), icon: "poems" },
+    { href: "/poets", label: tNav("poets"), icon: "poets" },
+    ...(user ? [{ href: "/favorites", label: tNav("favorites"), icon: "favorites" as const }] : []),
     ...(isStaff
-      ? [{ href: "/moderate", label: "Moderate", icon: "moderate" as const }]
+      ? [{ href: "/moderate", label: tNav("moderate"), icon: "moderate" as const }]
       : []),
   ];
 
@@ -66,9 +65,14 @@ export async function SiteHeader() {
         </Link>
 
         {/* Desktop nav (md and up) - no hamburger */}
-        <div className="flex items-center gap-4"><DesktopNav links={browseLinks} />{user ? <div className="hidden md:block"><SubmissionMenu /></div> : null}</div>
+        <div className="flex items-center gap-4">
+          <DesktopNav links={browseLinks} />
+          {user ? <div className="hidden md:block"><SubmissionMenu /></div> : null}
+        </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageToggle />
+
           {/* Desktop auth controls */}
           <div className="hidden items-center gap-2 md:flex">
             <ThemeToggle />
@@ -77,10 +81,10 @@ export async function SiteHeader() {
             ) : (
               <div className="flex items-center gap-2">
                 <Link href="/login" className="text-sm font-medium text-foreground transition hover:text-primary">
-                  Log in
+                  {tNav("login")}
                 </Link>
                 <Button asChild size="sm">
-                  <Link href="/signup">Sign up</Link>
+                  <Link href="/signup">{tNav("signup")}</Link>
                 </Button>
               </div>
             )}

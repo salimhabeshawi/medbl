@@ -3,6 +3,9 @@ import { firstRelation } from "@/lib/relations";
 import { SubmissionReview } from "@/components/submission-review";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyState } from "@/components/empty-state";
+import { BackLink } from "@/components/back-link";
+import type { CategorySelectRecord } from "@/components/category-select";
+import { getTranslations } from "next-intl/server";
 
 export const metadata = { title: "Moderation — submissions" };
 
@@ -14,10 +17,11 @@ type PoetMatch = {
 
 export default async function ModerateSubmissionsPage() {
   const supabase = await createClient();
+  const tMod = await getTranslations("Moderate");
   const { data, error } = await supabase
     .from("poem_submissions")
     .select(
-      "id, title, body, source, category, tags, created_at, status, poet_id, proposed_poet_name_am, proposed_poet_name_en, proposed_poet_bio, poets(name_am, name_en)",
+      "id, title, body, source, category_id, tags, created_at, status, poet_id, proposed_poet_name_am, proposed_poet_name_en, proposed_poet_bio, poets(name_am, name_en)",
     )
     .eq("status", "pending")
     .order("created_at", { ascending: true });
@@ -25,20 +29,16 @@ export default async function ModerateSubmissionsPage() {
   if (error) {
     return (
       <div>
-        <h2 className="mb-6 font-serif text-2xl font-semibold">Pending submissions</h2>
-        <Alert variant="destructive"><AlertTitle>Could not load submissions</AlertTitle><AlertDescription>{error.message}</AlertDescription></Alert>
+        <BackLink href="/moderate">{tMod("backModeration")}</BackLink>
+        <h2 className="mb-6 font-serif text-2xl font-semibold">{tMod("pendingHeading")}</h2>
+        <Alert variant="destructive"><AlertTitle>{tMod("loadSubmissionsError")}</AlertTitle><AlertDescription>{error.message}</AlertDescription></Alert>
       </div>
     );
   }
 
   const submissions = data ?? [];
-  const { data: categoryRows } = await supabase.from("categories").select("name").order("name");
-  const categories = [
-    ...new Set([
-      ...(categoryRows ?? []).map((category) => category.name),
-      ...submissions.map((submission) => submission.category).filter(Boolean),
-    ]),
-  ] as string[];
+  const { data: categoryRows } = await supabase.from("categories").select("id, name_am, name_en").order("name_en");
+  const categories = (categoryRows ?? []) as CategorySelectRecord[];
 
   // For proposals, fetch the top fuzzy-matched existing poets so the
   // moderator can avoid creating a duplicate registry entry.
@@ -59,7 +59,8 @@ export default async function ModerateSubmissionsPage() {
 
   return (
     <div>
-      <h2 className="mb-6 font-serif text-2xl font-semibold">Pending submissions</h2>
+      <BackLink href="/moderate">{tMod("backModeration")}</BackLink>
+      <h2 className="mb-6 font-serif text-2xl font-semibold">{tMod("pendingHeading")}</h2>
       {submissions.length > 0 ? (
         <ul className="flex flex-col gap-4">
           {submissions.map((sub) => {
@@ -80,7 +81,7 @@ export default async function ModerateSubmissionsPage() {
                 title={sub.title}
                 body={sub.body}
                 source={sub.source}
-                category={sub.category}
+                categoryId={sub.category_id}
                 tags={Array.isArray(sub.tags) ? sub.tags : null}
                 poetId={sub.poet_id}
                 poetName={
@@ -95,7 +96,7 @@ export default async function ModerateSubmissionsPage() {
           })}
         </ul>
       ) : (
-        <EmptyState title="The queue is clear" description="No submissions are waiting for review." />
+        <EmptyState title={tMod("queueClear")} description={tMod("queueClearDesc")} />
       )}
     </div>
   );
