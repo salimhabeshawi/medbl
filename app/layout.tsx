@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { Noto_Sans_Ethiopic, Lora, Inter } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { InstallAppPrompt } from "@/components/install-app-prompt";
-import Link from "next/link";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { LocaleProvider } from "@/components/locale-provider";
+import { getLocale } from "next-intl/server";
+import amMessages from "@/messages/am.json";
+import enMessages from "@/messages/en.json";
 
 const notoSansEthiopic = Noto_Sans_Ethiopic({
   variable: "--font-noto-ethiopic",
@@ -41,8 +43,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
-  const messages = await getMessages();
-  const tFooter = await getTranslations("Footer");
 
   return (
     <html
@@ -51,32 +51,25 @@ export default async function RootLayout({
       className={`${notoSansEthiopic.variable} ${lora.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        {/*
+          Both message sets are loaded server-side once and passed to
+          LocaleProvider. Switching locale only updates React state —
+          no server round-trip needed for client components to re-render
+          in the new language.
+        */}
+        <LocaleProvider
+          initialLocale={locale}
+          messagesAm={amMessages}
+          messagesEn={enMessages}
+        >
           <ThemeProvider>
             <SiteHeader />
             <main className="flex-1">{children}</main>
-            <footer className="border-t border-border bg-background py-8">
-              <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-2 px-4 text-center sm:px-6">
-                <p className="font-sans text-base font-semibold text-primary">
-                  መድብል
-                </p>
-                <p className="font-serif text-sm italic text-secondary">
-                  {tFooter("tagline")}
-                </p>
-                <nav className="flex gap-4 text-sm text-muted-foreground" aria-label="Legal">
-                  <Link href="/terms" className="hover:text-primary hover:underline">
-                    {tFooter("terms")}
-                  </Link>
-                  <Link href="/privacy" className="hover:text-primary hover:underline">
-                    {tFooter("privacy")}
-                  </Link>
-                </nav>
-              </div>
-            </footer>
+            <SiteFooter />
             <Toaster />
             <InstallAppPrompt />
           </ThemeProvider>
-        </NextIntlClientProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

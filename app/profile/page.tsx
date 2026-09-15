@@ -74,7 +74,17 @@ export default async function ProfilePage({
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       <BackLink href={cameFrom ?? "/"}>{tProfile("back")}</BackLink>
-      <div className="mb-10 max-w-2xl"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">{tProfile("eyebrow")}</p><h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">{tProfile("title")}</h1><p className="text-sm leading-7 text-muted-foreground sm:text-base">{tProfile("poetIntro")}</p></div>
+      <div className="mb-10 max-w-2xl">
+        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+          {tProfile("eyebrow")}
+        </p>
+        <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {tProfile("title")}
+        </h1>
+        <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+          {tProfile("poetIntro")}
+        </p>
+      </div>
 
       {redirectTo?.startsWith("/submit") ? (
         <p className="mb-8 rounded-lg border border-primary/25 bg-accent/40 px-4 py-4 text-sm leading-6 text-foreground">
@@ -83,7 +93,19 @@ export default async function ProfilePage({
       ) : null}
 
       <section className="mb-12">
-        <div className="mb-5 flex items-start gap-3"><div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><UserRound className="size-5" /></div><div><h2 className="text-xl font-semibold">{tProfile("poetDetailsHeading")}</h2><p className="text-sm text-muted-foreground">{tProfile("poetDetailsIntro")}</p></div></div>
+        <div className="mb-5 flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <UserRound className="size-5" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold">
+              {tProfile("poetDetailsHeading")}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {tProfile("poetDetailsIntro")}
+            </p>
+          </div>
+        </div>
         <PoetDetailsForm
           initial={{
             nameAm: poet?.name_am ?? "",
@@ -98,7 +120,19 @@ export default async function ProfilePage({
       </section>
 
       <section>
-        <div className="mb-5 flex items-start gap-3"><div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary/15 text-secondary"><LockKeyhole className="size-5" /></div><div><h2 className="text-xl font-semibold">{tProfile("accountHeading")}</h2><p className="text-sm text-muted-foreground">{tProfile("accountIntro")}</p></div></div>
+        <div className="mb-5 flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary/15 text-secondary">
+            <LockKeyhole className="size-5" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold">
+              {tProfile("accountHeading")}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {tProfile("accountIntro")}
+            </p>
+          </div>
+        </div>
         <div className="flex flex-col gap-6">
           <ChangeEmailForm currentEmail={user.email ?? ""} />
           <ChangePasswordForm />

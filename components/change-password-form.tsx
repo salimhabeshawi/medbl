@@ -34,19 +34,19 @@ export function ChangePasswordForm() {
   const error = mismatch ? tProfInline("passwordMismatch") : state.error;
 
   return (
-    <form
-      action={formAction}
-      onSubmit={handleSubmit}
-      className="form-stack"
-    >
+    <form action={formAction} onSubmit={handleSubmit} className="form-stack">
       <Card className="border-primary/15 shadow-sm">
         <CardHeader className="border-b border-border/70 bg-accent/20">
-          <CardTitle className="font-serif text-xl">{tProf("changePasswordTitle")}</CardTitle>
+          <CardTitle className="font-serif text-xl">
+            {tProf("changePasswordTitle")}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 pt-5">
           {state.success ? (
             <Alert className="border-secondary/30 bg-secondary/10 text-secondary">
-              <AlertDescription className="text-secondary/90">{state.success}</AlertDescription>
+              <AlertDescription className="text-secondary/90">
+                {state.success}
+              </AlertDescription>
             </Alert>
           ) : null}
           {error && !mismatch ? (
@@ -58,17 +58,38 @@ export function ChangePasswordForm() {
 
           <label className="space-y-2 text-sm font-medium">
             <span>{tProf("currentPasswordLabel")}</span>
-            <Input type="password" name="current_password" required autoComplete="current-password" />
+            <Input
+              type="password"
+              name="current_password"
+              required
+              autoComplete="current-password"
+              className="mt-2"
+            />
           </label>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-medium">
+            <label className="space-y-2 text-sm font-medium mt-4">
               <span>{tProf("newPasswordLabel")}</span>
-              <Input type="password" name="password" required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input
+                type="password"
+                name="password"
+                required
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-2"
+              />
             </label>
-            <label className="space-y-2 text-sm font-medium">
+            <label className="space-y-2 text-sm font-medium mt-4">
               <span>{tProf("newPasswordLabel")}</span>
-              <Input type="password" required autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+              <Input
+                type="password"
+                required
+                autoComplete="new-password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="mt-2"
+              />
             </label>
           </div>
           <Button type="submit" disabled={pending} variant="outline">

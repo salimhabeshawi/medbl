@@ -1,26 +1,18 @@
 "use client";
 
-import { useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { useLocaleSwitch } from "./locale-provider";
 
 export function LanguageToggle() {
-  const locale = useLocale();
+  const { locale, switchLocale } = useLocaleSwitch();
   const tNav = useTranslations("Nav");
-  const router = useRouter();
-
-  const toggleLanguage = () => {
-    const nextLocale = locale === "am" ? "en" : "am";
-    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;
-    router.refresh();
-  };
 
   return (
     <Button
       variant="ghost"
       size="sm"
-      onClick={toggleLanguage}
+      onClick={() => switchLocale(locale === "am" ? "en" : "am")}
       className="font-medium tracking-wide text-xs h-8 px-2.5 rounded-md hover:bg-accent hover:text-accent-foreground border border-border/50"
       aria-label={tNav("language")}
     >

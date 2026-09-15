@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
-import { getCurrentUser, getFavoriteCounts, getFavoritePoemIds } from "@/lib/favorites";
+import {
+  getCurrentUser,
+  getFavoriteCounts,
+  getFavoritePoemIds,
+} from "@/lib/favorites";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
 import { PoemCard } from "@/components/poem-card";
@@ -77,7 +81,10 @@ export default async function PoemsPage({
     const ids = ((searchResults ?? []) as { id: string }[]).map(
       (result) => result.id,
     );
-    query = ids.length > 0 ? query.in("id", ids) : query.eq("id", "00000000-0000-0000-0000-000000000000");
+    query =
+      ids.length > 0
+        ? query.in("id", ids)
+        : query.eq("id", "00000000-0000-0000-0000-000000000000");
   }
   if (category) query = query.eq("category_id", category);
   if (tag) query = query.contains("tags", [tag]);
@@ -85,7 +92,10 @@ export default async function PoemsPage({
   query = query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 
   const { data: poems, count } = await query;
-  const { data: categoryRows } = await supabase.from("categories").select("id, name_am, name_en").order("name_am");
+  const { data: categoryRows } = await supabase
+    .from("categories")
+    .select("id, name_am, name_en")
+    .order("name_am");
   const categories = (categoryRows ?? []) as CategoryRecord[];
 
   const selectedCategoryObj = categories.find((c) => c.id === category);
@@ -99,7 +109,9 @@ export default async function PoemsPage({
 
   const user = await getCurrentUser();
   const favIds = await getFavoritePoemIds((poems ?? []).map((p) => p.id));
-  const favoriteCounts = await getFavoriteCounts((poems ?? []).map((p) => p.id));
+  const favoriteCounts = await getFavoriteCounts(
+    (poems ?? []).map((p) => p.id),
+  );
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
@@ -107,7 +119,7 @@ export default async function PoemsPage({
 
       <div className="mb-6">
         <UniversalSearch defaultValue={q} categories={categories} />
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex justify-center">
           <PostPoemAction />
         </div>
       </div>
@@ -151,7 +163,11 @@ export default async function PoemsPage({
             return (
               <PoemCard
                 key={poem.id}
-                poem={{ ...poem, category: catRelation, poetName: poet?.name_am ?? poet?.name_en }}
+                poem={{
+                  ...poem,
+                  category: catRelation,
+                  poetName: poet?.name_am ?? poet?.name_en,
+                }}
                 favorited={favIds.has(poem.id)}
                 favoriteCount={favoriteCounts.get(poem.id) ?? 0}
                 showFavorite={Boolean(user)}
@@ -177,7 +193,10 @@ export default async function PoemsPage({
             </Link>
           ) : null}
           <span className="text-muted-foreground">
-            {tCommon("pageOf", { page: Math.min(page, totalPages), total: totalPages })}
+            {tCommon("pageOf", {
+              page: Math.min(page, totalPages),
+              total: totalPages,
+            })}
           </span>
           {page < totalPages ? (
             <Link

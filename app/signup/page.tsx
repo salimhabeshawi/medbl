@@ -17,33 +17,37 @@ export default async function SignupPage({
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm">
-      <BackLink href="/">{tAuth("backHome")}</BackLink>
-      <Card className="w-full border-primary/15 shadow-lg"><CardContent className="p-8">
-        <h1 className="mb-6 text-2xl font-bold">{tAuth("signupTitle")}</h1>
+        <BackLink href="/">{tAuth("backHome")}</BackLink>
+        <Card className="w-full border-primary/15 shadow-lg">
+          <CardContent className="p-8">
+            <h1 className="mb-6 text-2xl font-bold">{tAuth("signupTitle")}</h1>
 
-        {error ? (
-          <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </p>
-        ) : null}
+            {error ? (
+              <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {error}
+              </p>
+            ) : null}
 
-        <GoogleAuthButton next={typeof next === "string" ? next : undefined} />
+            <GoogleAuthButton
+              next={typeof next === "string" ? next : undefined}
+            />
 
-        <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-          <div className="h-px flex-1 bg-border" />
-          or
-          <div className="h-px flex-1 bg-border" />
-        </div>
+            <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="h-px flex-1 bg-border" />
+              {tAuth("or")}
+              <div className="h-px flex-1 bg-border" />
+            </div>
 
-        <SignupForm action={signup} />
+            <SignupForm action={signup} />
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          {tAuth("hasAccount")} {" "}
-          <Link href="/login" className="font-medium underline">
-            Log in
-          </Link>
-        </p>
-      </CardContent></Card>
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              {tAuth("hasAccount")}{" "}
+              <Link href="/login" className="font-medium underline">
+                {tAuth("login")}
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

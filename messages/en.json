@@ -31,6 +31,7 @@
     "discoverByCategory": "Discover by category",
     "browsePoems": "Browse poems",
     "featuredPoets": "Featured poets",
+    "featuredPoems": "Featured poems",
     "viewAllPoets": "View all poets",
     "recentPoems": "Recent poems",
     "noCategoriesTitle": "No categories yet",
@@ -56,7 +57,9 @@
     "noPoetsYet": "No poets yet",
     "noPoetsYetDesc": "Poets will appear here as the registry grows.",
     "noPublishedPoems": "No published poems yet",
-    "noPublishedPoemsDesc": "This poet does not have any published poems in the anthology."
+    "noPublishedPoemsDesc": "This poet does not have any published poems in the anthology.",
+    "likeCount": "{count} likes",
+    "likeRate": "{rate}% liked"
   },
   "Poems": {
     "heading": "Poems",
@@ -90,7 +93,7 @@
     "by": "by",
     "openPoem": "Open poem",
     "loginToReport": "Log in to report issues with this poem",
-    "disputedNotice": "The attribution of this poem is under review.",
+    "disputedNotice": "This poem is under review.",
     "favoriteAddLabel": "Add to favorites",
     "favoriteRemoveLabel": "Remove from favorites",
     "favoriteAddTooltip": "Add favorite",
@@ -114,7 +117,7 @@
     "category": "Category",
     "selectCategory": "Select a category",
     "tags": "Tags",
-    "tagsPlaceholder": "Add tags (e.g. ቅኔ, ፍቅር)",
+    "tagsPlaceholder": "Add tags (e.g. ቅኔ, ፍቅር, ትዝብት)",
     "source": "Source / Provenance",
     "sourcePlaceholder": "Where did you find this poem? (Book title, oral tradition, self-written...)",
     "poetSelection": "Poet Selection",
@@ -186,7 +189,7 @@
     "accountTab": "Account Settings",
     "nameAmLabel": "Amharic Name (Required to save)",
     "nameAmPlaceholder": "e.g. ከበደ ሚካኤል",
-    "nameEnLabel": "English Name / Transliteration",
+    "nameEnLabel": "Name in English / Transliteration",
     "nameEnPlaceholder": "e.g. Kebede Mikael",
     "birthYearLabel": "Birth Year (Optional)",
     "deathYearLabel": "Death Year (Optional)",
@@ -310,7 +313,10 @@
     "backHome": "Back to home",
     "termsAgreement": "I agree to the Terms of Service and Privacy Policy",
     "agreementPrefix": "I agree to the",
-    "agreementAnd": "and"
+    "agreementAnd": "and",
+    "login": "login",
+    "signup": "sighn up",
+    "or": "or"
   },
   "Footer": {
     "tagline": "Amharic poetry community platform.",
