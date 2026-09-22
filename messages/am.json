@@ -59,7 +59,7 @@
     "noPublishedPoems": "እስካሁን የታተሙ ግጥሞች የሉም",
     "noPublishedPoemsDesc": "ይህ ገጣሚ በመድብሉ ውስጥ የታተመ ግጥም የለውም።",
     "likeCount": "{count} ተወዶለታል",
-    "likeRate": "{rate}% ያወዱ"
+    "likeRate": "{rate}% ተወዳጅ"
   },
   "Poems": {
     "heading": "ግጥሞች",
