@@ -16,6 +16,7 @@ type PoemRow = {
   title: string;
   body: string;
   category_id: string | null;
+  poem_number: number | null;
   categories: { name_am: string | null; name_en: string | null }[] | null;
   tags: string[] | null;
   poets:
@@ -49,7 +50,7 @@ export default async function FavoritesPage({
   const { data: favorites, error } = await supabase
     .from("favorites")
     .select(
-      "id, poem_id, created_at, poems(id, title, body, category_id, categories(name_am, name_en), tags, poets(name_am, name_en))",
+      "id, poem_id, created_at, poems(id, title, body, category_id, poem_number, categories(name_am, name_en), tags, poets(name_am, name_en))",
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });

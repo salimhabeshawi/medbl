@@ -67,7 +67,7 @@ export default async function PoemsPage({
   let query = supabase
     .from("poems")
     .select(
-      "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poet_id, poets(name_am, name_en), created_at",
+      "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, poet_id, poets(name_am, name_en), created_at",
       { count: "exact" },
     )
     .neq("attribution_status", "disputed")
@@ -165,6 +165,7 @@ export default async function PoemsPage({
                 key={poem.id}
                 poem={{
                   ...poem,
+                  poemNumber: poem.poem_number,
                   category: catRelation,
                   poetName: poet?.name_am ?? poet?.name_en,
                 }}

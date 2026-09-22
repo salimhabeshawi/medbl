@@ -18,6 +18,7 @@ export function FavoriteRow({
     body: string;
     category: string | null;
     tags: string[] | null;
+    poem_number?: number | null;
   };
   poet: { name_am: string; name_en: string } | null;
   favoriteCount?: number;
@@ -31,7 +32,14 @@ export function FavoriteRow({
     <Card className="content-card relative border-primary/15">
       <Link href={`/poems/${poem.id}`} className="absolute inset-0 z-0 rounded-xl" aria-label={`${tPoems("openPoem")}: ${poem.title}`} />
       <CardHeader>
-        <CardTitle className="relative z-10 font-sans text-base pointer-events-none">{poem.title}</CardTitle>
+        <CardTitle className="relative z-10 font-sans text-base pointer-events-none">
+          {typeof poem.poem_number === "number" ? (
+            <span className="mr-1.5 font-normal tabular-nums text-sm text-muted-foreground">
+              #{poem.poem_number}
+            </span>
+          ) : null}
+          {poem.title}
+        </CardTitle>
         <CardAction className="relative z-10 pointer-events-auto"><FavoriteToggle poemId={poem.id} initialFavorited={true} initialFavoriteCount={favoriteCount} onUnfavorited={() => setHidden(true)} /></CardAction>
       </CardHeader>
       <CardContent className="relative z-10 pointer-events-none space-y-3">

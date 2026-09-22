@@ -43,7 +43,7 @@ export default async function PoemPage({
   const { data: poem, error } = await supabase
     .from("poems")
     .select(
-      "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, source, poets(id, name_am, name_en)",
+      "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, source, poets(id, name_am, name_en)",
     )
     .eq("id", id)
     .single();
@@ -103,6 +103,11 @@ export default async function PoemPage({
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <CardTitle className="mb-2 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+                {typeof poem.poem_number === "number" ? (
+                  <span className="mr-2 font-sans text-base font-normal tabular-nums text-muted-foreground">
+                    #{poem.poem_number}
+                  </span>
+                ) : null}
                 {poem.title}
               </CardTitle>
               {poet?.name_am || poet?.name_en ? (

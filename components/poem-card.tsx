@@ -21,6 +21,7 @@ export type PoemCardData = {
   categoryName?: string | null;
   tags?: string[] | null;
   attribution_status?: string;
+  poemNumber?: number | null;
   poetName?: string | null;
 };
 
@@ -63,7 +64,14 @@ export function PoemCard({
     <Card className="content-card relative border-border bg-card shadow-none">
       <Link href={`/poems/${poem.id}`} className="absolute inset-0 z-0 rounded-xl" aria-label={`${tPoems("openPoem")}: ${poem.title}`} />
       <CardHeader className="relative z-10 pointer-events-none">
-        <CardTitle className="font-sans text-base text-foreground"><span>{poem.title}</span></CardTitle>
+        <CardTitle className="font-sans text-base text-foreground">
+          {typeof poem.poemNumber === "number" ? (
+            <span className="mr-1.5 font-normal tabular-nums text-sm text-muted-foreground">
+              #{poem.poemNumber}
+            </span>
+          ) : null}
+          <span>{poem.title}</span>
+        </CardTitle>
         {showFavorite ? <CardAction className="pointer-events-auto"><FavoriteToggle poemId={poem.id} initialFavorited={favorited} initialFavoriteCount={favoriteCount} /></CardAction> : null}
       </CardHeader>
       <CardContent className="relative z-10 pointer-events-none space-y-3">
