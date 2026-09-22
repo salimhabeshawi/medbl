@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FavoriteToggle } from "@/components/favorite-toggle";
+import { PoemViewCount } from "@/components/poem-view-count";
 import {
   Tooltip,
   TooltipContent,
@@ -20,6 +21,7 @@ export function PoemActions({
   initialFavorited,
   initialFavoriteCount,
   canFavorite,
+  viewCount,
 }: {
   poemId: string;
   title: string;
@@ -27,6 +29,7 @@ export function PoemActions({
   initialFavorited: boolean;
   initialFavoriteCount: number;
   canFavorite: boolean;
+  viewCount: number;
 }) {
   const tPoems = useTranslations("Poems");
   async function copyPoem() {
@@ -61,6 +64,7 @@ export function PoemActions({
   return (
     <TooltipProvider>
       <div className="flex shrink-0 items-center gap-2">
+        <PoemViewCount viewCount={viewCount} />
         {canFavorite ? (
           <FavoriteToggle
             poemId={poemId}

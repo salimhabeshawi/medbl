@@ -1,5 +1,6 @@
 {
   "Nav": {
+    "medbl": "Medbl",
     "home": "Home",
     "poems": "Poems",
     "poets": "Poets",
@@ -13,10 +14,10 @@
     "signup": "Sign Up",
     "logout": "Sign Out",
     "language": "Language",
-    "menu": "Menu"
-    ,"accountMenu": "Account menu"
-    ,"signedIn": "Signed in"
-    ,"closeMenu": "Close menu"
+    "menu": "Menu",
+    "accountMenu": "Account menu",
+    "signedIn": "Signed in",
+    "closeMenu": "Close menu"
   },
   "Search": {
     "placeholder": "Search poems, poets, categories...",
@@ -69,7 +70,7 @@
     "category": "Category",
     "tags": "Tags",
     "source": "Source",
-    "submittedBy": "Submitted by",
+    "submittedBy": "by",
     "verifiedBadge": "Verified",
     "communityBadge": "Community",
     "disputedBadge": "Disputed",
@@ -89,6 +90,7 @@
     "shareError": "Could not share poem",
     "loginToFavorite": "Log in to favorite",
     "copyPoem": "Copy poem",
+    "viewsCount": "{count} views",
     "sharePoem": "Share poem",
     "by": "by",
     "openPoem": "Open poem",
@@ -138,17 +140,17 @@
     "switchToOther": "This is actually another poet's poem",
     "switchToOwn": "This is actually my own poem",
     "ownIntro": "Submitting as {poet}. Not you? Update your poet details on your profile.",
-    "otherIntro": "Your poem goes to moderator review before it appears publicly — nothing is published instantly. Attach it to a poet already in our registry, or propose the poet inline if they aren't there yet."
-    ,"termsNoticePrefix": "By submitting, you confirm this content follows our"
-    ,"termsLink": "Terms of Service"
-    ,"linkedPoet": "your linked poet"
-    ,"noPoetsFound": "No poets found."
-    ,"typeToSearch": "Type to search."
-    ,"removeTag": "Remove"
-    ,"addAnotherTag": "Add another tag"
-    ,"tagPlaceholder": "Type a tag, then press space"
-    ,"addTag": "Add tag"
-    ,"poetSelectionRequired": "Please select an existing poet, or add new poet details below the search box.",
+    "otherIntro": "Your poem goes to moderator review before it appears publicly — nothing is published instantly. Attach it to a poet already in our registry, or propose the poet inline if they aren't there yet.",
+    "termsNoticePrefix": "By submitting, you confirm this content follows our",
+    "termsLink": "Terms of Service",
+    "linkedPoet": "your linked poet",
+    "noPoetsFound": "No poets found.",
+    "typeToSearch": "Type to search.",
+    "removeTag": "Remove",
+    "addAnotherTag": "Add another tag",
+    "tagPlaceholder": "Type a tag, then press space",
+    "addTag": "Add tag",
+    "poetSelectionRequired": "Please select an existing poet, or add new poet details below the search box.",
     "poetSelectionConflict": "Either select an existing poet or propose a new one — not both."
   },
   "Favorites": {
@@ -322,7 +324,8 @@
     "tagline": "Amharic poetry community platform.",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
-    "copyright": "All rights reserved."
+    "copyright": "All rights reserved.",
+    "medbl": "Medbl"
   },
   "Common": {
     "save": "Save",
@@ -344,16 +347,16 @@
     "saving": "Saving...",
     "saveEdits": "Save edits",
     "editsSaved": "Edits saved.",
-    "cancelled": "Cancelled"
-    ,"backToPoets": "Back to poets",
+    "cancelled": "Cancelled",
+    "backToPoets": "Back to poets",
     "installApp": "Install Medbl",
     "installAppDesc": "Add the poetry library to your home screen.",
     "install": "Install",
     "dismiss": "Dismiss",
-    "theme": "Theme"
-    ,"light": "Light"
-    ,"dark": "Dark"
-    ,"device": "Device"
-    ,"pageOf": "Page {page} of {total}"
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "device": "Device",
+    "pageOf": "Page {page} of {total}"
   }
 }

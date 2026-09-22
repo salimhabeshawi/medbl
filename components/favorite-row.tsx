@@ -3,14 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FavoriteToggle } from "./favorite-toggle";
+import { PoemViewCount } from "./poem-view-count";
 import { Badge } from "./ui/badge";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useTranslations } from "next-intl";
 
 export function FavoriteRow({
   poem,
   poet,
   favoriteCount = 0,
+  viewCount = 0,
 }: {
   poem: {
     id: string;
@@ -22,6 +24,7 @@ export function FavoriteRow({
   };
   poet: { name_am: string; name_en: string } | null;
   favoriteCount?: number;
+  viewCount?: number;
 }) {
   const [hidden, setHidden] = useState(false);
   const tPoems = useTranslations("Poems");
@@ -31,16 +34,22 @@ export function FavoriteRow({
   return (
     <Card className="content-card relative border-primary/15">
       <Link href={`/poems/${poem.id}`} className="absolute inset-0 z-0 rounded-xl" aria-label={`${tPoems("openPoem")}: ${poem.title}`} />
-      <CardHeader>
+      <CardHeader className="gap-2">
+        {/* Poem number top-left, view/favorite stats top-right; the title gets
+            its own full-width line below, so long titles never wrap because of
+            the stats. */}
+        <div className="pointer-events-none relative z-10 flex items-center justify-between gap-2">
+          <span className="font-bold tabular-nums text-base text-muted-foreground">
+            {poem.poem_number != null ? `#${poem.poem_number}` : null}
+          </span>
+          <div className="pointer-events-auto flex items-center gap-2">
+            <PoemViewCount viewCount={viewCount} />
+            <FavoriteToggle poemId={poem.id} initialFavorited={true} initialFavoriteCount={favoriteCount} onUnfavorited={() => setHidden(true)} />
+          </div>
+        </div>
         <CardTitle className="relative z-10 font-sans text-base pointer-events-none">
-          {typeof poem.poem_number === "number" ? (
-            <span className="mr-1.5 font-normal tabular-nums text-sm text-muted-foreground">
-              #{poem.poem_number}
-            </span>
-          ) : null}
           {poem.title}
         </CardTitle>
-        <CardAction className="relative z-10 pointer-events-auto"><FavoriteToggle poemId={poem.id} initialFavorited={true} initialFavoriteCount={favoriteCount} onUnfavorited={() => setHidden(true)} /></CardAction>
       </CardHeader>
       <CardContent className="relative z-10 pointer-events-none space-y-3">
         <div className="min-w-0">

@@ -40,10 +40,15 @@ export default async function PoemPage({
   const { id } = await params;
   const supabase = await createClient();
 
+  // Count this page load as a view — server-side, once per request, before the
+  // poem data is fetched so the displayed count already includes this visit.
+  // Refreshes count again by design; list/card contexts never call this.
+  await supabase.rpc("increment_poem_view", { p_poem_id: id });
+
   const { data: poem, error } = await supabase
     .from("poems")
     .select(
-      "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, source, poets(id, name_am, name_en)",
+      "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, view_count, source, poets(id, name_am, name_en)",
     )
     .eq("id", id)
     .single();
@@ -129,6 +134,7 @@ export default async function PoemPage({
               initialFavorited={initialFavorited}
               initialFavoriteCount={favoriteCounts.get(poem.id) ?? 0}
               canFavorite={Boolean(user)}
+              viewCount={poem.view_count ?? 0}
             />
           </div>
 

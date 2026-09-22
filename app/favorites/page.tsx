@@ -17,6 +17,7 @@ type PoemRow = {
   body: string;
   category_id: string | null;
   poem_number: number | null;
+  view_count: number | null;
   categories: { name_am: string | null; name_en: string | null }[] | null;
   tags: string[] | null;
   poets:
@@ -50,7 +51,7 @@ export default async function FavoritesPage({
   const { data: favorites, error } = await supabase
     .from("favorites")
     .select(
-      "id, poem_id, created_at, poems(id, title, body, category_id, poem_number, categories(name_am, name_en), tags, poets(name_am, name_en))",
+      "id, poem_id, created_at, poems(id, title, body, category_id, poem_number, view_count, categories(name_am, name_en), tags, poets(name_am, name_en))",
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
@@ -88,7 +89,7 @@ export default async function FavoritesPage({
       ) : filteredRows.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredRows.map((row) => (
-            <FavoriteRow key={row.poem.id} poem={row.poem} poet={row.poet} favoriteCount={favoriteCounts.get(row.poem.id) ?? 0} />
+            <FavoriteRow key={row.poem.id} poem={row.poem} poet={row.poet} favoriteCount={favoriteCounts.get(row.poem.id) ?? 0} viewCount={row.poem.view_count ?? 0} />
           ))}
         </div>
       ) : (

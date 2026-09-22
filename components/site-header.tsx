@@ -35,12 +35,26 @@ export async function SiteHeader() {
     { href: "/", label: tNav("home"), icon: "home" },
     { href: "/poems", label: tNav("poems"), icon: "poems" },
     { href: "/poets", label: tNav("poets"), icon: "poets" },
-    ...(user ? [{ href: "/favorites", label: tNav("favorites"), icon: "favorites" as const }] : []),
+    ...(user
+      ? [
+          {
+            href: "/favorites",
+            label: tNav("favorites"),
+            icon: "favorites" as const,
+          },
+        ]
+      : []),
     ...(user
       ? [{ href: "/profile", label: tNav("profile"), icon: "profile" as const }]
       : []),
     ...(isStaff
-      ? [{ href: "/moderate", label: tNav("moderate"), icon: "moderate" as const }]
+      ? [
+          {
+            href: "/moderate",
+            label: tNav("moderate"),
+            icon: "moderate" as const,
+          },
+        ]
       : []),
   ];
 
@@ -48,9 +62,23 @@ export async function SiteHeader() {
     { href: "/", label: tNav("home"), icon: "home" },
     { href: "/poems", label: tNav("poems"), icon: "poems" },
     { href: "/poets", label: tNav("poets"), icon: "poets" },
-    ...(user ? [{ href: "/favorites", label: tNav("favorites"), icon: "favorites" as const }] : []),
+    ...(user
+      ? [
+          {
+            href: "/favorites",
+            label: tNav("favorites"),
+            icon: "favorites" as const,
+          },
+        ]
+      : []),
     ...(isStaff
-      ? [{ href: "/moderate", label: tNav("moderate"), icon: "moderate" as const }]
+      ? [
+          {
+            href: "/moderate",
+            label: tNav("moderate"),
+            icon: "moderate" as const,
+          },
+        ]
       : []),
   ];
 
@@ -61,13 +89,17 @@ export async function SiteHeader() {
           href="/"
           className="font-sans text-lg font-semibold text-primary transition hover:text-primary/80 md:text-xl"
         >
-          መድብል
+          {tNav("medbl")}
         </Link>
 
         {/* Desktop nav (md and up) - no hamburger */}
         <div className="flex items-center gap-4">
           <DesktopNav links={browseLinks} />
-          {user ? <div className="hidden md:block"><SubmissionMenu /></div> : null}
+          {user ? (
+            <div className="hidden md:block">
+              <SubmissionMenu />
+            </div>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -80,7 +112,10 @@ export async function SiteHeader() {
               <UserMenu email={user.email} role={user.role} />
             ) : (
               <div className="flex items-center gap-2">
-                <Link href="/login" className="text-sm font-medium text-foreground transition hover:text-primary">
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-foreground transition hover:text-primary"
+                >
                   {tNav("login")}
                 </Link>
                 <Button asChild size="sm">

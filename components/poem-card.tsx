@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { DisputedTag } from "@/components/disputed-tag";
+import { PoemViewCount } from "@/components/poem-view-count";
 import { useLocale, useTranslations } from "next-intl";
 
 export type CategoryData = {
@@ -23,6 +24,7 @@ export type PoemCardData = {
   attribution_status?: string;
   poemNumber?: number | null;
   poetName?: string | null;
+  viewCount?: number | null;
 };
 
 function firstFourLines(body: string): string {
@@ -63,16 +65,30 @@ export function PoemCard({
   return (
     <Card className="content-card relative border-border bg-card shadow-none">
       <Link href={`/poems/${poem.id}`} className="absolute inset-0 z-0 rounded-xl" aria-label={`${tPoems("openPoem")}: ${poem.title}`} />
-      <CardHeader className="relative z-10 pointer-events-none">
-        <CardTitle className="font-sans text-base text-foreground">
-          {typeof poem.poemNumber === "number" ? (
-            <span className="mr-1.5 font-normal tabular-nums text-sm text-muted-foreground">
-              #{poem.poemNumber}
+      <CardHeader className="relative z-10 gap-2 pointer-events-none">
+        {/* Poem number top-left, view/favorite stats top-right; the title gets
+            its own full-width line below, so long titles never wrap because of
+            the stats. */}
+        {poem.poemNumber != null || showFavorite || poem.viewCount != null ? (
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold tabular-nums text-base text-muted-foreground">
+              {poem.poemNumber != null ? `#${poem.poemNumber}` : null}
             </span>
-          ) : null}
+            {showFavorite || poem.viewCount != null ? (
+              <div className="pointer-events-auto flex items-center gap-2">
+                {poem.viewCount != null ? (
+                  <PoemViewCount viewCount={poem.viewCount} />
+                ) : null}
+                {showFavorite ? (
+                  <FavoriteToggle poemId={poem.id} initialFavorited={favorited} initialFavoriteCount={favoriteCount} />
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        <CardTitle className="font-sans text-base text-foreground">
           <span>{poem.title}</span>
         </CardTitle>
-        {showFavorite ? <CardAction className="pointer-events-auto"><FavoriteToggle poemId={poem.id} initialFavorited={favorited} initialFavoriteCount={favoriteCount} /></CardAction> : null}
       </CardHeader>
       <CardContent className="relative z-10 pointer-events-none space-y-3">
         {poem.poetName ? <p className="text-sm text-secondary">{tPoems("by")} {poem.poetName}</p> : null}

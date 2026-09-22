@@ -35,6 +35,7 @@ type FeaturedPoem = {
   poet_name_en: string | null;
   poem_number?: number | null;
   favorite_count: number;
+  view_count?: number | null;
 };
 
 type CategoryRecord = {
@@ -97,7 +98,7 @@ export default async function Home() {
     supabase
       .from("poems")
       .select(
-        "id, title, body, attribution_status, poem_number, category_id, categories(id, name_am, name_en), tags, poet_id, poets(name_am, name_en), created_at",
+        "id, title, body, attribution_status, poem_number, view_count, category_id, categories(id, name_am, name_en), tags, poet_id, poets(name_am, name_en), created_at",
       )
       .order("created_at", { ascending: false })
       .limit(6),
@@ -180,6 +181,7 @@ export default async function Home() {
                     poemNumber: poem.poem_number,
                     category: catRelation,
                     poetName: poet?.name_am ?? poet?.name_en,
+                    viewCount: poem.view_count ?? 0,
                   }}
                   favorited={favIds.has(poem.id)}
                   favoriteCount={favoriteCounts.get(poem.id) ?? 0}
@@ -216,6 +218,7 @@ export default async function Home() {
                       : poem.category_name_en || poem.category_name_am,
                   poemNumber: poem.poem_number,
                   poetName: poem.poet_name_am ?? poem.poet_name_en,
+                  viewCount: Number(poem.view_count ?? 0),
                 }}
                 favorited={favIds.has(poem.id)}
                 favoriteCount={Number(poem.favorite_count ?? 0)}

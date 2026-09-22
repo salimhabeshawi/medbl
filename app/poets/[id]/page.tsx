@@ -43,7 +43,7 @@ export default async function PoetPage({
 
   const { data: poems } = await supabase
     .from("poems")
-    .select("id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, created_at")
+    .select("id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, view_count, created_at")
     .eq("poet_id", id)
     .order("created_at", { ascending: false });
 
@@ -89,6 +89,7 @@ export default async function PoetPage({
                     poemNumber: poem.poem_number,
                     category: catRelation,
                     poetName: poet.name_am ?? poet.name_en,
+                    viewCount: poem.view_count ?? 0,
                   }}
                   favorited={favIds.has(poem.id)}
                   favoriteCount={favoriteCounts.get(poem.id) ?? 0}

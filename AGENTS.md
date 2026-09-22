@@ -212,6 +212,16 @@ grant itself is withheld.
 - `attribution_status`: `verified` | `community` | `disputed`
 - `source`, `submitted_by` (nullable)
 - `created_at`
+- `view_count` (integer, not null, default 0) — how many times the poem's
+  detail page has been opened. Incremented by exactly one per server request
+  of `/poems/[id]` through the security-definer RPC
+  `increment_poem_view(p_poem_id)` (callable by anonymous visitors — no
+  authorization check on purpose, since poem pages are public; no-ops on
+  unknown ids; a refresh counts again — no dedup by design). Never
+  incremented when a poem only appears in a list/card context. Reading is a
+  plain column select (covered by the existing public SELECT policy); the
+  RPC is the ONLY write path — no direct UPDATE grant for
+  anon/authenticated. `get_featured_poems` returns it for featured cards.
 - GIN trigram indexes on `title` and `body` for search.
 
 ### `categories` (bilingual registry)
@@ -512,6 +522,11 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
 19. Sequential human-facing poem numbers (`poems.poem_number` with dedicated
     sequence, publish-order backfill, "#N" on poem cards + poem page;
     `get_featured_poems` returns the number) — done
+20. Per-poem view counts (`poems.view_count` + public security-definer
+    `increment_poem_view()` RPC; incremented server-side exactly once per
+    `/poems/[id]` request, eye icon + count displayed to the left of the
+    favorite count on poem cards and the poem detail page;
+    `get_featured_poems` returns the count) — done
 
 ## Guidelines for future changes
 
