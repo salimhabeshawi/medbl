@@ -8,6 +8,9 @@ export default getRequestConfig(async () => {
 
   return {
     locale: validLocale,
+    // Global default so date/time formatting is identical on server and
+    // client (avoids next-intl's ENVIRONMENT_FALLBACK hydration warning).
+    timeZone: "Africa/Addis_Ababa",
     messages: (await import(`../messages/${validLocale}.json`)).default,
   };
 });
