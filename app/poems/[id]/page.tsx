@@ -131,6 +131,7 @@ export default async function PoemPage({
               poemId={poem.id}
               title={poem.title}
               body={poem.body}
+              poetNameAm={poet?.name_am ?? ""}
               initialFavorited={initialFavorited}
               initialFavoriteCount={favoriteCounts.get(poem.id) ?? 0}
               canFavorite={Boolean(user)}

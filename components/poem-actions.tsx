@@ -18,6 +18,7 @@ export function PoemActions({
   poemId,
   title,
   body,
+  poetNameAm,
   initialFavorited,
   initialFavoriteCount,
   canFavorite,
@@ -26,15 +27,29 @@ export function PoemActions({
   poemId: string;
   title: string;
   body: string;
+  poetNameAm: string;
   initialFavorited: boolean;
   initialFavoriteCount: number;
   canFavorite: boolean;
   viewCount: number;
 }) {
   const tPoems = useTranslations("Poems");
+
+  // Shared text for both share and copy. The poet name is always the Amharic
+  // name regardless of UI locale — this is the poem's own content, which is
+  // never translated. The URL is included at the end of the text itself, so
+  // navigator.share must NOT also receive a separate `url` field (some share
+  // targets would append it a second time). Body line breaks are preserved
+  // exactly as stored.
+  function buildShareText(): string {
+    return [title, body, `በ ${poetNameAm}`, window.location.href].join(
+      "\n\n",
+    );
+  }
+
   async function copyPoem() {
     try {
-      await navigator.clipboard.writeText(`${title}\n\n${body}`);
+      await navigator.clipboard.writeText(buildShareText());
       toast.success(tPoems("poemCopied"));
     } catch {
       toast.error(tPoems("copyError"));
@@ -42,15 +57,13 @@ export function PoemActions({
   }
 
   async function sharePoem() {
-    const url = window.location.href;
-
     try {
       if (navigator.share) {
-        await navigator.share({ title, text: title, url });
+        await navigator.share({ title, text: buildShareText() });
         return;
       }
 
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(buildShareText());
       toast.success(tPoems("linkCopied"));
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
