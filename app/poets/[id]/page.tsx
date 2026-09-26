@@ -7,6 +7,7 @@ import { PoemCard } from "@/components/poem-card";
 import { BackLink } from "@/components/back-link";
 import { getTranslations } from "next-intl/server";
 import { firstRelation } from "@/lib/relations";
+import { formatStoredGcYearDisplay } from "@/lib/calendar";
 
 export async function generateMetadata({
   params,
@@ -47,10 +48,14 @@ export default async function PoetPage({
     .eq("poet_id", id)
     .order("created_at", { ascending: false });
 
-  const years =
-    poet.birth_year || poet.death_year
-      ? `${poet.birth_year ?? "?"} – ${poet.death_year ?? "?"}`
-      : null;
+  let years: string | null = null;
+  if (poet.birth_year && poet.death_year) {
+    years = `${formatStoredGcYearDisplay(poet.birth_year)} – ${formatStoredGcYearDisplay(poet.death_year)}`;
+  } else if (poet.birth_year) {
+    years = `${formatStoredGcYearDisplay(poet.birth_year)}`;
+  } else if (poet.death_year) {
+    years = `? – ${formatStoredGcYearDisplay(poet.death_year)}`;
+  }
 
   const user = await getCurrentUser();
   const favIds = await getFavoritePoemIds((poems ?? []).map((p) => p.id));
@@ -74,7 +79,7 @@ export default async function PoetPage({
       <section className="mt-12">
         <h2 className="mb-4 text-2xl font-semibold">{tCommon("poems")}</h2>
         {poems && poems.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {poems.map((poem) => {
               const catRelation = firstRelation<{
                 id: string;

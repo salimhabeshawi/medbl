@@ -26,6 +26,19 @@
     "noResultsTitle": "ምንም የሚመሳሰል ግጥም አልተገኘም",
     "noResultsDesc": "እባክዎ የፍለጋ ቃልዎን ወይም ማጣሪያዎን ይቀይሩ።"
   },
+  "Filters": {
+    "filterCategory": "በመደብ ማጣሪያ",
+    "filterPoet": "በገጣሚ ማጣሪያ",
+    "allCategories": "ሁሉም መደቦች",
+    "allPoets": "ሁሉም ገጣሚዎች",
+    "clearFilters": "ማጣሪያዎችን አጽዳ"
+  },
+  "NotFound": {
+    "title": "ገጹ አልተገኘም",
+    "description": "የሚፈልጉት ገጽ አልተገኘም ወይም ተወርዏል።",
+    "backHome": "ወደ መነሻ ተመለስ",
+    "browsePoems": "ግጥሞችን ይመልከቱ"
+  },
   "Home": {
     "heroTitle": "የአማርኛ ግጥሞችን ያግኙ፣ ያንብቡ እንዲሁም ያጋሩ",
     "heroSubtitle": "በማህበረሰቡ የተሰበሰበ በጥንታዊ እና ዘመናዊ ግጥሞች የተሞላ መድረክ።",
@@ -100,7 +113,11 @@
     "favoriteAddTooltip": "ወደ ወደድኳቸው ጨምር",
     "favoriteRemoveTooltip": "ከወደድኳቸው አስወግድ",
     "likesCount": "{count} የተወደደ",
-    "viewsCount": "{count} ጊዜ የተነበበ"
+    "viewsCount": "{count} ጊዜ የተነበበ",
+    "_attributionTooltipsNote": "DRAFT TRANSLATIONS — the three attribution tooltip strings below are first-pass drafts and must be reviewed/refined by a native Amharic speaker (attribution nuance matters). JSON has no comment syntax, so this note lives as an unused key instead.",
+    "verifiedTooltip": "የዚህ ግጥም ደራሲነት በአወያይ ከታመነ ምንጭ ጋር ተረጋግጧል።",
+    "communityTooltip": "የዚህ ግጥም ደራሲነት በአወያይ ተቀባይነት አግኝቷል፤ ነገር ግን ገለልተኛ ማረጋገጫ አላገኘም።",
+    "disputedTooltip": "የዚህ ግጥም ደራሲነት አጠያያቂ ሆኖ በአወያዮች እየተጠና ነው።"
   },
   "Submit": {
     "title": "ግጥም አስገባ",
@@ -151,7 +168,9 @@
     "tagPlaceholder": "መለያዎችን የክፍተት ቁልፍን በመጫን እየለያዩ ይጻፉ",
     "addTag": "መለያ ጨምር",
     "poetSelectionRequired": "ነባር ገጣሚ ይምረጡ፣ ወይም ከፍለጋ ሳጥኑ በታች አዲስ ሰው ያክሉ።",
-    "poetSelectionConflict": "ነባር ገጣሚ ወይም አዲስ አቅርቡ — ሁለቱንም አይሆንም።"
+    "poetSelectionConflict": "ነባር ገጣሚ ወይም አዲስ አቅርቡ — ሁለቱንም አይሆንም።",
+    "categoryRequired": "እባክዎ ለዚህ ግጥም መደብ ይምረጡ።",
+    "categoryInvalid": "እባክዎ ከዝርዝሩ ውስጥ መደብ ይምረጡ።"
   },
   "Favorites": {
     "title": "የወደድኳቸው ግጥሞች",
@@ -182,7 +201,9 @@
     "proposedPoet": "የቀረበ አዲስ ገጣሚ: {name}",
     "unknownPoet": "ያልታወቀ ገጣሚ",
     "reason": "ምክንያት",
-    "back": "ወደ መነሻ ተመለስ"
+    "back": "ወደ መነሻ ተመለስ",
+    "noMatchTitle": "ከማጣሪያዎ ጋር የሚመሳሰል የቀረበ ግጥም የለም",
+    "noMatchDesc": "ማጣሪያውን ማጽዳት ወይም ሌላ እሴት መምረጥ ይሞክሩ።"
   },
   "Profile": {
     "title": "የእርስዎ መገለጫ",
@@ -193,7 +214,7 @@
     "nameAmPlaceholder": "ምሳሌ፦ ሳሊም አህመድ",
     "nameEnLabel": "ስም በእንግሊዝኛ",
     "nameEnPlaceholder": "ምሳሌ፦ Salim Ahmed",
-    "birthYearLabel": "የትውልድ ዘመን (አማራጭ)",
+    "birthYearLabel": "የትውልድ ዓመት (ኢ.አ)",
     "deathYearLabel": "የህልፈት ዘመን (አማራጭ)",
     "bioLabel": "ስለ ገጣሚው (አማራጭ)",
     "bioPlaceholder": "ስለ ገጣሚው አጭር መረጃ ያስገቡ...",

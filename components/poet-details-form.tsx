@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { useTranslations } from "next-intl";
+import { formatEcAsGcRange } from "@/lib/calendar";
 
 export function PoetDetailsForm({
   initial,
@@ -32,6 +33,12 @@ export function PoetDetailsForm({
   const [nameEn, setNameEn] = useState(initial.nameEn);
   const [birthYear, setBirthYear] = useState(initial.birthYear);
   const [bio, setBio] = useState(initial.bio);
+
+  const parsedEcYear = Number.parseInt(birthYear.trim(), 10);
+  const gcPreview =
+    !Number.isNaN(parsedEcYear) && parsedEcYear > 0
+      ? formatEcAsGcRange(parsedEcYear)
+      : null;
 
   return (
     <form action={formAction} className="form-stack">
@@ -78,19 +85,23 @@ export function PoetDetailsForm({
               />
             </label>
           </div>
-          <label className="block max-w-48 space-y-2 text-sm font-medium">
-            <span>{tProf("birthYearLabel")}</span>
-            <Input
-              type="number"
-              name="birth_year"
-              inputMode="numeric"
-              min={1000}
-              max={new Date().getFullYear()}
-              value={birthYear}
-              onChange={(e) => setBirthYear(e.target.value)}
-              className="mt-2"
-            />
-          </label>
+          <div className="block max-w-48 space-y-2 text-sm font-medium">
+            <label className="block space-y-2">
+              <span>{tProf("birthYearLabel")}</span>
+              <Input
+                type="number"
+                name="birth_year"
+                inputMode="numeric"
+                min={1}
+                value={birthYear}
+                onChange={(e) => setBirthYear(e.target.value)}
+                className="mt-2"
+              />
+            </label>
+            {gcPreview ? (
+              <p className="text-xs text-muted-foreground">{gcPreview}</p>
+            ) : null}
+          </div>
           <label className="space-y-2 text-sm font-medium">
             <span>{tProf("bioLabel")}</span>
             <Textarea

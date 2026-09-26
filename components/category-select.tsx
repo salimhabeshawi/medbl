@@ -13,13 +13,26 @@ export function CategorySelect({
   categories,
   defaultValue = "",
   name = "category_id",
+  required = false,
+  value,
+  onValueChange,
+  invalid = false,
 }: {
   categories: CategorySelectRecord[];
   defaultValue?: string;
   name?: string;
+  /** Marks the control as required for assistive tech (no native validation). */
+  required?: boolean;
+  /** Controlled selected category id. Omit both this and onValueChange to
+   *  keep the select uncontrolled (e.g. the moderator review form). */
+  value?: string;
+  onValueChange?: (value: string) => void;
+  /** Renders the error styling used by the submit forms' inline validation. */
+  invalid?: boolean;
 }) {
   const locale = useLocale();
   const tSubmit = useTranslations("Submit");
+  const controlled = value !== undefined;
 
   const getCategoryLabel = (cat: CategorySelectRecord) => {
     if (locale === "am") return cat.name_am || cat.name_en || "";
@@ -27,8 +40,17 @@ export function CategorySelect({
   };
 
   return (
-    <Select name={name} defaultValue={defaultValue}>
-      <SelectTrigger className="h-10 w-full">
+    <Select
+      name={name}
+      value={controlled ? value : undefined}
+      defaultValue={controlled ? undefined : defaultValue}
+      onValueChange={onValueChange}
+    >
+      <SelectTrigger
+        className="h-10 w-full"
+        aria-invalid={invalid || undefined}
+        aria-required={required || undefined}
+      >
         <SelectValue placeholder={tSubmit("selectCategory")} />
       </SelectTrigger>
       <SelectContent>

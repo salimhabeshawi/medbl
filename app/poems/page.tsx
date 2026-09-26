@@ -11,11 +11,21 @@ import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
 import { PoemCard } from "@/components/poem-card";
 import { PostPoemAction } from "@/components/post-poem-action";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { getLocale, getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = { title: "Poems" };
 
-const PAGE_SIZE = 20;
+// 12 poems per page: 3-column grid × 4 rows on desktop.
+const PAGE_SIZE = 12;
 
 function param(value: string | string[] | undefined): string {
   return (Array.isArray(value) ? value[0] : value) ?? "";
@@ -34,6 +44,29 @@ function pageUrl(params: {
   if (params.page > 1) search.set("page", String(params.page));
   const qs = search.toString();
   return qs ? `/poems?${qs}` : "/poems";
+}
+
+/**
+ * Page numbers to show: every page when there are few, otherwise the first and
+ * last page plus the current one and its neighbours, with ellipses in between.
+ */
+function pageItems(page: number, totalPages: number): (number | "ellipsis")[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const sorted = [...new Set([1, totalPages, page - 1, page, page + 1])]
+    .filter((candidate) => candidate >= 1 && candidate <= totalPages)
+    .sort((a, b) => a - b);
+
+  const items: (number | "ellipsis")[] = [];
+  let previous = 0;
+  for (const candidate of sorted) {
+    if (previous && candidate - previous > 1) items.push("ellipsis");
+    items.push(candidate);
+    previous = candidate;
+  }
+  return items;
 }
 
 type CategoryRecord = {
@@ -64,13 +97,14 @@ export default async function PoemsPage({
 
   const supabase = await createClient();
 
+  // Disputed poems stay publicly visible (marked with the red disputed tag) —
+  // see AGENTS.md "Disputed poems" — so no attribution_status filter here.
   let query = supabase
     .from("poems")
     .select(
       "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, view_count, poet_id, poets(name_am, name_en), created_at",
       { count: "exact" },
     )
-    .neq("attribution_status", "disputed")
     .order("created_at", { ascending: false });
 
   if (q) {
@@ -184,32 +218,74 @@ export default async function PoemsPage({
         />
       )}
 
-      {totalPages > 1 && (
-        <nav className="mt-8 flex items-center justify-between">
-          {page > 1 ? (
-            <Link
-              href={pageUrl({ q, category, tag, page: page - 1 })}
-              className="rounded-md border border-border px-3 py-1.5 transition hover:bg-accent hover:text-foreground"
-            >
-              {tCommon("previous")}
-            </Link>
-          ) : null}
-          <span className="text-muted-foreground">
+      {totalPages > 1 ? (
+        <>
+          <Pagination className="mt-8">
+            <PaginationContent className="flex-wrap">
+              <PaginationItem>
+                {page > 1 ? (
+                  <PaginationPrevious
+                    href={pageUrl({ q, category, tag, page: page - 1 })}
+                    text={tCommon("previous")}
+                    aria-label={tCommon("previous")}
+                  />
+                ) : (
+                  <PaginationPrevious
+                    text={tCommon("previous")}
+                    aria-label={tCommon("previous")}
+                    aria-disabled="true"
+                    className="pointer-events-none opacity-50"
+                  />
+                )}
+              </PaginationItem>
+
+              {pageItems(page, totalPages).map((item, index) =>
+                item === "ellipsis" ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={item}>
+                    <PaginationLink
+                      href={pageUrl({ q, category, tag, page: item })}
+                      isActive={item === page}
+                      aria-label={tCommon("pageOf", {
+                        page: item,
+                        total: totalPages,
+                      })}
+                    >
+                      {item}
+                    </PaginationLink>
+                  </PaginationItem>
+                ),
+              )}
+
+              <PaginationItem>
+                {page < totalPages ? (
+                  <PaginationNext
+                    href={pageUrl({ q, category, tag, page: page + 1 })}
+                    text={tCommon("next")}
+                    aria-label={tCommon("next")}
+                  />
+                ) : (
+                  <PaginationNext
+                    text={tCommon("next")}
+                    aria-label={tCommon("next")}
+                    aria-disabled="true"
+                    className="pointer-events-none opacity-50"
+                  />
+                )}
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+          <p className="mt-3 text-center text-sm text-muted-foreground">
             {tCommon("pageOf", {
               page: Math.min(page, totalPages),
               total: totalPages,
             })}
-          </span>
-          {page < totalPages ? (
-            <Link
-              href={pageUrl({ q, category, tag, page: page + 1 })}
-              className="rounded-md border border-border px-3 py-1.5 transition hover:bg-accent hover:text-foreground"
-            >
-              {tCommon("next")}
-            </Link>
-          ) : null}
-        </nav>
-      )}
+          </p>
+        </>
+      ) : null}
     </div>
   );
 }

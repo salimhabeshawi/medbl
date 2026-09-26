@@ -44,6 +44,11 @@ type CategoryRecord = {
   name_en: string | null;
 };
 
+// How many most-favorited poems the home page's "Featured poems" section shows.
+// get_featured_poems() also excludes disputed poems (see AGENTS.md), so fewer
+// rows can come back when a favorite has been disputed.
+const FEATURED_POEMS_LIMIT = 5;
+
 async function getFeaturedPoets(
   supabase: Awaited<ReturnType<typeof createClient>>,
 ): Promise<FeaturedPoet[]> {
@@ -103,7 +108,7 @@ export default async function Home() {
       .order("created_at", { ascending: false })
       .limit(6),
     getFeaturedPoets(supabase),
-    supabase.rpc("get_featured_poems", { p_limit: 5 }),
+    supabase.rpc("get_featured_poems", { p_limit: FEATURED_POEMS_LIMIT }),
     supabase.from("categories").select("id, name_am, name_en").order("name_am"),
     supabase.from("poems").select("tags").neq("attribution_status", "disputed"),
   ]);

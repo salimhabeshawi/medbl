@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FavoriteToggle } from "@/components/favorite-toggle";
-import { DisputedTag } from "@/components/disputed-tag";
+import { AttributionBadge } from "@/components/attribution-badge";
 import { PoemViewCount } from "@/components/poem-view-count";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -55,12 +55,9 @@ export function PoemCard({
     ? poem.category
     : null;
 
-  const renderAttribution = (status?: string) => {
-    if (status === "disputed") return <DisputedTag />;
-    if (status === "verified") return <Badge variant="default">{tPoems("verifiedBadge")}</Badge>;
-    if (status === "community") return <Badge variant="secondary">{tPoems("communityBadge")}</Badge>;
-    return null;
-  };
+  const renderAttribution = (status?: string) => (
+    <AttributionBadge status={status} />
+  );
 
   return (
     <Card className="content-card relative border-border bg-card shadow-none">

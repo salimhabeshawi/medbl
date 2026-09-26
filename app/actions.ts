@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ecToGc } from "@/lib/calendar";
 
 // Translate raw Supabase Auth errors into plain language before showing
 // them to users. Unknown errors fall through unchanged.
@@ -360,8 +361,18 @@ export async function submitPoem(
   const sourceInput = String(formData.get("source") ?? "").trim();
   const source = sourceInput || (isOwnSubmission ? "Personal knowledge" : "");
 
-  if (categoryId) {
-    const { data: category } = await supabase.from("categories").select("id").eq("id", categoryId).maybeSingle();
+  // Category is mandatory on every submission (poem_submissions.category_id
+  // is NOT NULL) — re-validated here so the constraint message never reaches
+  // the user raw.
+  if (!categoryId) {
+    return { error: "Please choose a category for this poem." };
+  }
+  {
+    const { data: category } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("id", categoryId)
+      .maybeSingle();
     if (!category) return { error: "Please choose a category from the list." };
   }
 
@@ -422,7 +433,7 @@ export async function submitPoem(
     proposed_poet_bio: proposedBio || null,
     title,
     body,
-    category_id: categoryId || null,
+    category_id: categoryId,
     tags,
     source,
   });
@@ -453,11 +464,14 @@ function buildEditableUpdates(formData: FormData): {
   if (!title) return { error: "Title is required." };
   if (!body.trim()) return { error: "Poem text is required." };
   if (!source) return { error: "Source is required." };
+  // poem_submissions.category_id is NOT NULL — the moderator review form shows
+  // the submission's current category, so this only fires if it was cleared.
+  if (!categoryId) return { error: "Category is required." };
 
   const updates: Record<string, unknown> = {
     title,
     body,
-    category_id: categoryId || null,
+    category_id: categoryId,
     tags: tagsRaw
       ? [
           ...new Set(
@@ -907,7 +921,9 @@ export async function savePoetProfile(
     if (!Number.isInteger(n) || n < 1000 || n > new Date().getFullYear()) {
       return { error: "Birth year must be a valid year." };
     }
-    birthYear = n;
+    // The user inputs an Ethiopian calendar (EC) year. Convert it to a single
+    // Gregorian year integer (GC = EC + 8) for database storage.
+    birthYear = ecToGc(n);
   }
 
   const { data: poetId, error } = await supabase.rpc("upsert_my_poet_profile", {

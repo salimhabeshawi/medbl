@@ -159,7 +159,9 @@ Registry of poets. A poet row can originate from three paths:
 - `name_en` (transliteration, optional)
 - `bio`
 - `birth_year` (nullable integer; both the profile form and
-  `upsert_my_poet_profile()` handle only birth year, no death year)
+  `upsert_my_poet_profile()` handle only birth year, no death year. Stored as
+  a Gregorian year even though the UI collects and displays it as an Ethiopian
+  year via the EC+8/GC-8 approximation)
 - `verified` (bool) — only set true by a moderator/admin action
 - `created_by` (user id, nullable)
 - `created_at`
@@ -182,8 +184,16 @@ Where all new poems land first. Nothing here is public until approved.
 - Exactly one of `poet_id` or `proposed_poet_name_am` must be set —
   enforced by a check constraint (`poem_submissions_poet_xor`)
 - `title`, `body`, `tags`
-- `category_id` (nullable FK to `categories`) — set on insert from the
-  category picker
+- `category_id` (FK to `categories`, NOT NULL) — mandatory on every
+  submission. The submit form (both the "my own poem" and "another
+  poet's poem" paths) blocks submission with an inline validation
+  message when no category is chosen, and `submitPoem()` re-checks it
+  server-side. Submissions that predated the categories feature were
+  backfilled onto the `Uncategorized` / `ያልተመደበ` fallback category
+  before the constraint was applied (migration
+  `20260926000000_submission_category_required.sql`). `poems.category_id`
+  deliberately stays nullable — historical published poems may predate
+  categories and there is no retroactive fix for the archive.
 - `source` (required — provenance of the poem; also doubles as
   provenance for a proposed poet, if applicable)
 - `status`: `pending` | `approved` | `rejected`
@@ -367,6 +377,11 @@ browse/search. Moderators, from a report card, can:
 - `/moderate/reports` — resolve reports; dispute / republish / remove
   poem actions.
 - `/terms`, `/privacy` — legal pages, linked from footer/signup/submit.
+- `app/not-found.tsx` — themed 404 page (warm palette tokens + shadcn
+  Card/Button, bilingual via the `NotFound` messages namespace, always
+  rendered inside the normal header/footer chrome). Shown for
+  unmatched routes and for `notFound()` calls (e.g. unknown
+  `/poems/[id]` or `/poets/[id]`).
 - `app/manifest.ts` — PWA web manifest (installable app;
   `install-app-prompt.tsx` shows the install banner).
 
@@ -527,6 +542,41 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
     `/poems/[id]` request, eye icon + count displayed to the left of the
     favorite count on poem cards and the poem detail page;
     `get_featured_poems` returns the count) — done
+21. Display/layout fixes: poet detail page's poem list is now the same
+    three-column grid as home/`/poems`; the poem number on `/poems/[id]`
+    is a large Lora focal element above the title (cards keep their
+    small "#N" badge); the verified/community/disputed attribution
+    badges (poem cards + poem detail) carry a muted lucide `Info` icon
+    with a shadcn `Tooltip` explaining the tag
+    (`verifiedTooltip`/`communityTooltip`/`disputedTooltip` in both
+    message files — the Amharic drafts are flagged for review in
+    `messages/am.json`); `/poems` now lists ALL published poems
+    (disputed included, per the "Disputed poems" flow) at 12 per page
+    with the shadcn `Pagination` component, `?page=` URL state that
+    preserves `q`/`category`/`tag`, an exact total count, and a
+    `app/poems/loading.tsx` shadcn `Skeleton` placeholder; home
+    "Featured poems" requests the top 5 via
+    `FEATURED_POEMS_LIMIT` — done
+22. Mandatory submission category + per-list filters: `poem_submissions.category_id`
+    is now NOT NULL (new `Uncategorized`/`ያልተመደበ` fallback category,
+    backfill of legacy nulls, then the constraint — applied live via
+    `supabase db push`; `poems.category_id` stays nullable); the category
+    select is required on both `/submit` paths with an inline error and is
+    re-validated in `submitPoem()`; `/my-submissions` and `/favorites`
+    gained combinable category + poet filters
+    (`components/list-filters.tsx`, shadcn `Select`, options built only from
+    the signed-in user's own rows via `lib/filter-options.ts`,
+    `?category=`/`?poet=` URL state that preserves existing params, and a
+    "Clear filters" control) — done
+23. Ethiopian calendar birth year input and dual-year Gregorian display:
+    `poets.birth_year` remains a Gregorian integer column in the database;
+    `lib/calendar.ts` encapsulates day-level approximation conversions
+    (`ecToGc`, `gcToEc`, `formatEcAsGcRange`, `formatStoredGcYearDisplay`);
+    the profile form accepts Ethiopian Calendar input labeled "Birth year (E.C)" /
+    "የትውልድ ዓመት (ኢ.አ)" with a live dual-year Gregorian preview
+    (e.g. `2018` shows `2025/26 gc`), converts to Gregorian integer on save, and
+    converts back to Ethiopian year on load; read-only display on `/poets/[id]`
+    shows the derived Ethiopian year with the dual-year Gregorian range — done
 
 ## Guidelines for future changes
 

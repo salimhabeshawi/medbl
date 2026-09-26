@@ -34,6 +34,8 @@ export function SubmitPoemForm({
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [source, setSource] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [clientError, setClientError] = useState<string | null>(null);
 
   function clearProposal() {
@@ -72,7 +74,16 @@ export function SubmitPoemForm({
       setClientError(tSubmit("poetSelectionConflict"));
       return;
     }
+    // Category is mandatory (poem_submissions.category_id is NOT NULL) — same
+    // rule on both submission paths, with the message shown by the field.
+    if (!categoryId) {
+      e.preventDefault();
+      setClientError(null);
+      setCategoryError(tSubmit("categoryRequired"));
+      return;
+    }
     setClientError(null);
+    setCategoryError(null);
   }
 
   if (state.success) {
@@ -200,8 +211,22 @@ export function SubmitPoemForm({
             <label className="space-y-2 text-sm font-medium mt-4">
               <span>{tSubmit("category")}</span>
               <div className="mt-2">
-                <CategorySelect categories={categories} />
+                <CategorySelect
+                  categories={categories}
+                  required
+                  invalid={Boolean(categoryError)}
+                  value={categoryId}
+                  onValueChange={(next) => {
+                    setCategoryId(next);
+                    setCategoryError(null);
+                  }}
+                />
               </div>
+              {categoryError ? (
+                <p className="font-normal text-destructive" role="alert">
+                  {categoryError}
+                </p>
+              ) : null}
             </label>
             <label className="space-y-2 text-sm font-medium mt-4">
               <span>{tSubmit("tags")}</span>

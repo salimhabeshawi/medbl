@@ -6,6 +6,7 @@ import { firstRelation } from "@/lib/relations";
 import { getFavoriteCounts } from "@/lib/favorites";
 import { PoemActions } from "@/components/poem-actions";
 import { ReportPoem } from "@/components/report-poem";
+import { AttributionBadge } from "@/components/attribution-badge";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -107,12 +108,22 @@ export default async function PoemPage({
         <CardHeader className="gap-5 border-b border-border bg-accent/45 px-5 py-5 sm:px-8 sm:py-7">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <CardTitle className="mb-2 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
-                {typeof poem.poem_number === "number" ? (
-                  <span className="mr-2 font-sans text-base font-normal tabular-nums text-muted-foreground">
-                    #{poem.poem_number}
+              {/* The poem number is a large focal element here; cards keep the
+                  small "#N" badge treatment. */}
+              {typeof poem.poem_number === "number" ? (
+                <p
+                  className="mb-2 flex items-baseline gap-1 font-serif font-bold leading-none tracking-tight text-primary"
+                  aria-label={`#${poem.poem_number}`}
+                >
+                  <span aria-hidden="true" className="text-2xl sm:text-3xl">
+                    #
                   </span>
-                ) : null}
+                  <span className="text-5xl tabular-nums sm:text-6xl">
+                    {poem.poem_number}
+                  </span>
+                </p>
+              ) : null}
+              <CardTitle className="mb-2 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
                 {poem.title}
               </CardTitle>
               {poet?.name_am || poet?.name_en ? (
@@ -140,13 +151,7 @@ export default async function PoemPage({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {poem.attribution_status === "disputed" ? (
-              <Badge variant="destructive">{tPoems("disputedBadge")}</Badge>
-            ) : poem.attribution_status === "community" ? (
-              <Badge variant="secondary">{tPoems("communityBadge")}</Badge>
-            ) : (
-              <Badge>{tPoems("verifiedBadge")}</Badge>
-            )}
+            <AttributionBadge status={poem.attribution_status} />
             {category && categoryLabel ? (
               <Badge asChild variant="outline">
                 <Link href={`/poems?category=${category.id}`}>

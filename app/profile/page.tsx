@@ -9,6 +9,7 @@ import { ChangePasswordForm } from "@/components/change-password-form";
 import { UserRound, LockKeyhole } from "lucide-react";
 import { BackLink } from "@/components/back-link";
 import { getTranslations } from "next-intl/server";
+import { gcToEc } from "@/lib/calendar";
 
 export const metadata: Metadata = { title: "Your profile" };
 
@@ -110,7 +111,8 @@ export default async function ProfilePage({
           initial={{
             nameAm: poet?.name_am ?? "",
             nameEn: poet?.name_en ?? "",
-            birthYear: poet?.birth_year != null ? String(poet.birth_year) : "",
+            birthYear:
+              poet?.birth_year != null ? String(gcToEc(poet.birth_year)) : "",
             bio: poet?.bio ?? "",
           }}
           linked={Boolean(profile?.poet_id)}

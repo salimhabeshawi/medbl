@@ -26,6 +26,19 @@
     "noResultsTitle": "No matching poems found",
     "noResultsDesc": "Try adjusting your query or filters."
   },
+  "Filters": {
+    "filterCategory": "Filter by category",
+    "filterPoet": "Filter by poet",
+    "allCategories": "All categories",
+    "allPoets": "All poets",
+    "clearFilters": "Clear filters"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "backHome": "Back to home",
+    "browsePoems": "Browse poems"
+  },
   "Home": {
     "heroTitle": "Discover, read & share Amharic poetry",
     "heroSubtitle": "A community-curated library of classic and contemporary verse.",
@@ -100,7 +113,10 @@
     "favoriteRemoveLabel": "Remove from favorites",
     "favoriteAddTooltip": "Add favorite",
     "favoriteRemoveTooltip": "Remove favorite",
-    "likesCount": "{count} likes"
+    "likesCount": "{count} likes",
+    "verifiedTooltip": "This poem's attribution has been confirmed by a moderator against a reliable source.",
+    "communityTooltip": "This poem's attribution was accepted by a moderator but not independently verified against a reliable source.",
+    "disputedTooltip": "This poem's attribution has been disputed and is currently under review by moderators."
   },
   "Submit": {
     "title": "Submit a Poem",
@@ -151,7 +167,9 @@
     "tagPlaceholder": "Type a tag, then press space",
     "addTag": "Add tag",
     "poetSelectionRequired": "Please select an existing poet, or add new poet details below the search box.",
-    "poetSelectionConflict": "Either select an existing poet or propose a new one — not both."
+    "poetSelectionConflict": "Either select an existing poet or propose a new one — not both.",
+    "categoryRequired": "Please choose a category for this poem.",
+    "categoryInvalid": "Please choose a category from the list."
   },
   "Favorites": {
     "title": "Favorite Poems",
@@ -182,7 +200,9 @@
     "proposedPoet": "Proposed new poet: {name}",
     "unknownPoet": "Unknown poet",
     "reason": "Reason",
-    "back": "Back to home"
+    "back": "Back to home",
+    "noMatchTitle": "No submissions match your filters",
+    "noMatchDesc": "Try clearing a filter or choosing a different value."
   },
   "Profile": {
     "title": "Your Profile",
@@ -193,7 +213,7 @@
     "nameAmPlaceholder": "e.g. ከበደ ሚካኤል",
     "nameEnLabel": "Name in English / Transliteration",
     "nameEnPlaceholder": "e.g. Kebede Mikael",
-    "birthYearLabel": "Birth Year (Optional)",
+    "birthYearLabel": "Birth year (E.C)",
     "deathYearLabel": "Death Year (Optional)",
     "bioLabel": "Biography (Optional)",
     "bioPlaceholder": "Share a short bio...",

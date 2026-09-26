@@ -6,10 +6,18 @@ import { FavoriteRow } from "@/components/favorite-row";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
 import { getFavoriteCounts } from "@/lib/favorites";
+import { optionList, type ListFilterOption } from "@/lib/filter-options";
+import { ListFilters } from "@/components/list-filters";
 import { BackLink } from "@/components/back-link";
 import { getLocale, getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = { title: "My favorites" };
+
+type CategoryRow = {
+  id: string;
+  name_am: string | null;
+  name_en: string | null;
+};
 
 type PoemRow = {
   id: string;
@@ -18,27 +26,37 @@ type PoemRow = {
   category_id: string | null;
   poem_number: number | null;
   view_count: number | null;
-  categories: { name_am: string | null; name_en: string | null }[] | null;
+  categories: CategoryRow[] | null;
   tags: string[] | null;
   poets:
-    | { name_am: string; name_en: string }[]
-    | { name_am: string; name_en: string }
+    | { id: string; name_am: string; name_en: string }[]
+    | { id: string; name_am: string; name_en: string }
     | null;
 };
 
-type PoetRow = { name_am: string; name_en: string };
+type PoetRow = { id: string; name_am: string; name_en: string };
 type FavoriteDisplayRow = {
   poem: Omit<PoemRow, "category"> & { category: string | null };
   poet: PoetRow | null;
 };
 
+function param(value?: string | string[]): string {
+  return (Array.isArray(value) ? value[0] : value) ?? "";
+}
+
 export default async function FavoritesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string | string[] }>;
+  searchParams: Promise<{
+    q?: string | string[];
+    category?: string | string[];
+    poet?: string | string[];
+  }>;
 }) {
   const params = await searchParams;
-  const q = (Array.isArray(params.q) ? params.q[0] : params.q ?? "").trim().toLocaleLowerCase();
+  const q = param(params.q).trim().toLocaleLowerCase();
+  const category = param(params.category);
+  const poet = param(params.poet);
   const locale = await getLocale();
   const tFav = await getTranslations("Favorites");
   const supabase = await createClient();
@@ -51,7 +69,7 @@ export default async function FavoritesPage({
   const { data: favorites, error } = await supabase
     .from("favorites")
     .select(
-      "id, poem_id, created_at, poems(id, title, body, category_id, poem_number, view_count, categories(name_am, name_en), tags, poets(name_am, name_en))",
+      "id, poem_id, created_at, poems(id, title, body, category_id, poem_number, view_count, categories(id, name_am, name_en), tags, poets(id, name_am, name_en))",
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
@@ -61,21 +79,45 @@ export default async function FavoritesPage({
       const poem = firstRelation<PoemRow>(fav.poems);
       if (!poem) return null;
       const poet = firstRelation<PoetRow>(poem.poets) ?? null;
-      const category = firstRelation<{ name_am: string | null; name_en: string | null }>(poem.categories);
-      return { poem: { ...poem, category: locale === "am" ? category?.name_am || category?.name_en || null : category?.name_en || category?.name_am || null }, poet } satisfies FavoriteDisplayRow;
+      const categoryRow = firstRelation<CategoryRow>(poem.categories);
+      return { poem: { ...poem, category: locale === "am" ? categoryRow?.name_am || categoryRow?.name_en || null : categoryRow?.name_en || categoryRow?.name_am || null }, poet } satisfies FavoriteDisplayRow;
     })
     .filter(
       (row): row is FavoriteDisplayRow => row !== null,
     );
-  const filteredRows = q
-    ? rows.filter(({ poem, poet }) =>
-        [poem.title, ...(poem.tags ?? []), poet?.name_am, poet?.name_en]
-          .filter(Boolean)
-          .join(" ")
-          .toLocaleLowerCase()
-          .includes(q),
-      )
-    : rows;
+
+  // Filter options come from THIS user's favorites only — never the site-wide
+  // category/poet registries.
+  const categoryOptions: ListFilterOption[] = optionList(
+    rows.map(({ poem }) =>
+      poem.category_id
+        ? { id: poem.category_id, label: poem.category ?? poem.category_id }
+        : null,
+    ),
+  );
+  const poetOptions: ListFilterOption[] = optionList(
+    rows.map(({ poet }) =>
+      poet ? { id: poet.id, label: poet.name_am || poet.name_en } : null,
+    ),
+  );
+
+  // Category and poet filters combine (category AND poet), and both stack on
+  // top of the client-side text search. Filter state lives in the URL.
+  const filteredRows = rows
+    .filter(
+      (row) =>
+        (!category || row.poem.category_id === category) &&
+        (!poet || row.poet?.id === poet),
+    )
+    .filter(({ poem, poet }) =>
+      q
+        ? [poem.title, ...(poem.tags ?? []), poet?.name_am, poet?.name_en]
+            .filter(Boolean)
+            .join(" ")
+            .toLocaleLowerCase()
+            .includes(q)
+        : true,
+    );
   const favoriteCounts = await getFavoriteCounts(rows.map((row) => row.poem.id));
 
   return (
@@ -86,14 +128,26 @@ export default async function FavoritesPage({
 
       {error ? (
         <EmptyState title={tFav("errorTitle")} description={tFav("errorDesc")} />
-      ) : filteredRows.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredRows.map((row) => (
-            <FavoriteRow key={row.poem.id} poem={row.poem} poet={row.poet} favoriteCount={favoriteCounts.get(row.poem.id) ?? 0} viewCount={row.poem.view_count ?? 0} />
-          ))}
-        </div>
+      ) : rows.length === 0 ? (
+        <EmptyState title={tFav("emptyTitle")} description={tFav("emptyDesc")} />
       ) : (
-        <EmptyState title={q ? tFav("noMatchTitle") : tFav("emptyTitle")} description={q ? tFav("noMatchDesc") : tFav("emptyDesc")} />
+        <>
+          <ListFilters
+            categoryOptions={categoryOptions}
+            poetOptions={poetOptions}
+            categoryValue={category}
+            poetValue={poet}
+          />
+          {filteredRows.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredRows.map((row) => (
+                <FavoriteRow key={row.poem.id} poem={row.poem} poet={row.poet} favoriteCount={favoriteCounts.get(row.poem.id) ?? 0} viewCount={row.poem.view_count ?? 0} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState title={tFav("noMatchTitle")} description={tFav("noMatchDesc")} />
+          )}
+        </>
       )}
     </div>
   );
