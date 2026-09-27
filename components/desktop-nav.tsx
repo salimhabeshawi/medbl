@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ModerationDot } from "./moderation-dot";
 
 type LinkDef = {
   href: string;
   label: string;
+  dot?: boolean;
 };
 
 function isActive(pathname: string, href: string) {
@@ -30,11 +32,12 @@ export function DesktopNav({ links }: { links: LinkDef[] }) {
             href={link.href}
             className={
               active
-                ? "text-primary transition hover:text-primary/80"
-                : "transition hover:text-primary"
+                ? "inline-flex items-center gap-1.5 text-primary transition hover:text-primary/80"
+                : "inline-flex items-center gap-1.5 transition hover:text-primary"
             }
           >
             {link.label}
+            {link.dot ? <ModerationDot /> : null}
           </Link>
         );
       })}

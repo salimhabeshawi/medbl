@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/actions";
+import { ModerationDot } from "@/components/moderation-dot";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,8 @@ import { useTranslations } from "next-intl";
 type LinkDef = {
   href: string;
   label: string;
+  /** Staff-only: render the pending-moderation dot next to the label. */
+  dot?: boolean;
   icon:
     | "home"
     | "poems"
@@ -129,6 +132,7 @@ export function MobileNav({
                 >
                   <Icon className="size-4 text-primary" aria-hidden="true" />
                   {link.label}
+                  {link.dot ? <ModerationDot /> : null}
                 </Link>
               </SheetClose>
             );

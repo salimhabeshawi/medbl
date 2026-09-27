@@ -310,6 +310,14 @@ inside and are revoked from `public` / granted to specific roles.
   select from `reports` directly). Authenticated only.
 - `delete_category(p_category_id)` — staff-only; refuses while the
   category is still referenced by a poem or submission.
+- `get_moderation_pending_counts()` — staff-only; returns one row of
+  two `bigint` totals (`pending_submissions`, `open_reports`) for the
+  header's notification dot. The body is gated on `where
+  public.is_staff()`, so a non-staff caller gets ZERO ROWS rather than
+  an error — callers must treat "no rows" as "nothing to show", never
+  as an error state. Deliberately exposes counts only, so the dot
+  never needs row-level access to the moderation queue. Authenticated
+  only (`anon` has no EXECUTE grant).
 
 ## Row-Level Security — key points (do not weaken any of these)
 
@@ -671,6 +679,35 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
     policy in migration
     `20260927010000_report_cancel_policy.sql`, applied live via
     `supabase db push` and verified against the live database — done
+27. Pending-moderation notification dot: the staff-only security-definer
+    RPC `get_moderation_pending_counts()` (migration
+    `20260927020000_moderation_pending_counts.sql`) returns one row of two
+    `bigint` totals — `pending_submissions` and `open_reports` — so the
+    header can show a dot without exposing the moderation queue itself.
+    Its body is gated on `where public.is_staff()`, so a non-staff caller
+    gets ZERO ROWS rather than an error; `anon` has no EXECUTE grant at
+    all. `getModerationPendingCounts()` / `hasPendingModeration()` in
+    `lib/moderation.ts` wrap the call, and the site header fetches it
+    server-side right after the role check that decides whether the
+    Moderation link renders at all — so signed-out visitors and members
+    cost zero extra queries. The dot itself is the new
+    `components/moderation-dot.tsx` (a `destructive`-token filled circle
+    plus `sr-only` text, `Nav.moderationPending` in both message files),
+    rendered by both `desktop-nav.tsx` and `mobile-nav.tsx` from a `dot`
+    flag on the nav link. Presence only, no count, and deliberately no
+    seen/unseen tracking — it mirrors current totals, so it stays visible
+    while work remains even after the moderator opens `/moderate`. No
+    polling: it reflects the totals as of the current render, and every
+    action that moves those totals (`approveSubmission`,
+    `rejectSubmission`, `markReportDisputed`, `republishDisputedPoem`,
+    `removeDisputedPoem`, `submitPoem`, `cancelMySubmission`,
+    `reportPoem`, `cancelMyReport`) additionally calls
+    `revalidatePath("/", "layout")` so the header refreshes immediately
+    — the dot lives in the root layout, which the path-scoped
+    `revalidatePath` calls alone would not touch. Migration applied
+    live via `supabase db push` and verified against the live database
+    (anon denied, member returns zero rows, moderator returns the real
+    totals) — done
 
 ## Guidelines for future changes
 

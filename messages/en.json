@@ -17,7 +17,8 @@
     "menu": "Menu",
     "accountMenu": "Account menu",
     "signedIn": "Signed in",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "moderationPending": "Items awaiting moderation"
   },
   "Search": {
     "placeholder": "Search poems, poets, categories...",

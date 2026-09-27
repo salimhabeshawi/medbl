@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { getCurrentUserWithRole, isModerator } from "@/lib/moderation";
+import {
+  getCurrentUserWithRole,
+  getModerationPendingCounts,
+  hasPendingModeration,
+  isModerator,
+} from "@/lib/moderation";
 import { DesktopNav } from "./desktop-nav";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
@@ -23,6 +28,8 @@ type NavLink = {
   href: string;
   label: string;
   icon: NavIcon;
+  /** Staff-only: render the pending-moderation dot next to the label. */
+  dot?: boolean;
 };
 
 export async function SiteHeader() {
@@ -30,6 +37,15 @@ export async function SiteHeader() {
   const isStaff = user ? isModerator(user.role) : false;
   const role = user?.role ?? null;
   const tNav = await getTranslations("Nav");
+
+  // Fetched here, next to the role check that decides whether the Moderation
+  // link renders at all, so the dot costs one staff-only RPC on page load and
+  // nothing at all for signed-out visitors and members. No polling: it simply
+  // reflects the totals as of this render. Moderation actions revalidate the
+  // root layout, so it also refreshes right after a review.
+  const showModerationDot = isStaff
+    ? hasPendingModeration(await getModerationPendingCounts())
+    : false;
 
   const links: NavLink[] = [
     { href: "/", label: tNav("home"), icon: "home" },
@@ -53,6 +69,7 @@ export async function SiteHeader() {
             href: "/moderate",
             label: tNav("moderate"),
             icon: "moderate" as const,
+            dot: showModerationDot,
           },
         ]
       : []),
@@ -77,6 +94,7 @@ export async function SiteHeader() {
             href: "/moderate",
             label: tNav("moderate"),
             icon: "moderate" as const,
+            dot: showModerationDot,
           },
         ]
       : []),

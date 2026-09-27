@@ -17,7 +17,9 @@
     "menu": "ማውጫ",
     "accountMenu": "የመለያ ማውጫ",
     "signedIn": "ገብተዋል",
-    "closeMenu": "ማውጫ ዝጋ"
+    "closeMenu": "ማውጫ ዝጋ",
+    "_moderationPendingNote": "DRAFT TRANSLATION — \"moderationPending\" is the screen-reader text for the pending-moderation dot on the Moderation nav link; a native Amharic speaker should review the wording. JSON has no comment syntax, so this note lives as an unused key instead.",
+    "moderationPending": "በቁጥጥር የሚጠብቁ ሥራዎች አሉ"
   },
   "Search": {
     "placeholder": "ግጥሞችን፣ ገጣሚያንን ወይም መደቦችን ፈልግ...",

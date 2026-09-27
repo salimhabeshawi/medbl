@@ -456,6 +456,8 @@ export async function submitPoem(
   if (error) {
     return { error: "Could not submit your poem. Please try again." };
   }
+  // A new pending row changes the totals behind the header's moderation dot.
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -672,6 +674,8 @@ export async function cancelMySubmission(
   }
 
   revalidatePath("/my-submissions");
+  // Cancelling removes a pending row, so the header's moderation dot changes.
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -780,6 +784,9 @@ export async function approveSubmission(
 
   revalidatePath("/moderate/submissions");
   revalidatePath("/moderate");
+  // The header's pending-moderation dot is rendered in the root layout, so the
+  // queue counts it reads only refresh when the layout itself is revalidated.
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -823,6 +830,7 @@ export async function rejectSubmission(
 
   revalidatePath("/moderate/submissions");
   revalidatePath("/moderate");
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -932,6 +940,7 @@ export async function markReportDisputed(
   revalidatePath("/moderate");
   revalidatePath("/poems");
   revalidatePath("/");
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -1001,6 +1010,7 @@ export async function republishDisputedPoem(
   revalidatePath("/moderate");
   revalidatePath("/poems");
   revalidatePath("/");
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -1059,9 +1069,13 @@ export async function removeDisputedPoem(
     return { error: `Could not remove the poem: ${deleteError.message}` };
   }
 
+  // Favorites and reports cascade-delete with the poem, so this can clear
+  // open_reports too.
   revalidatePath("/moderate");
   revalidatePath("/poems");
   revalidatePath("/");
+  // The header's pending-moderation dot lives in the root layout.
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -1109,6 +1123,8 @@ export async function reportPoem(
     }
     return { error: "Could not submit your report. Please try again." };
   }
+  // An open report is one half of what the header's moderation dot counts.
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
@@ -1153,6 +1169,8 @@ export async function cancelMyReport(
   }
 
   revalidatePath(`/poems/${poemId}`);
+  // Withdrawing removes an open report, so the header's moderation dot changes.
+  revalidatePath("/", "layout");
   return { success: true };
 }
 
