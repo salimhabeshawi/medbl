@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/favorites";
 import { SubmitPoemForm } from "@/components/submit-poem-form";
 import { OwnPoemForm } from "@/components/own-poem-form";
-import { ArrowLeft, BookOpen, Feather, ShieldCheck } from "lucide-react";
+import { BookOpen, Feather, ShieldCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BackLink } from "@/components/back-link";
 import { type CategorySelectRecord } from "@/components/category-select";
@@ -62,16 +62,21 @@ export default async function SubmitPage({
           </p>
         </div>
         <OwnPoemForm poetId={poetId} categories={categories} />
-        <p className="mt-6 text-sm">
-          <Link href="/submit" className="inline-flex items-center gap-2 font-medium text-primary hover:underline">
-            <ArrowLeft className="size-4" /> {tSubmit("anotherPoetPoem")}
-          </Link>
-        </p>
       </div>
     );
   }
 
   if (type === "other") {
+    // The seeded system "Folk poetry" poet is the default attribution for
+    // poems of unknown authorship. Looked up by name (never by a hardcoded id)
+    // because ids differ between environments. If the seed is somehow missing,
+    // the form simply starts with nothing selected and requires a choice.
+    const { data: folkPoet } = await supabase
+      .from("poets")
+      .select("id, name_am, name_en")
+      .eq("name_en", "Folk poetry")
+      .maybeSingle();
+
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         <BackLink href="/submit">{tSubmit("selectPath")}</BackLink>
@@ -81,12 +86,7 @@ export default async function SubmitPage({
             {tSubmit("subtitle")}
           </p>
         </div>
-        <SubmitPoemForm categories={categories} />
-        <p className="mt-6 text-sm">
-          <Link href="/submit" className="inline-flex items-center gap-2 font-medium text-primary hover:underline">
-            <ArrowLeft className="size-4" /> {tSubmit("myOwnPoem")}
-          </Link>
-        </p>
+        <SubmitPoemForm categories={categories} defaultPoet={folkPoet ?? null} />
       </div>
     );
   }

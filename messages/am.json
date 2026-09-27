@@ -139,8 +139,11 @@
     "tagsPlaceholder": "መለያዎችን ያክሉ (ምሳሌ፦ ቅኔ፣ ፍቅር፣ ትዝብት)",
     "source": "ምንጭ / መገኛ",
     "sourcePlaceholder": "ይህንን ግጥም ከየት አገኙት? (የመጽሐፍ ርዕስ፣ ከአፍ የተወሰደ፣ በራስ የተጻፈ...)",
+    "ownSourceValue": "የግል እውቀት",
+    "ownSourceFixedNote": "በዚህ መንገድ ላይ ቋሚ የተለጠፈ ነው — ግጥሙ የራስዎ ስለሆነ የውጭ ምንጭ የለም.",
     "poetSelection": "ገጣሚ መምረጫ",
     "searchPoetPlaceholder": "ነባር ገጣሚ በስም ፈልግ...",
+    "folkPoetDefaultNote": "ለማይታወቁ ያልታወቀ ግጥሞች \"የህዝብ ግጥም\" በነባር ተመርጧል። ለመተካት ገጣሚ ይፈልጉ።",
     "proposePoetToggle": "ገጣሚውን አላገኙትም? የአዲስ ገጣሚ መረጃ ያክሉ",
     "proposedNameAm": "የገጣሚው የአማርኛ ስም",
     "proposedNameAmPlaceholder": "ምሳሌ፦ ሳሊም አህመድ",
@@ -152,6 +155,7 @@
     "submitting": "እየተላከ ነው...",
     "successTitle": "ግጥሙ ተልኳል!",
     "successDesc": "ግጥምዎ ለግምገማ ወደ ቁጥጥር ክፍሉ ተልኳል።",
+    "viewMySubmission": "ግጥምዎን ይመልከቱ",
     "termsNotice": "በማስገባትዎ ይህ ይዘት የአገልግሎት ውሎቻችንን እንደሚከተል ያረጋግጣሉ።",
     "backToOptions": "ወደ ማስገቢያ አማራጮች ተመለስ",
     "switchToOther": "ይህ የሌላ ገጣሚ ግጥም ነው",
@@ -170,7 +174,8 @@
     "poetSelectionRequired": "ነባር ገጣሚ ይምረጡ፣ ወይም ከፍለጋ ሳጥኑ በታች አዲስ ሰው ያክሉ።",
     "poetSelectionConflict": "ነባር ገጣሚ ወይም አዲስ አቅርቡ — ሁለቱንም አይሆንም።",
     "categoryRequired": "እባክዎ ለዚህ ግጥም መደብ ይምረጡ።",
-    "categoryInvalid": "እባክዎ ከዝርዝሩ ውስጥ መደብ ይምረጡ።"
+    "categoryInvalid": "እባክዎ ከዝርዝሩ ውስጥ መደብ ይምረጡ።",
+    "ownAttributionFixedNote": "ይህ የራስዎ ግጥም ስለሆነ ገጣሙና ምንጩ ቋሚ ሆነው እዚህ ላይ መቀየር አይችሉም።"
   },
   "Favorites": {
     "title": "የወደድኳቸው ግጥሞች",
@@ -203,7 +208,16 @@
     "reason": "ምክንያት",
     "back": "ወደ መነሻ ተመለስ",
     "noMatchTitle": "ከማጣሪያዎ ጋር የሚመሳሰል የቀረበ ግጥም የለም",
-    "noMatchDesc": "ማጣሪያውን ማጽዳት ወይም ሌላ እሴት መምረጥ ይሞክሩ።"
+    "noMatchDesc": "ማጣሪያውን ማጽዳት ወይም ሌላ እሴት መምረጥ ይሞክሩ።",
+    "editSubmission": "ግጥሙን አስተካክል",
+    "cancelSubmission": "ግጥሙን ተቀርስ",
+    "editTitle": "የቀረቡትን ግጥም አስተካክል",
+    "editDesc": "ይህን ግጥም ያሻሽሉ። በግምገማ ገብ ላይ ይቆያል — ከተገመገመበት በኋላ መቀየር አይችሉም።",
+    "cancelTitle": "ይህን ግጥም ተቀርስ?",
+    "cancelDesc": "በዚህ ጊዜ «{title}» ሙሉ በሙሉ ይጠፋል። ይህን መመለስ አይችሉም — ካለፈው ማንሰብና እንደገና ማስገባ ያስፈልጋል።",
+    "cancelConfirm": "ግጥሙን አጥፋ",
+    "cancelling": "በማጥፋት ላይ...",
+    "cancelled": "ግጥሙ ተጥፋል።"
   },
   "Profile": {
     "title": "የእርስዎ መገለጫ",

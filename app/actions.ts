@@ -334,6 +334,39 @@ export async function deleteCategory(formData: FormData): Promise<void> {
   revalidatePath("/submit");
 }
 
+// Tags reach the server as a single space-separated string (the hidden input
+// inside TagInput) and are stored as a deduplicated text[].
+function parseTags(raw: string): string[] | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  return [
+    ...new Set(
+      trimmed
+        .split(/\s+/)
+        .map((t) => t.trim())
+        .filter(Boolean),
+    ),
+  ];
+}
+
+// Every submission — new or edited — must name a category that actually exists:
+// the select is a free choice client-side and poem_submissions.category_id is
+// NOT NULL. Shared so both paths report the same plain-language message instead
+// of leaking the raw constraint error.
+async function validateCategory(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  categoryId: string,
+): Promise<string | null> {
+  if (!categoryId) return "Please choose a category for this poem.";
+  const { data: category } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("id", categoryId)
+    .maybeSingle();
+  if (!category) return "Please choose a category from the list.";
+  return null;
+}
+
 export async function submitPoem(
   _prevState: FormState,
   formData: FormData,
@@ -364,17 +397,8 @@ export async function submitPoem(
   // Category is mandatory on every submission (poem_submissions.category_id
   // is NOT NULL) — re-validated here so the constraint message never reaches
   // the user raw.
-  if (!categoryId) {
-    return { error: "Please choose a category for this poem." };
-  }
-  {
-    const { data: category } = await supabase
-      .from("categories")
-      .select("id")
-      .eq("id", categoryId)
-      .maybeSingle();
-    if (!category) return { error: "Please choose a category from the list." };
-  }
+  const categoryError = await validateCategory(supabase, categoryId);
+  if (categoryError) return { error: categoryError };
 
   // Mirror of the poem_submissions_poet_xor check constraint: exactly one
   // of an existing poet OR a proposed new poet.
@@ -414,16 +438,7 @@ export async function submitPoem(
     }
   }
 
-  const tags = tagsRaw
-    ? [
-        ...new Set(
-          tagsRaw
-            .split(/\s+/)
-            .map((t) => t.trim())
-            .filter(Boolean),
-        ),
-      ]
-    : null;
+  const tags = parseTags(tagsRaw);
 
   const { error } = await supabase.from("poem_submissions").insert({
     submitted_by: user.id,
@@ -441,6 +456,222 @@ export async function submitPoem(
   if (error) {
     return { error: "Could not submit your poem. Please try again." };
   }
+  return { success: true };
+}
+
+// ---------------------------------------------------------------------------
+// Editing / cancelling a pending submission (used by /my-submissions)
+// ---------------------------------------------------------------------------
+
+// Returns the stored row the caller is trying to change, or a user-facing
+// reason why they may not. RLS (`poem_submissions_update_own` /
+// `_delete_own`) is the real gate — this read only exists so the UI can show a
+// readable message instead of a raw "row-level security policy" error.
+async function loadOwnPendingSubmission(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  submissionId: string,
+): Promise<
+  | { ok: true; submission: { id: string; poet_id: string | null } }
+  | { ok: false; error: string }
+> {
+  if (!submissionId) return { ok: false, error: "Missing submission." };
+
+  const { data, error } = await supabase
+    .from("poem_submissions")
+    .select("id, poet_id, status")
+    .eq("id", submissionId)
+    .eq("submitted_by", userId)
+    .maybeSingle();
+
+  if (error) return { ok: false, error: "Could not load this submission." };
+  if (!data) return { ok: false, error: "This submission no longer exists." };
+  if (data.status !== "pending") {
+    return {
+      ok: false,
+      error:
+        "This submission can no longer be changed — a moderator has already reviewed it.",
+    };
+  }
+  return { ok: true, submission: { id: data.id, poet_id: data.poet_id } };
+}
+
+export async function updateMySubmission(
+  _prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const loaded = await loadOwnPendingSubmission(
+    supabase,
+    user.id,
+    String(formData.get("submission_id") ?? "").trim(),
+  );
+  if (!loaded.ok) return { error: loaded.error };
+  const { submission } = loaded;
+
+  const title = String(formData.get("title") ?? "").trim();
+  const body = String(formData.get("body") ?? "");
+  const categoryId = String(formData.get("category_id") ?? "").trim();
+  const tagsRaw = String(formData.get("tags") ?? "").trim();
+
+  if (!title) return { error: "Title is required." };
+  if (!body.trim()) return { error: "Poem text is required." };
+  const categoryError = await validateCategory(supabase, categoryId);
+  if (categoryError) return { error: categoryError };
+
+  // An "own poem" submission is attributed to the caller's own linked poet
+  // record. On that path the attribution and the fixed "Personal knowledge"
+  // source are both locked — exactly as on first submission — so neither is
+  // read from the form at all and the stored source is left untouched, even
+  // though the form still carries the hidden `source` input.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("poet_id")
+    .eq("id", user.id)
+    .maybeSingle();
+  const isOwnPoem =
+    Boolean(submission.poet_id) && submission.poet_id === profile?.poet_id;
+
+  const updates: Record<string, unknown> = {
+    title,
+    body,
+    category_id: categoryId,
+    tags: parseTags(tagsRaw),
+  };
+
+  if (!isOwnPoem) {
+    // "Another poet's poem": attribution is fully editable, including swapping
+    // an existing poet for a newly proposed one (and back again).
+    const poetId = String(formData.get("poet_id") ?? "").trim();
+    const proposedNameAm = String(
+      formData.get("proposed_poet_name_am") ?? "",
+    ).trim();
+    const proposedNameEn = String(
+      formData.get("proposed_poet_name_en") ?? "",
+    ).trim();
+    const proposedBio = String(formData.get("proposed_poet_bio") ?? "").trim();
+    const source = String(formData.get("source") ?? "").trim();
+
+    // Mirror of the poem_submissions_poet_xor check constraint: exactly one of
+    // an existing poet OR a proposed new poet.
+    if (!poetId && !proposedNameAm) {
+      return {
+        error:
+          "Please select an existing poet, or add new poet details below the search box.",
+      };
+    }
+    if (poetId && proposedNameAm) {
+      return {
+        error: "Either select an existing poet or propose a new one — not both.",
+      };
+    }
+    if (!source) {
+      return {
+        error:
+          "Source is required — it helps our moderators verify attribution.",
+      };
+    }
+    if (poetId) {
+      // The poet_id always comes from the search-and-select control, but we
+      // re-validate it server-side: it must reference an existing poet row.
+      const { data: poet } = await supabase
+        .from("poets")
+        .select("id")
+        .eq("id", poetId)
+        .maybeSingle();
+      if (!poet) {
+        return {
+          error:
+            "Selected poet no longer exists. Please pick one from the list again.",
+        };
+      }
+    }
+
+    // All four attribution fields are always written together, so switching
+    // between "existing poet" and "proposed poet" can never leave a stale value
+    // behind that would trip the XOR constraint.
+    updates.poet_id = poetId || null;
+    updates.proposed_poet_name_am = proposedNameAm || null;
+    updates.proposed_poet_name_en = proposedNameEn || null;
+    updates.proposed_poet_bio = proposedBio || null;
+    updates.source = source;
+  }
+
+  // `.eq("status", "pending")` sits on top of the RLS USING clause as a
+  // belt-and-braces guard: if a moderator approved or rejected the row between
+  // the read above and this write, the row is no longer selected and nothing
+  // changes. `status` itself is never written, so an edit always leaves the
+  // submission 'pending'.
+  const { data: updated, error } = await supabase
+    .from("poem_submissions")
+    .update(updates)
+    .eq("id", submission.id)
+    .eq("submitted_by", user.id)
+    .eq("status", "pending")
+    .select("id");
+
+  if (error) {
+    return {
+      error: error.message || "Could not save your changes. Please try again.",
+    };
+  }
+  if (!updated || updated.length === 0) {
+    return {
+      error:
+        "This submission can no longer be changed — a moderator has already reviewed it.",
+    };
+  }
+
+  revalidatePath("/my-submissions");
+  return { success: true };
+}
+
+export async function cancelMySubmission(
+  _prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const loaded = await loadOwnPendingSubmission(
+    supabase,
+    user.id,
+    String(formData.get("submission_id") ?? "").trim(),
+  );
+  if (!loaded.ok) return { error: loaded.error };
+
+  // Hard delete — there is deliberately no "cancelled" status. Authorized by
+  // poem_submissions_delete_own (own row AND still pending); the explicit
+  // filters turn a policy rejection into a clear message.
+  const { data: deleted, error } = await supabase
+    .from("poem_submissions")
+    .delete()
+    .eq("id", loaded.submission.id)
+    .eq("submitted_by", user.id)
+    .eq("status", "pending")
+    .select("id");
+
+  if (error) {
+    return { error: error.message || "Could not cancel this submission." };
+  }
+  if (!deleted || deleted.length === 0) {
+    return {
+      error:
+        "This submission can no longer be cancelled — a moderator has already reviewed it.",
+    };
+  }
+
+  revalidatePath("/my-submissions");
   return { success: true };
 }
 
@@ -472,16 +703,7 @@ function buildEditableUpdates(formData: FormData): {
     title,
     body,
     category_id: categoryId,
-    tags: tagsRaw
-      ? [
-          ...new Set(
-            tagsRaw
-              .split(/\s+/)
-              .map((t) => t.trim())
-              .filter(Boolean),
-          ),
-        ]
-      : null,
+    tags: parseTags(tagsRaw),
     source,
   };
 

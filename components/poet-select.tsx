@@ -27,7 +27,9 @@ export function PoetSelect({
   const latestQueryRef = useRef<string>("");
 
   useEffect(() => {
-    if (value) return;
+    // NOTE: searching stays live even while a poet is selected, so a
+    // pre-selected default (Folk poetry) can be swapped for a specific poet
+    // without clearing the field first.
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(async () => {
       const q = query.trim();
@@ -91,7 +93,7 @@ export function PoetSelect({
       <input type="hidden" name="poet_id" value={value?.id ?? ""} />
 
       {value ? (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-card px-3 py-3 text-sm shadow-sm">
+        <div className={`flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-card px-3 py-3 text-sm shadow-sm ${value ? "mb-2" : ""}`}>
           <span className="flex min-w-0 items-center gap-2"><span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Search className="size-3.5" /></span><span className="truncate font-medium">
             {value.name_am}
             {value.name_en ? ` (${value.name_en})` : ""}
@@ -106,62 +108,63 @@ export function PoetSelect({
             <X className="size-4" />
           </Button>
         </div>
-      ) : (
-        <>
-          <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => {
-              if (results.length > 0) setOpen(true);
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder={tSubmit("searchPoetPlaceholder")}
-            autoComplete="off"
-            aria-label={tSubmit("searchPoetPlaceholder")}
-            className="h-11 pl-9"
-          /></div>
-          {open ? (
-            <ul className="absolute left-0 right-0 z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-primary/15 bg-card p-1 shadow-xl">
-              {searching ? (
-                <li className="px-3 py-3 text-sm text-muted-foreground">
-                  Searching…
-                </li>
-              ) : results.length === 0 ? (
-                <li className="px-3 py-3 text-sm text-muted-foreground">
-                  {triedEmpty ? tSubmit("noPoetsFound") : tSubmit("typeToSearch")}
-                </li>
-              ) : (
-                results.map((poet) => (
-                  <li key={poet.id}>
-                    <button
-                      type="button"
-                      onClick={() => choose(poet)}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm transition hover:bg-accent"
-                    >
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary/15 text-secondary"><UserRoundPlus className="size-4" /></span><span><span className="block font-medium">{poet.name_am}</span>{poet.name_en ? <span className="block text-xs text-muted-foreground">{poet.name_en}</span> : null}</span>
-                    </button>
-                  </li>
-                ))
-              )}
-              {onRequestNew ? (
-                <li className="border-t border-border/70 px-3 py-2">
+      ) : null}
+
+      {/* The search box stays rendered below the selected chip, so a
+          pre-selected default can be replaced by a specific poet at any time
+          without clearing the field first. */}
+      <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => {
+            if (results.length > 0) setOpen(true);
+          }}
+          onKeyDown={handleKeyDown}
+          placeholder={tSubmit("searchPoetPlaceholder")}
+          autoComplete="off"
+          aria-label={tSubmit("searchPoetPlaceholder")}
+          className="h-11 pl-9"
+        /></div>
+        {open ? (
+          <ul className="absolute left-0 right-0 z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-primary/15 bg-card p-1 shadow-xl">
+            {searching ? (
+              <li className="px-3 py-3 text-sm text-muted-foreground">
+                Searching…
+              </li>
+            ) : results.length === 0 ? (
+              <li className="px-3 py-3 text-sm text-muted-foreground">
+                {triedEmpty ? tSubmit("noPoetsFound") : tSubmit("typeToSearch")}
+              </li>
+            ) : (
+              results.map((poet) => (
+                <li key={poet.id}>
                   <button
                     type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      onRequestNew();
-                    }}
-                    className="inline-flex items-center gap-2 text-xs font-medium text-primary hover:underline"
+                    onClick={() => choose(poet)}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm transition hover:bg-accent"
                   >
-                    <UserRoundPlus className="size-3.5" /> {tSubmit("proposePoetToggle")}
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary/15 text-secondary"><UserRoundPlus className="size-4" /></span><span><span className="block font-medium">{poet.name_am}</span>{poet.name_en ? <span className="block text-xs text-muted-foreground">{poet.name_en}</span> : null}</span>
                   </button>
                 </li>
-              ) : null}
-            </ul>
-          ) : null}
-        </>
-      )}
+              ))
+            )}
+            {onRequestNew ? (
+              <li className="border-t border-border/70 px-3 py-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    onRequestNew();
+                  }}
+                  className="inline-flex items-center gap-2 text-xs font-medium text-primary hover:underline"
+                >
+                  <UserRoundPlus className="size-3.5" /> {tSubmit("proposePoetToggle")}
+                </button>
+              </li>
+            ) : null}
+          </ul>
+        ) : null}
     </div>
   );
 }

@@ -6,6 +6,11 @@ import { firstRelation } from "@/lib/relations";
 import { optionList, type ListFilterOption } from "@/lib/filter-options";
 import { EmptyState } from "@/components/empty-state";
 import { ListFilters } from "@/components/list-filters";
+import {
+  SubmissionActions,
+  type EditableSubmission,
+} from "@/components/submission-actions";
+import { type CategorySelectRecord } from "@/components/category-select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BackLink } from "@/components/back-link";
@@ -20,9 +25,14 @@ function param(value?: string | string[]): string {
 type SubmissionRow = {
   id: string;
   title: string;
+  body: string;
   poet_id: string | null;
   proposed_poet_name_am: string | null;
+  proposed_poet_name_en: string | null;
+  proposed_poet_bio: string | null;
   category_id: string | null;
+  tags: string[] | null;
+  source: string;
   status: string;
   rejection_reason: string | null;
   created_at: string;
@@ -64,15 +74,35 @@ export default async function MySubmissionsPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Every column the pending-submission edit form needs is fetched here, so the
+  // sheet can be pre-filled without a second round trip per card.
   const { data, error: submissionsError } = await supabase
     .from("poem_submissions")
     .select(
-      "id, title, poet_id, proposed_poet_name_am, category_id, categories(name_am, name_en), poets(name_am, name_en), status, rejection_reason, created_at",
+      "id, title, body, poet_id, proposed_poet_name_am, proposed_poet_name_en, proposed_poet_bio, category_id, tags, source, categories(name_am, name_en), poets(name_am, name_en), status, rejection_reason, created_at",
     )
     .eq("submitted_by", user.id)
     .order("created_at", { ascending: false });
 
   const submissions = (data ?? []) as SubmissionRow[];
+
+  // The same bilingual category list the /submit form uses, for its required
+  // category select.
+  const { data: categoryRows } = await supabase
+    .from("categories")
+    .select("id, name_am, name_en")
+    .order("name_am");
+  const categories = (categoryRows ?? []) as CategorySelectRecord[];
+
+  // A submission whose `poet_id` is the signed-in user's own linked poet is an
+  // "own poem" row: editing it must not let the attribution move. The same rule
+  // is re-derived server-side in updateSubmission().
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("poet_id")
+    .eq("id", user.id)
+    .maybeSingle();
+  const ownPoetId = profile?.poet_id ?? null;
 
   // Filter options come from THIS user's submissions only — never the
   // site-wide category/poet registries. Submissions that still only propose a
@@ -139,6 +169,27 @@ export default async function MySubmissionsPage({
                     name_am: string;
                     name_en: string | null;
                   }>(sub.poets);
+                  // Everything the edit sheet needs, pre-computed here so the
+                  // client component stays a dumb renderer.
+                  const editable: EditableSubmission = {
+                    id: sub.id,
+                    isOwnPoem: Boolean(sub.poet_id) && sub.poet_id === ownPoetId,
+                    title: sub.title,
+                    body: sub.body,
+                    categoryId: sub.category_id,
+                    tags: sub.tags,
+                    source: sub.source,
+                    poet: sub.poet_id
+                      ? {
+                          id: sub.poet_id,
+                          name_am: poet?.name_am ?? tSubs("unknownPoet"),
+                          name_en: poet?.name_en ?? null,
+                        }
+                      : null,
+                    proposedNameAm: sub.proposed_poet_name_am,
+                    proposedNameEn: sub.proposed_poet_name_en,
+                    proposedBio: sub.proposed_poet_bio,
+                  };
                   return (
                     <Card key={sub.id} className="border-primary/15 shadow-sm"><CardContent className="p-5">
                       <div className="flex items-center justify-between gap-3">
@@ -151,7 +202,17 @@ export default async function MySubmissionsPage({
                             · {new Date(sub.created_at).toLocaleDateString()}
                           </p>
                         </div>
-                        <StatusBadge status={sub.status} label={sub.status === "approved" ? tSubs("approved") : sub.status === "rejected" ? tSubs("rejected") : tSubs("pending")} />
+                        <div className="flex shrink-0 items-center gap-2">
+                          <StatusBadge status={sub.status} label={sub.status === "approved" ? tSubs("approved") : sub.status === "rejected" ? tSubs("rejected") : tSubs("pending")} />
+                          {/* Edit and cancel exist only while the row is still
+                              pending — an approved/rejected card is read-only. */}
+                          {sub.status === "pending" ? (
+                            <SubmissionActions
+                              submission={editable}
+                              categories={categories}
+                            />
+                          ) : null}
+                        </div>
                       </div>
                       {sub.status === "rejected" && sub.rejection_reason ? (
                         <p className="mt-3 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">

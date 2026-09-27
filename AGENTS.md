@@ -319,7 +319,16 @@ inside and are revoked from `public` / granted to specific roles.
   definer function `upsert_my_poet_profile()`, which only ever touches
   the calling user's own linked poet row.
 - `poem_submissions`: users read/insert only their own rows. Staff read
-  and update all.
+  and update all. Own-row `update` and `delete` are also allowed, but ONLY
+  while the row is still `pending` — `poem_submissions_update_own` (using AND
+  with check `auth.uid() = submitted_by and status = 'pending'`) and
+  `poem_submissions_delete_own` (using the same predicate), applied live in
+  migration `20260927000000_submission_edit_cancel_policies.sql` together
+  with the `grant delete ... to authenticated` those policies need. Once a
+  moderator approves or rejects a row those clauses stop matching, so the
+  database itself refuses further user edits or deletes regardless of what a
+  client sends; staff are unaffected and keep working through
+  `poem_submissions_update_staff_all`.
 - `poems`: public read — ALL rows, including disputed ones (see
   "Disputed poems" below). NO insert grant for `anon`/`authenticated`
   at all — only `approve_poem_submission()` can create rows here.
@@ -439,6 +448,15 @@ user chooses one of two paths:
 - If null: redirect to `/profile?redirect=...` with a message
   explaining they need to set up their poet profile first. Once saved,
   they're sent back to finish the submission.
+- `source` is NOT free text on this path. It is auto-filled with a fixed
+  bilingual constant and the input is `disabled` — "Personal knowledge" /
+  "የግል እውቀት" (`Submit.ownSourceValue`). This is a real value that is
+  actually stored in `poem_submissions.source`; the user simply cannot
+  edit it, because there is no external provenance for their own poem.
+  Because a disabled input is never submitted by the browser, the form
+  pairs the disabled display input with a hidden input carrying the same
+  `name="source"` value. **Any future edit flow for pending submissions
+  MUST apply this identical rule when editing a self-submitted poem.**
 
 **2. "This is another poet's poem"**
 
@@ -446,9 +464,25 @@ user chooses one of two paths:
   "didn't find the poet? add details" form to propose a new one
   (populates `proposed_poet_name_am`/`name_en`/`bio` instead of
   `poet_id`). Never touches the user's own profile.
+- The poet field is **pre-selected with the seeded "Folk poetry" poet**
+  (`የህዝብ ግጥም`), the default attribution for poems whose author isn't
+  known — so the user does not have to search for it. The page looks
+  this poet up by `name_en = 'Folk poetry'` (never by a hardcoded id,
+  since ids differ between environments) and passes it to
+  `SubmitPoemForm` as `defaultPoet`. Searching for and selecting a real
+  poet replaces it, and expanding the inline proposal form clears it
+  exactly as it would for any other selection. `source` on this path
+  remains a normal required free-text input.
 
 Either path inserts one row into `poem_submissions` with `status =
 'pending'`. Self-submitted poems are NOT auto-approved.
+
+After a successful submission, the confirmation keeps the "pending
+moderator review" explanation and links to `/my-submissions`
+(`Submit.viewMySubmission`) — it does NOT offer to switch to the
+"another poet's poem" path any more. The inter-path "this is actually
+the other path" link lives inside each form's body, so it disappears
+along with the form once submission succeeds.
 
 ## Moderation workflow (current)
 
@@ -577,6 +611,48 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
     (e.g. `2018` shows `2025/26 gc`), converts to Gregorian integer on save, and
     converts back to Ethiopian year on load; read-only display on `/poets/[id]`
     shows the derived Ethiopian year with the dual-year Gregorian range — done
+24. Seeded "Folk poetry" poet + submission-flow defaults: new migration
+    `20260926010000_seed_folk_poetry.sql` seeds the system poet
+    `የህዝብ ግጥም` / `Folk poetry` (`verified = true`, `created_by = null`)
+    as the default attribution for poems of unknown authorship, guarded by
+    a `where not exists` clause so re-running is a no-op — done. The
+    post-submit confirmation now links to `/my-submissions`
+    (`Submit.viewMySubmission`) instead of prompting "is this another
+    poet's poem?" (the inter-path switch link moved inside each form so it
+    vanishes on success); the "my own poem" path auto-fills `source` with
+    the fixed bilingual `Submit.ownSourceValue` ("Personal knowledge" /
+    "የግል እውቀት") and disables the input, pairing it with a hidden
+    `name="source"` input so the real value is still submitted (this rule
+    must be replicated in any future pending-submission edit flow); and
+    the "another poet's poem" path pre-selects the Folk poetry poet via a
+    `name_en = 'Folk poetry'` lookup passed to `SubmitPoemForm` as
+    `defaultPoet`, with `PoetSelect` keeping its search box live while a
+    poet is selected so the default can be swapped at any time — done
+25. Edit + cancel for pending submissions: the two `/submit` form components
+    were collapsed into one shared `components/poem-submission-form.tsx`
+    (`PoemSubmissionForm`, props `path: "own" | "other"`, `editMode`,
+    `initialValues`, `lockedPoetId`/`lockedPoet`); `submit-poem-form.tsx` and
+    `own-poem-form.tsx` are now thin wrappers over it, so creating and editing
+    share one copy of the field set, the mandatory category rule and the
+    poet/proposed-poet XOR. `updateMySubmission()` and `cancelMySubmission()`
+    in `app/actions.ts` back the flows (the pre-existing moderator
+    `updateSubmission()` is untouched). `/my-submissions` gives every `pending`
+    card two icon-only buttons — `Pencil` and `Trash2`, styled exactly like the
+    like/copy/share buttons in `components/poem-actions.tsx` — hosted by
+    `components/submission-actions.tsx`: edit opens a shadcn `Sheet` holding
+    the shared form pre-filled from the row, cancel asks for confirmation in a
+    shadcn `AlertDialog` and then hard-deletes the row (toast + row disappears
+    via `revalidatePath`). "Own poem" rows keep their attribution locked and
+    their `source` on the fixed disabled bilingual constant; "another poet's
+    poem" rows get the full poet search/select-or-propose UI, defaulting to the
+    row's CURRENT poet rather than the Folk poetry default. Edits update the row
+    in place and leave `status = 'pending'`. Approved/rejected rows render no
+    actions at all. Backed by the new own-row RLS policies
+    (`poem_submissions_update_own` / `poem_submissions_delete_own`, both scoped
+    to `submitted_by = auth.uid() and status = 'pending'`, plus the
+    `grant delete` they require) in migration
+    `20260927000000_submission_edit_cancel_policies.sql`, applied live via
+    `supabase db push` and verified against the live database — done
 
 ## Guidelines for future changes
 

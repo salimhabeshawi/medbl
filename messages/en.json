@@ -138,8 +138,11 @@
     "tagsPlaceholder": "Add tags (e.g. ቅኔ, ፍቅር, ትዝብት)",
     "source": "Source / Provenance",
     "sourcePlaceholder": "Where did you find this poem? (Book title, oral tradition, self-written...)",
+    "ownSourceValue": "Personal knowledge",
+    "ownSourceFixedNote": "Fixed on this path — this poem is your own, so there is no external source to cite.",
     "poetSelection": "Poet Selection",
     "searchPoetPlaceholder": "Search existing poet by name...",
+    "folkPoetDefaultNote": "\"Folk poetry\" is selected by default for poems of unknown authorship. Search for a poet to replace it.",
     "proposePoetToggle": "Can't find the poet? Add new poet details",
     "proposedNameAm": "Poet Amharic Name",
     "proposedNameAmPlaceholder": "e.g. ኃይሉ ገብረዮሐንስ",
@@ -151,6 +154,7 @@
     "submitting": "Submitting...",
     "successTitle": "Poem submitted!",
     "successDesc": "Your poem has been submitted to the moderation queue for review.",
+    "viewMySubmission": "View your submission",
     "termsNotice": "By submitting, you confirm this content follows our Terms of Service.",
     "backToOptions": "Back to submission options",
     "switchToOther": "This is actually another poet's poem",
@@ -169,7 +173,8 @@
     "poetSelectionRequired": "Please select an existing poet, or add new poet details below the search box.",
     "poetSelectionConflict": "Either select an existing poet or propose a new one — not both.",
     "categoryRequired": "Please choose a category for this poem.",
-    "categoryInvalid": "Please choose a category from the list."
+    "categoryInvalid": "Please choose a category from the list.",
+    "ownAttributionFixedNote": "This is your own poem, so the poet and the source are fixed and cannot be changed here."
   },
   "Favorites": {
     "title": "Favorite Poems",
@@ -202,7 +207,16 @@
     "reason": "Reason",
     "back": "Back to home",
     "noMatchTitle": "No submissions match your filters",
-    "noMatchDesc": "Try clearing a filter or choosing a different value."
+    "noMatchDesc": "Try clearing a filter or choosing a different value.",
+    "editSubmission": "Edit submission",
+    "cancelSubmission": "Cancel submission",
+    "editTitle": "Edit your submission",
+    "editDesc": "Update this submission. It stays pending review — you can only change it before a moderator reviews it.",
+    "cancelTitle": "Cancel this submission?",
+    "cancelDesc": "\"{title}\" will be permanently deleted. This cannot be undone — you would have to submit it again.",
+    "cancelConfirm": "Delete submission",
+    "cancelling": "Deleting...",
+    "cancelled": "Submission deleted."
   },
   "Profile": {
     "title": "Your Profile",
