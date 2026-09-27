@@ -338,6 +338,11 @@ inside and are revoked from `public` / granted to specific roles.
   `get_poem_favorite_counts` / featured RPCs above.
 - `reports`: any authenticated user can insert one; read/update are
   staff-only (that's why `has_open_report()` exists for the UI).
+  `reports_delete_own_open` lets a user delete their own report while it is
+  still `open` (`auth.uid() = reported_by and status = 'open'`, plus the
+  `grant delete` it needs) — the "Cancel report" action on `/poems/[id]`.
+  Hard delete, no "cancelled" status; the moment a moderator resolves the
+  report the clause stops matching and the reporter can no longer withdraw it.
 - `profiles`: users read/update their own row but cannot change their
   own `role`. Admins can update any profile. Staff can read all profiles.
 - `categories`: public read; staff-only insert/delete (insert requires
@@ -652,6 +657,19 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
     to `submitted_by = auth.uid() and status = 'pending'`, plus the
     `grant delete` they require) in migration
     `20260927000000_submission_edit_cancel_policies.sql`, applied live via
+    `supabase db push` and verified against the live database — done
+26. Cancel your own open report: the "already reported" note on `/poems/[id]`
+    (driven by `has_open_report()`) now carries an icon-only `X` cancel button —
+    exact variant/size/className of the like/copy/share icon buttons in
+    `components/poem-actions.tsx`, no new style — that confirms through a
+    shadcn `AlertDialog` and calls `cancelMyReport()` in `app/actions.ts`
+    (hard delete, filtered on `poem_id` + `reported_by = auth.uid()` +
+    `status = 'open'`). On success the client drops the "already reported"
+    state locally so the normal "Report poem" link reappears without a reload
+    (the `state.success` flag is preserved, so a report filed earlier in the
+    same visit can also be withdrawn). Backed by the new `reports_delete_own_open`
+    policy in migration
+    `20260927010000_report_cancel_policy.sql`, applied live via
     `supabase db push` and verified against the live database — done
 
 ## Guidelines for future changes

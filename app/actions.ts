@@ -1112,6 +1112,50 @@ export async function reportPoem(
   return { success: true };
 }
 
+// Withdraw your own OPEN report on a poem — the "Cancel report" action next to
+// the "already reported" note on /poems/[id]. Hard delete: there is deliberately
+// no "cancelled" status, so a reporter who changes their mind simply files a
+// new report (the partial unique index reports_open_poem_reporter_key only ever
+// blocks a second OPEN report).
+export async function cancelMyReport(
+  _prevState: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be logged in." };
+
+  const poemId = String(formData.get("poem_id") ?? "").trim();
+  if (!poemId) return { error: "Missing poem." };
+
+  // Authorized by reports_delete_own_open (own row AND still open); the explicit
+  // filters turn a policy rejection into a clear message — if a moderator
+  // resolved the report first, the row is no longer deletable by this user.
+  const { data: deleted, error } = await supabase
+    .from("reports")
+    .delete()
+    .eq("poem_id", poemId)
+    .eq("reported_by", user.id)
+    .eq("status", "open")
+    .select("id");
+
+  if (error) {
+    return { error: error.message || "Could not cancel your report." };
+  }
+  if (!deleted || deleted.length === 0) {
+    return {
+      error:
+        "This report can no longer be cancelled — a moderator has already reviewed it.",
+    };
+  }
+
+  revalidatePath(`/poems/${poemId}`);
+  return { success: true };
+}
+
 // Only allow same-app relative paths as redirect targets.
 function internalPath(value: string | null | undefined): string | null {
   if (!value) return null;
