@@ -24,6 +24,7 @@ import {
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 export function ReportPoem({
   poemId,
@@ -132,6 +133,7 @@ export function ReportPoem({
                   confirmCancel();
                 }}
               >
+                {cancelling ? <LoadingSpinner /> : null}
                 {cancelling
                   ? tPoems("cancelReportCancelling")
                   : tPoems("cancelReportConfirm")}
@@ -179,6 +181,7 @@ export function ReportPoem({
           disabled={pending}
           size="sm"
         >
+          {pending ? <LoadingSpinner /> : null}
           {pending ? tCommon("loading") : tPoems("submitReport")}
         </Button>
         <Button

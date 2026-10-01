@@ -8,6 +8,7 @@ import {
 } from "@/app/actions";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { useTranslations } from "next-intl";
 
 type Props = {
@@ -88,6 +89,7 @@ export function ReportReview({
                 disabled={republishPending}
                 variant="secondary"
               >
+                {republishPending ? <LoadingSpinner /> : null}
                 {republishPending
                   ? tMod("republishingEllipsis")
                   : formerStatus
@@ -114,6 +116,7 @@ export function ReportReview({
                 disabled={removePending}
                 variant="destructive"
               >
+                {removePending ? <LoadingSpinner /> : null}
                 {removePending ? tMod("removingEllipsis") : tMod("removePoem")}
               </Button>
               {removeState.error ? (
@@ -136,6 +139,7 @@ export function ReportReview({
               disabled={markPending}
               variant="outline"
             >
+              {markPending ? <LoadingSpinner /> : null}
               {markPending ? tMod("markingEllipsis") : tMod("markDisputed")}
             </Button>
             {markState.error ? (

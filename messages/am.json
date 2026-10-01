@@ -75,7 +75,8 @@
     "noPublishedPoems": "እስካሁን የታተሙ ግጥሞች የሉም",
     "noPublishedPoemsDesc": "ይህ ገጣሚ በመድብሉ ውስጥ የታተመ ግጥም የለውም።",
     "likeCount": "{count} ተወዶለታል",
-    "likeRate": "{rate}% ተወዳጅ"
+    "_avgLikesPerPoemNote": "DRAFT TRANSLATION — \"avgLikesPerPoem\" replaces the old \"{rate}% liked\" percentage with a raw average (\"avg. {value} likes/poem\"); the Amharic wording below is a first draft and a native speaker should review it. JSON has no comment syntax, so this note lives as an unused key instead.",
+    "avgLikesPerPoem": "በአንድ ግጥም በአማካይ {value} ተወዶለታል"
   },
   "Poems": {
     "heading": "ግጥሞች",

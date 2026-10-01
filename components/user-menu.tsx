@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserRound, ClipboardList, LogOut } from "lucide-react";
+import { useFormStatus } from "react-dom";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { useTranslations } from "next-intl";
 
 function initials(email?: string): string {
@@ -23,6 +25,36 @@ function initials(email?: string): string {
   const first = parts[0] ?? raw;
   const last = parts[parts.length - 1] ?? "";
   return (first[0] ?? "U").toUpperCase() + (parts.length > 1 ? (last[0] ?? "").toUpperCase() : (first[1] ?? "").toUpperCase());
+}
+
+/**
+ * Sign out is an auth request, so it gets the app's standard loading state.
+ *
+ * It is its own component only so it can call `useFormStatus`, which reports
+ * the state of the enclosing `<form action={signOut}>` — the only place the
+ * in-flight flag exists, since `signOut` is a bare server action. The button is
+ * a plain <button> rather than a shadcn Button because it lives inside
+ * DropdownMenuContent, which is styled for the dark sheet, not the card.
+ */
+function SignOutMenuButton() {
+  const { pending } = useFormStatus();
+  const tNav = useTranslations("Nav");
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-busy={pending || undefined}
+      className="flex w-full cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1.5 text-sm text-destructive outline-none transition-colors hover:bg-destructive/10 focus:bg-destructive/10"
+    >
+      {pending ? (
+        <LoadingSpinner />
+      ) : (
+        <LogOut className="size-4" />
+      )}
+      {tNav("logout")}
+    </button>
+  );
 }
 
 export function UserMenu({
@@ -78,13 +110,7 @@ export function UserMenu({
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <form action={signOut} className="px-1 py-1">
-          <button
-            type="submit"
-            className="flex w-full cursor-pointer items-center gap-1.5 rounded-sm px-2 py-1.5 text-sm text-destructive outline-none transition-colors hover:bg-destructive/10 focus:bg-destructive/10"
-          >
-            <LogOut className="size-4" />
-            {tNav("logout")}
-          </button>
+          <SignOutMenuButton />
         </form>
       </DropdownMenuContent>
     </DropdownMenu>

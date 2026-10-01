@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { EmptyState } from "@/components/empty-state";
 import { BackLink } from "@/components/back-link";
 import type { CategorySelectRecord } from "@/components/category-select";
+import { AlertTriangle } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 export const metadata = { title: "Moderation — submissions" };
@@ -30,8 +31,14 @@ export default async function ModerateSubmissionsPage() {
     return (
       <div>
         <BackLink href="/moderate">{tMod("backModeration")}</BackLink>
-        <h2 className="mb-6 font-serif text-2xl font-semibold">{tMod("pendingHeading")}</h2>
-        <Alert variant="destructive"><AlertTitle>{tMod("loadSubmissionsError")}</AlertTitle><AlertDescription>{error.message}</AlertDescription></Alert>
+        <h2 className="mb-6 font-serif text-2xl font-semibold">
+          {tMod("pendingHeading")}
+        </h2>
+        <Alert variant="destructive">
+          <AlertTriangle aria-hidden="true" />
+          <AlertTitle>{tMod("loadSubmissionsError")}</AlertTitle>
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -60,9 +67,11 @@ export default async function ModerateSubmissionsPage() {
   return (
     <div>
       <BackLink href="/moderate">{tMod("backModeration")}</BackLink>
-      <h2 className="mb-6 font-serif text-2xl font-semibold">{tMod("pendingHeading")}</h2>
+      <h2 className="mb-6 font-serif text-2xl font-semibold">
+        {tMod("pendingSubmissions", { count: submissions.length })}
+      </h2>
       {submissions.length > 0 ? (
-        <ul className="flex flex-col gap-4">
+        <ul className="flex flex-col gap-4 sm:gap-5">
           {submissions.map((sub) => {
             const poet = firstRelation<{ name_am: string; name_en: string }>(
               sub.poets,

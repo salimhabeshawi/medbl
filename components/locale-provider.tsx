@@ -1,6 +1,11 @@
 "use client";
 
-import { createContext, startTransition, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useTransition,
+} from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { useRouter } from "next/navigation";
 
@@ -10,11 +15,19 @@ type Messages = Record<string, any>;
 type LocaleCtx = {
   locale: string;
   switchLocale: (next: string) => void;
+  /**
+   * True while the server refresh triggered by a locale switch is still in
+   * flight. Consumers (the header's LanguageToggle) disable themselves and show
+   * a LoadingSpinner for its duration, so switching language on a slow
+   * connection reads as "working" instead of "broken".
+   */
+  isSwitching: boolean;
 };
 
 const LocaleContext = createContext<LocaleCtx>({
   locale: "am",
   switchLocale: () => {},
+  isSwitching: false,
 });
 
 export function useLocaleSwitch() {
@@ -33,6 +46,7 @@ export function LocaleProvider({
   children: React.ReactNode;
 }) {
   const [locale, setLocale] = useState(initialLocale);
+  const [isSwitching, startSwitching] = useTransition();
   const router = useRouter();
 
   function switchLocale(next: string) {
@@ -44,14 +58,16 @@ export function LocaleProvider({
     //    re-renders in the same React flush, zero waiting.
     setLocale(next);
     // 4. Background: refresh server components (nav labels from SiteHeader,
-    //    page headings, etc.) without blocking the UI or showing a spinner.
-    startTransition(() => {
+    //    page headings, etc.) without blocking the UI. The refresh runs INSIDE
+    //    this transition so `isSwitching` stays true until the new RSC payload
+    //    has actually been applied — that is what the toggle's spinner tracks.
+    startSwitching(() => {
       router.refresh();
     });
   }
 
   return (
-    <LocaleContext.Provider value={{ locale, switchLocale }}>
+    <LocaleContext.Provider value={{ locale, switchLocale, isSwitching }}>
       <NextIntlClientProvider
         locale={locale}
         messages={locale === "en" ? messagesEn : messagesAm}

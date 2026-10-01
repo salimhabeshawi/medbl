@@ -291,8 +291,16 @@ inside and are revoked from `public` / granted to specific roles.
   counting). Public.
 - `get_featured_poets(p_limit)` — ranked poets: poem output + total
   likes, log-scaled (40/60 weights), plus `liked_poem_count` (poems
-  with ≥ 1 favorite) and a log-scale `favorites_per_poem_percent`.
-  Disputed poems excluded. Public.
+  with ≥ 1 favorite) and `avg_likes_per_poem` (a raw
+  `favorite_count / poem_count` average, e.g. 3.2). Disputed poems
+  are INCLUDED in `poem_count`, `favorite_count` and
+  `liked_poem_count` — and therefore in the ranking's inputs — because
+  disputed poems stay publicly visible (see "Disputed poems").
+  `avg_likes_per_poem` is NULL unless the poet has at least
+  `v_avg_likes_min_poems` poems (currently 2, an easily adjusted
+  constant inside the function); that threshold gates only this stat,
+  never `featured_score` and never whether a poet appears in the
+  list. Public.
 - `approve_poem_submission(p_submission_id, p_attribution_status,
   p_poet_id)` — staff-only; resolves the poet (explicit choice →
   proposed new poet → submission's own poet_id), inserts into `poems`
@@ -708,6 +716,120 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
     live via `supabase db push` and verified against the live database
     (anon denied, member returns zero rows, moderator returns the real
     totals) — done
+28. `/moderate/submissions` restyle onto the current design system — pure
+    appearance/structure pass, no logic, query or database changes.
+    `components/submission-review.tsx` was the last page holding pre-rebuild
+    markup: a hand-rolled `inputClass` string (7 fields), a hand-rolled
+    `<li className="rounded-xl border…">` card, a raw `<select>` for
+    attribution, raw `<input type="radio">` for the fuzzy poet matches, and
+    a hardcoded `border-t pt-4` divider. It is now built from shadcn
+    `Card`/`CardHeader`/`CardTitle`/`CardContent`, `Badge`, `Label`,
+    `Input`, `Textarea`, `Select`, `RadioGroup`/`RadioGroupItem` and
+    `Separator`, matching `/moderate/reports` and the poem detail page.
+    Two leftover non-token colors are gone: `text-amber-700` on the
+    "new poet proposed" legend and `focus:ring-zinc-400` on the
+    attribution select + rejection-reason input (AGENTS.md "Design
+    system" forbids raw palette values; everything is now `primary` /
+    `secondary` / `accent` / `muted` / `destructive` tokens). The card
+    header leads with the poem's own title in Lora (plus a date `Badge`
+    and, when the poet is already resolved, a `secondary` poet `Badge`)
+    instead of a generic "Review submission" label, the success state
+    and every inline `Alert` gained a muted lucide icon, and the
+    linked-poet field now uses the correct `Common.poet` label (it
+    previously read "Poem"). Genuinely mobile-first: card padding is
+    `px-4 py-5` up to `sm:px-6 sm:py-6` (was a fixed `p-6`), the save
+    button is `w-full sm:w-auto` with its hint stacked above/below
+    instead of `ml-3` inline, and approve/reject are full-width
+    `size="lg"` at narrow widths before going two-column at `sm:`.
+    Both two-column rows in the form are declared as
+    `grid-cols-[minmax(0,1fr)] sm:grid-cols-2` with a `min-w-0` chain
+    down to the controls: a bare `sm:grid-cols-2` leaves the implicit
+    mobile column track as `auto`, which is floored by the
+    `whitespace-nowrap` `SelectTrigger` min-content and would push
+    BOTH halves of the row (attribution + reject, category + tags)
+    past the card edge on a phone.
+    Added `components/ui/radio-group.tsx` (the one shadcn primitive the
+    app was missing) and `components/moderate-nav.tsx`, which replaces
+    the layout's hand-rolled `<nav>` of hardcoded English links — the
+    `/moderate` sub-nav now uses `Button` pills with a real active
+    state and translated labels, and wraps instead of squashing. The
+    submissions page heading now uses the existing
+    `Moderate.pendingSubmissions` key with the live pending count. The
+    submitted payload is unchanged and deliberately so: `submission_id`,
+    `poet_id`, `title`, `body`, `category_id` (still `CategorySelect`'s
+    default name), `tags`, `source`, `proposed_poet_*`, `match_choice`,
+    `attribution_status` and `rejection_reason` are all still sent, and
+    because Radix RadioGroup treats `""` as "nothing selected" the
+    "create the poet as proposed" option is sent through a
+    `create-new` sentinel that maps back to the original empty
+    `matchChoice`, leaving `poet_id` derived exactly as before — so
+    approve / reject / fuzzy-match selection / inline editing all
+    behave identically. Verified with `tsc --noEmit`, `eslint` and a
+    full `next build` (all clean) — done
+29. App-wide loading states for network-triggering actions: every button or
+    control that starts a request (a database write, an RPC, an auth action, or
+    a navigation whose data comes from the server) now disables itself and shows
+    an inline `Loader2` spinner for the whole duration, so a slow connection
+    reads as "working" instead of "frozen". Two shared primitives make it one
+    consistent pattern: `components/loading-spinner.tsx` (the single spinner;
+    it deliberately carries no size class so the shadcn `Button`'s existing
+    `[&_svg:not([class*='size-'])]:size-*` rules size it correctly in every
+    variant) and `components/submit-button.tsx` (`useFormStatus`-driven submit
+    button for a plain `<form action={serverAction}>` that has no pending state
+    of its own). Components that already track their own request
+    (`useActionState` / `useTransition`) render `<LoadingSpinner />` next to
+    their existing `pending` flag instead. `components/language-toggle.tsx` is
+    the reference implementation: `LocaleProvider` now wraps `router.refresh()`
+    in a `useTransition` and exposes `isSwitching`, so the toggle disables and
+    swaps its `አማ | EN` state for the spinner until the new RSC payload lands.
+    Covered: login + signup submit (the only two forms that previously had *no*
+    pending state at all), Google OAuth (whose label was a literal no-op —
+    `{pending ? tAuth("googleAuth") : tAuth("googleAuth")}`), favorite heart
+    (already had the pattern, untouched), poem submit + pending-edit save,
+    submission-cancel and report-cancel AlertDialog confirm buttons, profile
+    poet-details save + email change + password change, report submission,
+    moderator approve / reject / save-edits, resolve / dispute / republish /
+    remove poem, category add / save / delete (delete had no pending state and
+    got its own `components/delete-category-button.tsx` purely to call
+    `useFormStatus` inside its form), and `/poems` pagination — which was a raw
+    `<a>` causing a full page load and now renders `next/link` with a
+    `useLinkStatus`-driven spinner on the clicked control itself, alongside the
+    existing `loading.tsx` skeleton for the content area. Two cases found by
+    auditing beyond the original list: **sign out** in both `user-menu.tsx` and
+    `mobile-nav.tsx` (an auth request with zero feedback) and the two debounced
+    live-search fields (`universal-search.tsx`, `poet-select.tsx`), which now
+    swap their magnifier for the spinner while the search RPC runs. Deliberately
+    NOT given loading states, because they never touch the network: the copy and
+    share buttons (clipboard / native OS share sheet, already have toast
+    feedback), the theme toggle, and every pure client-side interaction
+    (opening a menu, dialog, disclosure, or `list-filters`' `router.push`).
+    Verified with `tsc --noEmit`, `eslint` and a full `next build` — done
+30. Corrected `get_featured_poets` stats + avg-likes-per-poem: the
+    aggregate no longer filters disputed poems out of the join, so
+    `poem_count`, `favorite_count` and `liked_poem_count` — and
+    therefore both inputs of the unchanged 40/60 log-scaled
+    `featured_score` — now include poems currently marked `disputed`,
+    consistent with "Disputed poems" above, where such poems stay
+    publicly visible (one exclusion in the JOIN had been dropping a
+    poem, its favourites and its weight all at once).
+    `favorites_per_poem` and `favorites_per_poem_percent` are gone,
+    replaced by `avg_likes_per_poem`: a raw `favorite_count /
+    poem_count` average (1 dp, e.g. 3.2) that is NULL below
+    `v_avg_likes_min_poems` (2 — a deliberately adjustable constant
+    inside the function, mirrored by `MIN_POEMS_FOR_AVG_LIKES` in
+    `app/page.tsx`); the threshold gates only that stat, never the
+    ranking or list membership, so a one-poem poet still ranks and
+    appears normally. On the home featured poet cards
+    `Poets.likeRate` ("{rate}% liked") became `Poets.avgLikesPerPoem`
+    ("Avg. {value} likes/poem" / "በአንድ ግጥም በአማካይ {value}
+    ተወዶለታል", the Amharic draft flagged for review via
+    `_avgLikesPerPoemNote` in `messages/am.json`), and the badge is
+    omitted entirely rather than showing a "—" placeholder when the
+    average is null. The no-RPC fallback in `app/page.tsx` also
+    stopped excluding disputed poems, so its `poem_count` matches the
+    RPC. Migration `20260927030000_featured_poets_inclusive_stats.sql`
+    applied live via `supabase db push` and verified against the live
+    database (anon RPC + real data) — done
 
 ## Guidelines for future changes
 
@@ -724,6 +846,18 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
 - Any new UI must follow the "Design system" section above — warm
   palette tokens, Lora/Inter/Noto Sans Ethiopic, mobile-first, shadcn
   components — not ad hoc styling.
+- Any new button that triggers a network request must include a loading
+  state: disable the control and render `<LoadingSpinner />` (from
+  `components/loading-spinner.tsx`) for the whole duration of the request, so
+  a slow connection never looks frozen. Render it in place of the button's
+  icon/label or alongside it, whichever suits the button's size. Use
+  `<SubmitButton />` (from `components/submit-button.tsx`) for a plain
+  `<form action={serverAction}>` that has no pending state of its own, or
+  render the spinner next to an existing `pending` flag from
+  `useActionState` / `useTransition`. `components/language-toggle.tsx` is
+  the reference implementation. Do NOT add this to purely client-side,
+  instantaneous interactions that never touch the network (opening a menu
+  or dialog, toggling a disclosure, local form validation).
 - Keep this file in sync with reality at the end of every feature step
   — update the relevant section(s) above rather than appending a change
   log at the bottom.

@@ -74,7 +74,7 @@
     "noPublishedPoems": "No published poems yet",
     "noPublishedPoemsDesc": "This poet does not have any published poems in the anthology.",
     "likeCount": "{count} likes",
-    "likeRate": "{rate}% liked"
+    "avgLikesPerPoem": "Avg. {value} likes/poem"
   },
   "Poems": {
     "heading": "Poems",

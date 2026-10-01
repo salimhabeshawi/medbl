@@ -18,6 +18,7 @@ import { TagInput } from "./tag-input";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, ClipboardList, Lock } from "lucide-react";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 /** Everything the form needs to pre-fill itself from an existing row. */
 export type SubmissionFormValues = {
@@ -432,6 +433,7 @@ export function PoemSubmissionForm({
             size="lg"
             className="w-full sm:w-auto"
           >
+            {pending ? <LoadingSpinner /> : null}
             {pending
               ? editMode
                 ? tCommon("saving")

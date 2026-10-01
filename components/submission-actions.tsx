@@ -38,6 +38,7 @@ import {
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 /** A pending `poem_submissions` row, prepared by /my-submissions for editing. */
 export type EditableSubmission = SubmissionFormValues & {
@@ -190,6 +191,7 @@ export function SubmissionActions({
                 confirmCancel();
               }}
             >
+              {cancelling ? <LoadingSpinner /> : null}
               {cancelling ? tSubs("cancelling") : tSubs("cancelConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>

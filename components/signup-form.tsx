@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
 import { useTranslations } from "next-intl";
 
 export function SignupForm({
@@ -13,6 +13,7 @@ export function SignupForm({
 }) {
   const [agreed, setAgreed] = useState(false);
   const tAuth = useTranslations("Auth");
+  const tCommon = useTranslations("Common");
   const tFooter = useTranslations("Footer");
 
   return (
@@ -57,9 +58,13 @@ export function SignupForm({
           </Link>
         </span>
       </label>
-      <Button type="submit" disabled={!agreed} className="w-full">
+      <SubmitButton
+        className="w-full"
+        disabled={!agreed}
+        pendingLabel={tCommon("loading")}
+      >
         {tAuth("signupBtn")}
-      </Button>
+      </SubmitButton>
     </form>
   );
 }

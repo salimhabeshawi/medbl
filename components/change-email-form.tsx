@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { useTranslations } from "next-intl";
 
 export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
@@ -61,6 +62,7 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
             variant="outline"
             className="mt-4"
           >
+            {pending ? <LoadingSpinner /> : null}
             {pending ? tCommon("loading") : tProf("changeEmailBtn")}
           </Button>
         </CardContent>

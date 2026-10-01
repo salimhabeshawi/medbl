@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { useTranslations } from "next-intl";
 
 export function ChangePasswordForm() {
@@ -93,6 +94,7 @@ export function ChangePasswordForm() {
             </label>
           </div>
           <Button type="submit" disabled={pending} variant="outline">
+            {pending ? <LoadingSpinner /> : null}
             {pending ? tCommon("loading") : tProf("changePasswordBtn")}
           </Button>
         </CardContent>

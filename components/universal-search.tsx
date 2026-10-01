@@ -11,6 +11,7 @@ import {
 } from "@/app/actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { LoadingSpinner } from "@/components/loading-spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -98,7 +99,15 @@ export function UniversalSearch({
     <form onSubmit={(event) => event.preventDefault()} className="w-full">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_13rem]">
         <div className="relative min-w-0">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          {/* The search RPC is debounced and hits the network, so the field's
+              magnifier becomes the standard LoadingSpinner while it runs —
+              feedback right where the user is looking, not just in the results
+              list far below. */}
+          {searching ? (
+            <LoadingSpinner className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          ) : (
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          )}
           <Input
             type="search"
             name="q"

@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Edit2, Check, X, Trash2 } from "lucide-react";
+import { LoadingSpinner } from "@/components/loading-spinner";
+import { DeleteCategoryButton } from "@/components/delete-category-button";
+import { AlertTriangle, Edit2, Check, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 export type CategoryRecord = {
@@ -64,7 +66,8 @@ export function CategoryManager({ categories }: { categories: CategoryRecord[] }
           placeholder={tMod("nameEnPlaceholder")}
           className="sm:max-w-xs"
         />
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} aria-busy={pending || undefined}>
+          {pending ? <LoadingSpinner /> : null}
           {pending ? tCommon("loading") : tMod("addCategoryBtn")}
         </Button>
       </form>
@@ -120,9 +123,10 @@ export function CategoryManager({ categories }: { categories: CategoryRecord[] }
                   placeholder={tMod("nameEnPlaceholder")}
                   className="h-9 max-w-[200px]"
                 />
-                <Button type="submit" size="sm" disabled={updatePending}>
+                <Button type="submit" size="sm" disabled={updatePending} aria-busy={updatePending || undefined}>
+                  {updatePending ? <LoadingSpinner /> : null}
                   <Check className="mr-1 size-3.5" />
-                  {tMod("saveCategory")}
+                  {updatePending ? tCommon("loading") : tMod("saveCategory")}
                 </Button>
                 <Button type="button" variant="ghost" size="sm" onClick={cancelEdit}>
                   <X className="mr-1 size-3.5" />
@@ -174,15 +178,9 @@ export function CategoryManager({ categories }: { categories: CategoryRecord[] }
                 </Button>
                 <form action={deleteCategory}>
                   <input type="hidden" name="category_id" value={category.id} />
-                  <Button
-                    type="submit"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    aria-label={`Delete ${category.name_am || category.name_en}`}
-                  >
-                    <Trash2 className="size-3.5" />
-                  </Button>
+                  {/* deleteCategory is a bare server action, so the button reads
+                      its own in-flight state off the enclosing form. */}
+                  <DeleteCategoryButton label={category.name_am || category.name_en || category.id} />
                 </form>
               </div>
             </div>

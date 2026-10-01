@@ -2,7 +2,7 @@ import Link from "next/link";
 import { login } from "@/app/actions";
 import { GoogleAuthButton } from "@/components/google-auth-button";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BackLink } from "@/components/back-link";
 import { getTranslations } from "next-intl/server";
@@ -14,6 +14,7 @@ export default async function LoginPage({
 }) {
   const { error, message, next } = await searchParams;
   const tAuth = await getTranslations("Auth");
+  const tCommon = await getTranslations("Common");
 
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
@@ -65,9 +66,9 @@ export default async function LoginPage({
                   className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
                 />
               </label>
-              <Button type="submit" className="w-full">
+              <SubmitButton className="w-full" pendingLabel={tCommon("loading")}>
                 {tAuth("loginBtn")}
-              </Button>
+              </SubmitButton>
             </form>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">

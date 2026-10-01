@@ -9,6 +9,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { useTranslations } from "next-intl";
 import { formatEcAsGcRange } from "@/lib/calendar";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 export function PoetDetailsForm({
   initial,
@@ -114,6 +115,7 @@ export function PoetDetailsForm({
             />
           </label>
           <Button type="submit" disabled={pending} size="lg" className="mt-4">
+            {pending ? <LoadingSpinner /> : null}
             {pending ? tProf("saving") : tProf("savePoetBtn")}
           </Button>
         </CardContent>

@@ -6,6 +6,7 @@ import { X, Search, UserRoundPlus } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTranslations } from "next-intl";
 import { Input } from "./ui/input";
+import { LoadingSpinner } from "./loading-spinner";
 
 export function PoetSelect({
   value,
@@ -113,7 +114,14 @@ export function PoetSelect({
       {/* The search box stays rendered below the selected chip, so a
           pre-selected default can be replaced by a specific poet at any time
           without clearing the field first. */}
-      <div className="relative"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input
+      {/* Searching calls the searchPoets server action, so the field's
+          magnifier becomes the standard LoadingSpinner while it is in flight —
+          consistent with the header search. */}
+      <div className="relative">{searching ? (
+        <LoadingSpinner className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      ) : (
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      )}<Input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

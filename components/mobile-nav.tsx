@@ -7,6 +7,7 @@ import { signOut } from "@/app/actions";
 import { ModerationDot } from "@/components/moderation-dot";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
 import {
   Sheet,
   SheetContent,
@@ -182,14 +183,13 @@ export function MobileNav({
         <div className="mt-auto flex flex-col gap-2 border-t border-background/15 p-4">
           {role ? (
             <form action={signOut}>
-              <Button
-                type="submit"
+              <SubmitButton
                 variant="ghost"
                 className="w-full cursor-pointer justify-start text-destructive hover:bg-background/10 hover:text-destructive"
               >
                 <LogOut className="size-4" />
                 {tNav("logout")}
-              </Button>
+              </SubmitButton>
             </form>
           ) : (
             <>

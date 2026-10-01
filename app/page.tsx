@@ -17,11 +17,15 @@ type FeaturedPoet = {
   id: string;
   name_am: string;
   name_en: string | null;
+  /** Published poems, disputed ones INCLUDED (see get_featured_poets). */
   poem_count: number;
-  liked_poem_count?: number; // poems with ≥ 1 favourite (from get_featured_poets v2)
+  /** Poems with ≥ 1 favourite, disputed ones included. */
+  liked_poem_count?: number;
+  /** Favourites across ALL of the poet's poems, disputed ones included. */
   favorite_count: number;
-  favorites_per_poem: number;
-  favorites_per_poem_percent?: number;
+  /** favorite_count / poem_count as a raw average (e.g. 3.2), or null when
+   *  the poet has fewer than MIN_POEMS_FOR_AVG_LIKES poems. */
+  avg_likes_per_poem: number | null;
 };
 
 type FeaturedPoem = {
@@ -49,6 +53,15 @@ type CategoryRecord = {
 // rows can come back when a favorite has been disputed.
 const FEATURED_POEMS_LIMIT = 5;
 
+// Minimum number of published poems before a poet card shows an
+// "avg. likes/poem" figure — an average over a single poem is that poem's like
+// count, not an average. Mirrors v_avg_likes_min_poems in
+// get_featured_poets(), which already returns null below the threshold; this is
+// a defensive display guard (and the only gate on the no-RPC fallback below,
+// which has no favourites data and therefore never produces a figure).
+// Judgment call — raise it as the collection grows.
+const MIN_POEMS_FOR_AVG_LIKES = 2;
+
 async function getFeaturedPoets(
   supabase: Awaited<ReturnType<typeof createClient>>,
 ): Promise<FeaturedPoet[]> {
@@ -57,10 +70,13 @@ async function getFeaturedPoets(
   });
   if (!error && data) return data as FeaturedPoet[];
 
+  // Fallback for when the RPC is unavailable. Like get_featured_poets, this
+  // counts disputed poems too (they stay publicly visible), so the two paths
+  // report the same poem_count. Favourite counts aren't reachable without the
+  // RPC, so they stay 0 and no average is shown.
   const { data: poems } = await supabase
     .from("poems")
-    .select("poet_id, poets(id, name_am, name_en)")
-    .neq("attribution_status", "disputed");
+    .select("poet_id, poets(id, name_am, name_en)");
 
   const byPoet = new Map<string, FeaturedPoet>();
   for (const row of poems ?? []) {
@@ -73,7 +89,7 @@ async function getFeaturedPoets(
       poem_count: 0,
       liked_poem_count: 0,
       favorite_count: 0,
-      favorites_per_poem: 0,
+      avg_likes_per_poem: null,
     };
     current.poem_count += 1;
     byPoet.set(row.poet_id, current);
@@ -296,13 +312,15 @@ export default async function Home() {
                   <Badge variant="outline">
                     {tPoets("likeCount", { count: poet.favorite_count })}
                   </Badge>
-                  {poet.poem_count > 0 &&
-                  poet.liked_poem_count !== undefined ? (
+                  {poet.poem_count >= MIN_POEMS_FOR_AVG_LIKES &&
+                  poet.avg_likes_per_poem !== null &&
+                  poet.avg_likes_per_poem !== undefined ? (
+                    // Raw average, e.g. 3.2. Hidden (not "—") below the
+                    // threshold: a placeholder badge next to two real counts
+                    // reads as broken data rather than "not enough poems yet".
                     <Badge variant="secondary">
-                      {tPoets("likeRate", {
-                        rate: Math.round(
-                          (poet.liked_poem_count / poet.poem_count) * 100,
-                        ),
+                      {tPoets("avgLikesPerPoem", {
+                        value: Number(poet.avg_likes_per_poem).toFixed(1),
                       })}
                     </Badge>
                   ) : null}

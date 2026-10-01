@@ -1,7 +1,11 @@
+"use client"
+
 import * as React from "react"
 import { cn } from "cn"
+import Link, { useLinkStatus } from "next/link"
 
 import { Button } from "@/components/ui/button"
+import { LoadingSpinner } from "@/components/loading-spinner"
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
@@ -33,17 +37,46 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
   return <li data-slot="pagination-item" {...props} />
 }
 
+// `href` stays optional on purpose: a disabled page control (first page's
+// "Previous", last page's "Next") is rendered WITHOUT an href so it is not
+// navigable at all, rather than pointing somewhere inert. That is why the
+// disabled branch below renders a <span> instead of a <Link> — an <a> always
+// needs an href, and `next/link` types it as required.
 type PaginationLinkProps = {
   isActive?: boolean
-} & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">
+  href?: string
+  className?: string
+  children?: React.ReactNode
+  "aria-label"?: string
+  "aria-disabled"?: boolean | "false" | "true"
+} & Pick<React.ComponentProps<typeof Button>, "size">
+
+/**
+ * Swaps a page link's content for the app's standard LoadingSpinner while the
+ * navigation it triggered is still in flight.
+ *
+ * `useLinkStatus` only reports state for links inside a <Link>, so this has to
+ * be a descendant of one — which is exactly where the link's children are.
+ * Without it, clicking page 3 left the button looking completely inert until
+ * the new page painted, which reads as a dead button on a slow connection.
+ * `app/poems/loading.tsx` covers the content area; this covers the control.
+ */
+function LinkPending({ children }: { children: React.ReactNode }) {
+  const { pending } = useLinkStatus()
+  if (!pending) return <>{children}</>
+  return <LoadingSpinner />
+}
 
 function PaginationLink({
   className,
   isActive,
   size = "icon",
+  children,
+  href,
   ...props
 }: PaginationLinkProps) {
+  const content = <LinkPending>{children}</LinkPending>
+
   return (
     <Button
       asChild
@@ -51,12 +84,25 @@ function PaginationLink({
       size={size}
       className={cn(className)}
     >
-      <a
-        aria-current={isActive ? "page" : undefined}
-        data-slot="pagination-link"
-        data-active={isActive}
-        {...props}
-      />
+      {href ? (
+        <Link
+          href={href}
+          aria-current={isActive ? "page" : undefined}
+          data-slot="pagination-link"
+          data-active={isActive}
+          {...props}
+        >
+          {content}
+        </Link>
+      ) : (
+        <span
+          data-slot="pagination-link"
+          data-active={isActive}
+          {...props}
+        >
+          {content}
+        </span>
+      )}
     </Button>
   )
 }
