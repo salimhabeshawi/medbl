@@ -12,7 +12,14 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/loading-spinner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLocale, useTranslations } from "next-intl";
 
 export type CategorySearchItem = {
@@ -47,18 +54,23 @@ export function UniversalSearch({
   const [category, setCategory] = useState("all");
   const [filterOpen, setFilterOpen] = useState(false);
 
-  const visibleResults = category === "all"
-    ? results
-    : results.filter((poem) => poem.category_id === category);
+  const visibleResults =
+    category === "all"
+      ? results
+      : results.filter((poem) => poem.category_id === category);
 
   useEffect(() => {
     const nextValue = value.trim();
     if (!nextValue && category === "all") return;
     let cancelled = false;
     const timer = window.setTimeout(async () => {
-      const nextResults = mode === "poets"
-        ? await searchPoets(nextValue)
-        : await searchPoems(nextValue, category === "all" ? undefined : category);
+      const nextResults =
+        mode === "poets"
+          ? await searchPoets(nextValue)
+          : await searchPoems(
+              nextValue,
+              category === "all" ? undefined : category,
+            );
       if (cancelled) return;
       if (mode === "poets") setPoetResults(nextResults as PoetResult[]);
       else setResults(nextResults as UniversalPoemResult[]);
@@ -120,9 +132,18 @@ export function UniversalSearch({
         </div>
         {mode === "poems" && categories.length > 0 ? (
           <div className="relative min-w-0">
-            <Filter className={`pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground ${filterOpen ? "max-sm:hidden" : ""}`} />
-            <Select value={category} onValueChange={handleCategoryChange} onOpenChange={setFilterOpen}>
-              <SelectTrigger aria-label={tPoems("filterCategory")} className="mobile-filter-trigger h-11 min-h-11 w-11 shrink-0 justify-center pl-0 leading-none sm:w-full sm:justify-between sm:pl-9">
+            <Filter
+              className={`pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground ${filterOpen ? "max-sm:hidden" : ""}`}
+            />
+            <Select
+              value={category}
+              onValueChange={handleCategoryChange}
+              onOpenChange={setFilterOpen}
+            >
+              <SelectTrigger
+                aria-label={tPoems("filterCategory")}
+                className="mobile-filter-trigger h-11 min-h-11 w-11 shrink-0 justify-center pl-0 leading-none sm:w-full sm:justify-between sm:pl-9"
+              >
                 <SelectValue placeholder={tPoems("allCategories")} />
               </SelectTrigger>
               <SelectContent>
@@ -141,14 +162,28 @@ export function UniversalSearch({
       {value.trim() || category !== "all" ? (
         <div className="mt-3 space-y-2">
           {searching ? (
-            <p className="px-1 text-sm text-muted-foreground">{tCommon("loading")}</p>
+            Array.from({ length: mode === "poets" ? 3 : 4 }, (_, index) => (
+              <Card key={index} className="border-primary/15">
+                <CardContent className="space-y-2 p-4">
+                  <Skeleton className="h-5 w-2/3" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-full" />
+                </CardContent>
+              </Card>
+            ))
           ) : mode === "poets" && poetResults.length > 0 ? (
             poetResults.map((poet) => (
               <Link key={poet.id} href={`/poets/${poet.id}`} className="block">
                 <Card className="content-card border-primary/15">
                   <CardContent className="p-4">
-                    <p className="font-serif font-semibold text-foreground">{poet.name_am}</p>
-                    {poet.name_en ? <p className="mt-1 text-sm text-muted-foreground">{poet.name_en}</p> : null}
+                    <p className="font-serif font-semibold text-foreground">
+                      {poet.name_am}
+                    </p>
+                    {poet.name_en ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {poet.name_en}
+                      </p>
+                    ) : null}
                   </CardContent>
                 </Card>
               </Link>
@@ -158,16 +193,26 @@ export function UniversalSearch({
               <Link key={poem.id} href={`/poems/${poem.id}`} className="block">
                 <Card className="content-card border-primary/15">
                   <CardContent className="p-4">
-                    <p className="font-serif font-semibold text-foreground">{poem.title}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{poem.poet_name_am || poem.poet_name_en || tCommon("unknownPoet")}</p>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{excerpt(poem.body)}</p>
+                    <p className="font-serif font-semibold text-foreground">
+                      {poem.title}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {poem.poet_name_am ||
+                        poem.poet_name_en ||
+                        tCommon("unknownPoet")}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      {excerpt(poem.body)}
+                    </p>
                   </CardContent>
                 </Card>
               </Link>
             ))
           ) : (
             <p className="px-1 text-sm text-muted-foreground">
-              {mode === "poets" ? tPoets("noPoetsTitle") : tPoems("noPoemsTitle")}
+              {mode === "poets"
+                ? tPoets("noPoetsTitle")
+                : tPoems("noPoemsTitle")}
             </p>
           )}
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "next-themes";
+import { useTheme, type Theme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,7 +13,7 @@ import {
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-const options = [
+const options: { value: Theme; key: string; icon: typeof Sun }[] = [
   { value: "light", key: "light", icon: Sun },
   { value: "dark", key: "dark", icon: Moon },
   { value: "system", key: "device", icon: Monitor },
@@ -73,9 +73,19 @@ export function ThemeToggle({
           <Moon className="hidden size-4 dark:block" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40 border-border bg-popover">
+      <DropdownMenuContent
+        align="end"
+        className="w-40 border-border bg-popover"
+      >
         <DropdownMenuLabel>{t("theme")}</DropdownMenuLabel>
-        <DropdownMenuRadioGroup value={value} onValueChange={setTheme}>
+        <DropdownMenuRadioGroup
+          value={value}
+          onValueChange={(nextTheme) => {
+            if (options.some((option) => option.value === nextTheme)) {
+              setTheme(nextTheme as Theme);
+            }
+          }}
+        >
           {options.map((option) => {
             const Icon = option.icon;
 

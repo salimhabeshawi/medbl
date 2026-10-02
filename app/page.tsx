@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
@@ -12,6 +13,7 @@ import { EmptyState } from "@/components/empty-state";
 import { PoemCard } from "@/components/poem-card";
 import { PostPoemAction } from "@/components/post-poem-action";
 import { getLocale, getTranslations } from "next-intl/server";
+import { HomeLoading } from "@/components/home-loading";
 
 type FeaturedPoet = {
   id: string;
@@ -103,7 +105,15 @@ async function getFeaturedPoets(
     .slice(0, 5);
 }
 
-export default async function Home() {
+export default function Home() {
+  return (
+    <Suspense fallback={<HomeLoading />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+async function HomeContent() {
   const supabase = await createClient();
   const locale = await getLocale();
   const tHome = await getTranslations("Home");

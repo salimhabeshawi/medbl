@@ -7,6 +7,7 @@ import { Button } from "./ui/button";
 import { useTranslations } from "next-intl";
 import { Input } from "./ui/input";
 import { LoadingSpinner } from "./loading-spinner";
+import { Skeleton } from "./ui/skeleton";
 
 export function PoetSelect({
   value,
@@ -94,11 +95,18 @@ export function PoetSelect({
       <input type="hidden" name="poet_id" value={value?.id ?? ""} />
 
       {value ? (
-        <div className={`flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-card px-3 py-3 text-sm shadow-sm ${value ? "mb-2" : ""}`}>
-          <span className="flex min-w-0 items-center gap-2"><span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Search className="size-3.5" /></span><span className="truncate font-medium">
-            {value.name_am}
-            {value.name_en ? ` (${value.name_en})` : ""}
-          </span></span>
+        <div
+          className={`flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-card px-3 py-3 text-sm shadow-sm ${value ? "mb-2" : ""}`}
+        >
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Search className="size-3.5" />
+            </span>
+            <span className="truncate font-medium">
+              {value.name_am}
+              {value.name_en ? ` (${value.name_en})` : ""}
+            </span>
+          </span>
           <Button
             type="button"
             onClick={deselect}
@@ -117,11 +125,13 @@ export function PoetSelect({
       {/* Searching calls the searchPoets server action, so the field's
           magnifier becomes the standard LoadingSpinner while it is in flight —
           consistent with the header search. */}
-      <div className="relative">{searching ? (
-        <LoadingSpinner className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-      ) : (
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-      )}<Input
+      <div className="relative">
+        {searching ? (
+          <LoadingSpinner className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        ) : (
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        )}
+        <Input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -133,46 +143,64 @@ export function PoetSelect({
           autoComplete="off"
           aria-label={tSubmit("searchPoetPlaceholder")}
           className="h-11 pl-9"
-        /></div>
-        {open ? (
-          <ul className="absolute left-0 right-0 z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-primary/15 bg-card p-1 shadow-xl">
-            {searching ? (
-              <li className="px-3 py-3 text-sm text-muted-foreground">
-                Searching…
+        />
+      </div>
+      {open ? (
+        <ul className="absolute left-0 right-0 z-50 mt-2 max-h-72 overflow-y-auto rounded-xl border border-primary/15 bg-card p-1 shadow-xl">
+          {searching ? (
+            Array.from({ length: 3 }, (_, index) => (
+              <li key={index} className="flex items-center gap-3 px-3 py-3">
+                <Skeleton className="size-8 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
               </li>
-            ) : results.length === 0 ? (
-              <li className="px-3 py-3 text-sm text-muted-foreground">
-                {triedEmpty ? tSubmit("noPoetsFound") : tSubmit("typeToSearch")}
-              </li>
-            ) : (
-              results.map((poet) => (
-                <li key={poet.id}>
-                  <button
-                    type="button"
-                    onClick={() => choose(poet)}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm transition hover:bg-accent"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary/15 text-secondary"><UserRoundPlus className="size-4" /></span><span><span className="block font-medium">{poet.name_am}</span>{poet.name_en ? <span className="block text-xs text-muted-foreground">{poet.name_en}</span> : null}</span>
-                  </button>
-                </li>
-              ))
-            )}
-            {onRequestNew ? (
-              <li className="border-t border-border/70 px-3 py-2">
+            ))
+          ) : results.length === 0 ? (
+            <li className="px-3 py-3 text-sm text-muted-foreground">
+              {triedEmpty ? tSubmit("noPoetsFound") : tSubmit("typeToSearch")}
+            </li>
+          ) : (
+            results.map((poet) => (
+              <li key={poet.id}>
                 <button
                   type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    onRequestNew();
-                  }}
-                  className="inline-flex items-center gap-2 text-xs font-medium text-primary hover:underline"
+                  onClick={() => choose(poet)}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm transition hover:bg-accent"
                 >
-                  <UserRoundPlus className="size-3.5" /> {tSubmit("proposePoetToggle")}
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary/15 text-secondary">
+                    <UserRoundPlus className="size-4" />
+                  </span>
+                  <span>
+                    <span className="block font-medium">{poet.name_am}</span>
+                    {poet.name_en ? (
+                      <span className="block text-xs text-muted-foreground">
+                        {poet.name_en}
+                      </span>
+                    ) : null}
+                  </span>
                 </button>
               </li>
-            ) : null}
-          </ul>
-        ) : null}
+            ))
+          )}
+          {onRequestNew ? (
+            <li className="border-t border-border/70 px-3 py-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onRequestNew();
+                }}
+                className="inline-flex items-center gap-2 text-xs font-medium text-primary hover:underline"
+              >
+                <UserRoundPlus className="size-3.5" />{" "}
+                {tSubmit("proposePoetToggle")}
+              </button>
+            </li>
+          ) : null}
+        </ul>
+      ) : null}
     </div>
   );
 }

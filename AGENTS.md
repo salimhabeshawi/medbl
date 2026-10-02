@@ -830,6 +830,9 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
     RPC. Migration `20260927030000_featured_poets_inclusive_stats.sql`
     applied live via `supabase db push` and verified against the live
     database (anon RPC + real data) — done
+  31. Added shape-matched page and section skeleton loading states across
+    data-fetching routes and client search results, following the existing
+    `/poems` loading pattern — done
 
 ## Guidelines for future changes
 
@@ -858,6 +861,8 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
   the reference implementation. Do NOT add this to purely client-side,
   instantaneous interactions that never touch the network (opening a menu
   or dialog, toggling a disclosure, local form validation).
+- Any new page or section that fetches data must include a matching skeleton
+  loading state, following the `/poems` pattern.
 - Keep this file in sync with reality at the end of every feature step
   — update the relevant section(s) above rather than appending a change
   log at the bottom.
