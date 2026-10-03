@@ -6,9 +6,52 @@ import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { ListSortSelect, type ListSort } from "@/components/list-sort-select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { getTranslations } from "next-intl/server";
 
 export const metadata: Metadata = { title: "Poets" };
+
+const PAGE_SIZE = 12;
+
+function param(value: string | string[] | undefined): string {
+  return (Array.isArray(value) ? value[0] : value) ?? "";
+}
+
+function pageUrl(params: { q: string; page: number; sort: ListSort }): string {
+  const search = new URLSearchParams();
+  if (params.q) search.set("q", params.q);
+  if (params.sort !== "poems_desc") search.set("sort", params.sort);
+  if (params.page > 1) search.set("page", String(params.page));
+  const query = search.toString();
+  return query ? `/poets?${query}` : "/poets";
+}
+
+function pageItems(page: number, totalPages: number): (number | "ellipsis")[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const sorted = [...new Set([1, totalPages, page - 1, page, page + 1])]
+    .filter((candidate) => candidate >= 1 && candidate <= totalPages)
+    .sort((a, b) => a - b);
+
+  const items: (number | "ellipsis")[] = [];
+  let previous = 0;
+  for (const candidate of sorted) {
+    if (previous && candidate - previous > 1) items.push("ellipsis");
+    items.push(candidate);
+    previous = candidate;
+  }
+  return items;
+}
 
 type PoetRow = {
   id: string;
@@ -18,6 +61,7 @@ type PoetRow = {
   poems_count: number;
   likes_count: number;
   avg_likes_per_poem: number | null;
+  total_count: number;
 };
 
 export default async function PoetsPage({
@@ -26,11 +70,13 @@ export default async function PoetsPage({
   searchParams: Promise<{
     q?: string | string[];
     sort?: string | string[];
+    page?: string | string[];
   }>;
 }) {
   const params = await searchParams;
-  const q = (Array.isArray(params.q) ? params.q[0] : (params.q ?? "")).trim();
-  const rawSort = Array.isArray(params.sort) ? params.sort[0] : params.sort;
+  const q = param(params.q).trim();
+  const rawSort = param(params.sort);
+  const page = Math.max(1, parseInt(param(params.page), 10) || 1);
   const sort: ListSort = [
     "poems_desc",
     "poems_asc",
@@ -42,14 +88,19 @@ export default async function PoetsPage({
     ? (rawSort as ListSort)
     : "poems_desc";
   const tPoets = await getTranslations("Poets");
+  const tCommon = await getTranslations("Common");
 
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("list_poets", {
     p_sort: sort,
     p_query: q || null,
+    p_limit: PAGE_SIZE,
+    p_offset: (page - 1) * PAGE_SIZE,
   });
   const poets = (data ?? []) as PoetRow[];
+  const totalCount = Number(poets[0]?.total_count ?? 0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
@@ -141,6 +192,75 @@ export default async function PoetsPage({
           description={q ? tPoets("noPoetsDesc") : tPoets("noPoetsYetDesc")}
         />
       )}
+
+      {totalPages > 1 ? (
+        <>
+          <Pagination className="mt-8">
+            <PaginationContent className="flex-wrap">
+              <PaginationItem>
+                {page > 1 ? (
+                  <PaginationPrevious
+                    href={pageUrl({ q, page: page - 1, sort })}
+                    text={tCommon("previous")}
+                    aria-label={tCommon("previous")}
+                  />
+                ) : (
+                  <PaginationPrevious
+                    text={tCommon("previous")}
+                    aria-label={tCommon("previous")}
+                    aria-disabled="true"
+                    className="pointer-events-none opacity-50"
+                  />
+                )}
+              </PaginationItem>
+
+              {pageItems(page, totalPages).map((item, index) =>
+                item === "ellipsis" ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={item}>
+                    <PaginationLink
+                      href={pageUrl({ q, page: item, sort })}
+                      isActive={item === page}
+                      aria-label={tCommon("pageOf", {
+                        page: item,
+                        total: totalPages,
+                      })}
+                    >
+                      {item}
+                    </PaginationLink>
+                  </PaginationItem>
+                ),
+              )}
+
+              <PaginationItem>
+                {page < totalPages ? (
+                  <PaginationNext
+                    href={pageUrl({ q, page: page + 1, sort })}
+                    text={tCommon("next")}
+                    aria-label={tCommon("next")}
+                  />
+                ) : (
+                  <PaginationNext
+                    text={tCommon("next")}
+                    aria-label={tCommon("next")}
+                    aria-disabled="true"
+                    className="pointer-events-none opacity-50"
+                  />
+                )}
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+          <p className="mt-3 text-center text-sm text-muted-foreground">
+            {tCommon("pageOf", {
+              page: Math.min(page, totalPages),
+              total: totalPages,
+            })}
+          </p>
+        </>
+      ) : null}
     </div>
   );
 }

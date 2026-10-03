@@ -12,7 +12,7 @@ export default function PoetsLoading() {
         <Skeleton className="size-11 rounded-lg sm:w-full" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 9 }, (_, index) => (
+        {Array.from({ length: 12 }, (_, index) => (
           <PoetCardSkeleton key={index} />
         ))}
       </div>

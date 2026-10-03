@@ -858,6 +858,9 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
   35. Updated loading skeletons across current page layouts, including
     controls, responsive grids, moderation forms, adjacent navigation, and
     recommended reads — done
+  36. Added 12-per-page pagination to `/poets`, including paginated `list_poets()`
+    results, sort-preserving page links, total counts, and matching loading
+    controls/skeletons — done
 
 ## Guidelines for future changes
 
