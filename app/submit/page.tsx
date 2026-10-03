@@ -54,11 +54,15 @@ export default async function SubmitPage({
 
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-        <BackLink href="/submit">{tSubmit("selectPath")}</BackLink>
+        <BackLink fallbackHref="/submit">{tSubmit("selectPath")}</BackLink>
         <div className="mb-10 max-w-2xl">
-          <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">{tSubmit("myOwnPoem")}</h1>
+          <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+            {tSubmit("myOwnPoem")}
+          </h1>
           <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-            {tSubmit("ownIntro", { poet: poet?.name_am ?? poet?.name_en ?? tSubmit("linkedPoet") })}
+            {tSubmit("ownIntro", {
+              poet: poet?.name_am ?? poet?.name_en ?? tSubmit("linkedPoet"),
+            })}
           </p>
         </div>
         <OwnPoemForm poetId={poetId} categories={categories} />
@@ -79,14 +83,19 @@ export default async function SubmitPage({
 
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-        <BackLink href="/submit">{tSubmit("selectPath")}</BackLink>
+        <BackLink fallbackHref="/submit">{tSubmit("selectPath")}</BackLink>
         <div className="mb-10 max-w-2xl">
-          <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">{tSubmit("anotherPoetPoem")}</h1>
+          <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+            {tSubmit("anotherPoetPoem")}
+          </h1>
           <p className="text-sm leading-7 text-muted-foreground sm:text-base">
             {tSubmit("subtitle")}
           </p>
         </div>
-        <SubmitPoemForm categories={categories} defaultPoet={folkPoet ?? null} />
+        <SubmitPoemForm
+          categories={categories}
+          defaultPoet={folkPoet ?? null}
+        />
       </div>
     );
   }
@@ -94,7 +103,9 @@ export default async function SubmitPage({
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       <div className="mb-10 max-w-2xl">
-        <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">{tSubmit("title")}</h1>
+        <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {tSubmit("title")}
+        </h1>
         <p className="text-sm leading-7 text-muted-foreground sm:text-base">
           {tSubmit("subtitle")}
         </p>
@@ -107,7 +118,9 @@ export default async function SubmitPage({
                 <Feather className="size-5" />
               </div>
               <div>
-                <h2 className="mb-2 font-serif text-xl">{tSubmit("myOwnPoem")}</h2>
+                <h2 className="mb-2 font-serif text-xl">
+                  {tSubmit("myOwnPoem")}
+                </h2>
               </div>
             </CardContent>
           </Card>
@@ -119,7 +132,9 @@ export default async function SubmitPage({
                 <BookOpen className="size-5" />
               </div>
               <div>
-                <h2 className="mb-2 font-serif text-xl">{tSubmit("anotherPoetPoem")}</h2>
+                <h2 className="mb-2 font-serif text-xl">
+                  {tSubmit("anotherPoetPoem")}
+                </h2>
               </div>
             </CardContent>
           </Card>

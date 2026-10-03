@@ -32,7 +32,21 @@
     "filterPoet": "Filter by poet",
     "allCategories": "All categories",
     "allPoets": "All poets",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "filtersAndSort": "Filters & sort",
+    "filtersAndSortDescription": "Refine your submissions by category, poet, or order."
+  },
+  "Sort": {
+    "label": "Sort by",
+    "date_desc": "Newest first",
+    "date_asc": "Oldest first",
+    "alphabetical": "Alphabetical (A–Z)",
+    "likes_desc": "Most liked",
+    "likes_asc": "Least liked",
+    "poems_desc": "Most poems",
+    "poems_asc": "Fewest poems",
+    "avg_likes_desc": "Highest avg likes per poem",
+    "avg_likes_asc": "Lowest avg likes per poem"
   },
   "NotFound": {
     "title": "Page not found",
@@ -111,6 +125,10 @@
     "loginToFavorite": "Log in to favorite",
     "copyPoem": "Copy poem",
     "viewsCount": "{count} views",
+    "publishedOn": "Published",
+    "recommendedReads": "Recommended reads",
+    "moreInCategory": "More in {category}",
+    "moreByPoet": "More by {poet}",
     "sharePoem": "Share poem",
     "by": "by",
     "openPoem": "Open poem",
@@ -223,7 +241,9 @@
     "cancelDesc": "\"{title}\" will be permanently deleted. This cannot be undone — you would have to submit it again.",
     "cancelConfirm": "Delete submission",
     "cancelling": "Deleting...",
-    "cancelled": "Submission deleted."
+    "cancelled": "Submission deleted.",
+    "all": "All",
+    "statusFilters": "Filter by submission status"
   },
   "Profile": {
     "title": "Your Profile",

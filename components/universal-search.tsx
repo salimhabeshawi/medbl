@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Filter, Search } from "lucide-react";
 import {
   searchPoems,
@@ -33,17 +34,24 @@ export function UniversalSearch({
   defaultValue = "",
   placeholder,
   categories = [],
+  selectedCategory = "",
+  syncCategoryToUrl = false,
 }: {
   mode?: "poems" | "poets";
   defaultValue?: string;
   placeholder?: string;
   categories?: CategorySearchItem[];
+  selectedCategory?: string;
+  syncCategoryToUrl?: boolean;
 }) {
   const locale = useLocale();
   const tSearch = useTranslations("Search");
   const tPoems = useTranslations("Poems");
   const tPoets = useTranslations("Poets");
   const tCommon = useTranslations("Common");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const searchPlaceholder = placeholder || tSearch("placeholder");
 
@@ -51,7 +59,7 @@ export function UniversalSearch({
   const [results, setResults] = useState<UniversalPoemResult[]>([]);
   const [poetResults, setPoetResults] = useState<PoetResult[]>([]);
   const [searching, setSearching] = useState(false);
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(selectedCategory || "all");
   const [filterOpen, setFilterOpen] = useState(false);
 
   const visibleResults =
@@ -95,6 +103,14 @@ export function UniversalSearch({
   function handleCategoryChange(nextCategory: string) {
     setCategory(nextCategory);
     setSearching(nextCategory !== "all" || Boolean(value.trim()));
+    if (syncCategoryToUrl) {
+      const params = new URLSearchParams(searchParams.toString());
+      if (nextCategory === "all") params.delete("category");
+      else params.set("category", nextCategory);
+      params.delete("page");
+      const query = params.toString();
+      router.push(query ? `${pathname}?${query}` : pathname);
+    }
   }
 
   function excerpt(body: string): string {
@@ -109,7 +125,13 @@ export function UniversalSearch({
 
   return (
     <form onSubmit={(event) => event.preventDefault()} className="w-full">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_13rem]">
+      <div
+        className={
+          mode === "poets"
+            ? "grid grid-cols-1 items-center gap-2"
+            : "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:grid-cols-[minmax(0,1fr)_13rem]"
+        }
+      >
         <div className="relative min-w-0">
           {/* The search RPC is debounced and hits the network, so the field's
               magnifier becomes the standard LoadingSpinner while it runs —

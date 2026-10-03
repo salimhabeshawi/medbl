@@ -12,6 +12,9 @@ export function HomeLoading() {
         <Skeleton className="mx-auto h-8 w-56" />
         <Skeleton className="mx-auto mt-3 h-5 w-full max-w-xl" />
         <Skeleton className="mx-auto mt-6 h-11 w-full max-w-2xl rounded-lg" />
+        <div className="mt-4 flex justify-center">
+          <Skeleton className="h-9 w-32 rounded-lg" />
+        </div>
       </section>
       <HomeSectionSkeleton count={6} />
       <HomeSectionSkeleton count={5} />

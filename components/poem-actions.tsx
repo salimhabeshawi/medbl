@@ -42,9 +42,7 @@ export function PoemActions({
   // targets would append it a second time). Body line breaks are preserved
   // exactly as stored.
   function buildShareText(): string {
-    return [title, body, `በ ${poetNameAm}`, window.location.href].join(
-      "\n\n",
-    );
+    return [title, body, `በ ${poetNameAm}`, window.location.href].join("\n\n");
   }
 
   async function copyPoem() {
@@ -85,21 +83,29 @@ export function PoemActions({
             initialFavoriteCount={initialFavoriteCount}
           />
         ) : (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                asChild
-                variant="outline"
-                size="icon"
-                className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
-              >
-                <Link href="/login" aria-label={tPoems("loginToFavorite")}>
-                  <Heart className="size-4" aria-hidden="true" />
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{tPoems("loginToFavorite")}</TooltipContent>
-          </Tooltip>
+          <>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
+                >
+                  <Link href="/login" aria-label={tPoems("loginToFavorite")}>
+                    <Heart className="size-4" aria-hidden="true" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{tPoems("loginToFavorite")}</TooltipContent>
+            </Tooltip>
+            <span
+              className="min-w-5 text-center text-xs font-medium text-muted-foreground"
+              aria-label={tPoems("likesCount", { count: initialFavoriteCount })}
+            >
+              {initialFavoriteCount}
+            </span>
+          </>
         )}
 
         <Tooltip>

@@ -33,7 +33,21 @@
     "filterPoet": "በገጣሚ ማጣሪያ",
     "allCategories": "ሁሉም መደቦች",
     "allPoets": "ሁሉም ገጣሚዎች",
-    "clearFilters": "ማጣሪያዎችን አጽዳ"
+    "clearFilters": "ማጣሪያዎችን አጽዳ",
+    "filtersAndSort": "ማጣሪያ እና ደረጃ",
+    "filtersAndSortDescription": "ያስገቧቸውን ግጥሞች በመደብ፣ በገጣሚ ወይም በቅደም ተከተል ያጣሩ።"
+  },
+  "Sort": {
+    "label": "በዚህ ደርድር",
+    "date_desc": "አዲስ መጀመሪያ",
+    "date_asc": "አሮጌ መጀመሪያ",
+    "alphabetical": "በፊደል (A–Z)",
+    "likes_desc": "ብዙ የተወደደ",
+    "likes_asc": "ጥቂት የተወደደ",
+    "poems_desc": "ብዙ ግጥሞች",
+    "poems_asc": "ጥቂት ግጥሞች",
+    "avg_likes_desc": "ከፍተኛ አማካይ ውዶታ በግጥም",
+    "avg_likes_asc": "ዝቅተኛ አማካይ ውዶታ በግጥም"
   },
   "NotFound": {
     "title": "ገጹ አልተገኘም",
@@ -123,6 +137,10 @@
     "favoriteRemoveTooltip": "ከወደድኳቸው አስወግድ",
     "likesCount": "{count} የተወደደ",
     "viewsCount": "{count} ጊዜ የተነበበ",
+    "publishedOn": "የታተመበት ቀን",
+    "recommendedReads": "የሚመከሩ ግጥሞች",
+    "moreInCategory": "በ{category} መደብ ውስጥ ተጨማሪ",
+    "moreByPoet": "በ{poet} ተጨማሪ",
     "_attributionTooltipsNote": "DRAFT TRANSLATIONS — the three attribution tooltip strings below are first-pass drafts and must be reviewed/refined by a native Amharic speaker (attribution nuance matters). JSON has no comment syntax, so this note lives as an unused key instead.",
     "verifiedTooltip": "የዚህ ግጥም ደራሲነት በአወያይ ከታመነ ምንጭ ጋር ተረጋግጧል።",
     "communityTooltip": "የዚህ ግጥም ደራሲነት በአወያይ ተቀባይነት አግኝቷል፤ ነገር ግን ገለልተኛ ማረጋገጫ አላገኘም።",
@@ -226,7 +244,9 @@
     "cancelDesc": "በዚህ ጊዜ «{title}» ሙሉ በሙሉ ይጠፋል። ይህን መመለስ አይችሉም — ካለፈው ማንሰብና እንደገና ማስገባ ያስፈልጋል።",
     "cancelConfirm": "ግጥሙን አጥፋ",
     "cancelling": "በማጥፋት ላይ...",
-    "cancelled": "ግጥሙ ተጥፋል።"
+    "cancelled": "ግጥሙ ተጥፋል።",
+    "all": "ሁሉም",
+    "statusFilters": "በግጥሙ ሁኔታ ይለዩ"
   },
   "Profile": {
     "title": "የእርስዎ መገለጫ",

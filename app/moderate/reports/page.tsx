@@ -21,10 +21,15 @@ export default async function ModerateReportsPage() {
 
   return (
     <div>
-      <BackLink href="/moderate">{tMod("backModeration")}</BackLink>
-      <h2 className="mb-6 font-serif text-2xl font-semibold">{tMod("reportsHeadingSimple")}</h2>
+      <BackLink fallbackHref="/moderate">{tMod("backModeration")}</BackLink>
+      <h2 className="mb-6 font-serif text-2xl font-semibold">
+        {tMod("reportsHeadingSimple")}
+      </h2>
       {error ? (
-        <Alert variant="destructive"><AlertTitle>{tMod("loadReportsError")}</AlertTitle><AlertDescription>{error.message}</AlertDescription></Alert>
+        <Alert variant="destructive">
+          <AlertTitle>{tMod("loadReportsError")}</AlertTitle>
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
       ) : data && data.length > 0 ? (
         <ul className="flex flex-col gap-4">
           {data.map((report) => {
@@ -48,7 +53,10 @@ export default async function ModerateReportsPage() {
           })}
         </ul>
       ) : (
-        <EmptyState title={tMod("noOpenReports")} description={tMod("noOpenReportsDesc")} />
+        <EmptyState
+          title={tMod("noOpenReports")}
+          description={tMod("noOpenReportsDesc")}
+        />
       )}
     </div>
   );

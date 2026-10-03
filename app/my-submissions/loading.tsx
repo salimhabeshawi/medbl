@@ -9,9 +9,12 @@ export default function MySubmissionsLoading() {
       <Skeleton className="mb-10 h-5 w-full max-w-xl" />
       <Skeleton className="mb-4 h-8 w-48" />
       <Skeleton className="mb-4 h-5 w-28" />
-      <div className="mb-6 flex gap-3">
-        <Skeleton className="h-10 w-52 rounded-lg" />
-        <Skeleton className="h-10 w-52 rounded-lg" />
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Skeleton className="h-8 w-20 rounded-lg" />
+        <Skeleton className="h-8 w-24 rounded-lg" />
+        <Skeleton className="h-8 w-24 rounded-lg" />
+        <Skeleton className="h-8 w-24 rounded-lg" />
+        <Skeleton className="h-8 w-28 rounded-lg" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {Array.from({ length: 6 }, (_, index) => (

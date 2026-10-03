@@ -1,5 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { FormSkeleton } from "@/components/page-skeletons";
+import {
+  AccountFormSkeleton,
+  PasswordFormSkeleton,
+  PoetDetailsSkeleton,
+} from "@/components/page-skeletons";
 
 export default function ProfileLoading() {
   return (
@@ -15,14 +19,15 @@ export default function ProfileLoading() {
             <Skeleton className="h-4 w-64" />
           </div>
         </div>
-        <FormSkeleton />
+        <PoetDetailsSkeleton />
       </section>
       <section className="space-y-5">
         <div className="flex items-center gap-3">
           <Skeleton className="size-10 rounded-full" />
           <Skeleton className="h-6 w-40" />
         </div>
-        <FormSkeleton />
+        <AccountFormSkeleton />
+        <PasswordFormSkeleton />
       </section>
     </div>
   );

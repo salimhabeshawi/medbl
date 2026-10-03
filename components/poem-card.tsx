@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { AttributionBadge } from "@/components/attribution-badge";
 import { PoemViewCount } from "@/components/poem-view-count";
 import { useLocale, useTranslations } from "next-intl";
+import { Heart } from "lucide-react";
 
 export type CategoryData = {
   id?: string;
@@ -36,11 +38,13 @@ export function PoemCard({
   favorited = false,
   favoriteCount = 0,
   showFavorite = true,
+  showFavoriteCount = showFavorite,
 }: {
   poem: PoemCardData;
   favorited?: boolean;
   favoriteCount?: number;
   showFavorite?: boolean;
+  showFavoriteCount?: boolean;
 }) {
   const locale = useLocale();
   const tPoems = useTranslations("Poems");
@@ -48,12 +52,12 @@ export function PoemCard({
   const displayCategory = poem.categoryName
     ? poem.categoryName
     : typeof poem.category === "object" && poem.category !== null
-    ? locale === "am"
-      ? poem.category.name_am || poem.category.name_en
-      : poem.category.name_en || poem.category.name_am
-    : typeof poem.category === "string"
-    ? poem.category
-    : null;
+      ? locale === "am"
+        ? poem.category.name_am || poem.category.name_en
+        : poem.category.name_en || poem.category.name_am
+      : typeof poem.category === "string"
+        ? poem.category
+        : null;
 
   const renderAttribution = (status?: string) => (
     <AttributionBadge status={status} />
@@ -61,23 +65,54 @@ export function PoemCard({
 
   return (
     <Card className="content-card relative border-border bg-card shadow-none">
-      <Link href={`/poems/${poem.id}`} className="absolute inset-0 z-0 rounded-xl" aria-label={`${tPoems("openPoem")}: ${poem.title}`} />
+      <Link
+        href={`/poems/${poem.id}`}
+        className="absolute inset-0 z-0 rounded-xl"
+        aria-label={`${tPoems("openPoem")}: ${poem.title}`}
+      />
       <CardHeader className="relative z-10 gap-2 pointer-events-none">
         {/* Poem number top-left, view/favorite stats top-right; the title gets
             its own full-width line below, so long titles never wrap because of
             the stats. */}
-        {poem.poemNumber != null || showFavorite || poem.viewCount != null ? (
+        {poem.poemNumber != null ||
+        showFavorite ||
+        showFavoriteCount ||
+        poem.viewCount != null ? (
           <div className="flex items-center justify-between gap-2">
             <span className="font-bold tabular-nums text-base text-muted-foreground">
               {poem.poemNumber != null ? `#${poem.poemNumber}` : null}
             </span>
-            {showFavorite || poem.viewCount != null ? (
+            {showFavorite || showFavoriteCount || poem.viewCount != null ? (
               <div className="pointer-events-auto flex items-center gap-2">
                 {poem.viewCount != null ? (
                   <PoemViewCount viewCount={poem.viewCount} />
                 ) : null}
                 {showFavorite ? (
-                  <FavoriteToggle poemId={poem.id} initialFavorited={favorited} initialFavoriteCount={favoriteCount} />
+                  <FavoriteToggle
+                    poemId={poem.id}
+                    initialFavorited={favorited}
+                    initialFavoriteCount={favoriteCount}
+                  />
+                ) : showFavoriteCount ? (
+                  <span
+                    className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground"
+                    aria-label={tPoems("likesCount", { count: favoriteCount })}
+                  >
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="icon"
+                      className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
+                    >
+                      <Link
+                        href="/login"
+                        aria-label={tPoems("loginToFavorite")}
+                      >
+                        <Heart className="size-4" aria-hidden="true" />
+                      </Link>
+                    </Button>
+                    {favoriteCount}
+                  </span>
                 ) : null}
               </div>
             ) : null}
@@ -88,12 +123,26 @@ export function PoemCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="relative z-10 pointer-events-none space-y-3">
-        {poem.poetName ? <p className="text-sm text-secondary">{tPoems("by")} {poem.poetName}</p> : null}
-        {poem.body ? <p className="whitespace-pre-line text-sm leading-6 text-muted-foreground">{firstFourLines(poem.body)}</p> : null}
+        {poem.poetName ? (
+          <p className="text-sm text-secondary">
+            {tPoems("by")} {poem.poetName}
+          </p>
+        ) : null}
+        {poem.body ? (
+          <p className="whitespace-pre-line text-sm leading-6 text-muted-foreground">
+            {firstFourLines(poem.body)}
+          </p>
+        ) : null}
         <div className="flex flex-wrap gap-2">
           {renderAttribution(poem.attribution_status)}
-          {displayCategory ? <Badge variant="outline">{displayCategory}</Badge> : null}
-          {(poem.tags ?? []).slice(0, 3).map((tag) => <Badge key={tag} variant="outline">{tag}</Badge>)}
+          {displayCategory ? (
+            <Badge variant="outline">{displayCategory}</Badge>
+          ) : null}
+          {(poem.tags ?? []).slice(0, 3).map((tag) => (
+            <Badge key={tag} variant="outline">
+              {tag}
+            </Badge>
+          ))}
         </div>
       </CardContent>
     </Card>

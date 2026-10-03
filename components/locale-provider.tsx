@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useTransition,
-} from "react";
+import { createContext, useContext, useState, useTransition } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { useRouter } from "next/navigation";
 
@@ -71,6 +66,7 @@ export function LocaleProvider({
       <NextIntlClientProvider
         locale={locale}
         messages={locale === "en" ? messagesEn : messagesAm}
+        timeZone="Africa/Addis_Ababa"
       >
         {children}
       </NextIntlClientProvider>

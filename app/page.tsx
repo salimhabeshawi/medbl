@@ -2,11 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
-import {
-  getCurrentUser,
-  getFavoriteCounts,
-  getFavoritePoemIds,
-} from "@/lib/favorites";
+import { getFavoriteCounts, getFavoritePoemIds } from "@/lib/favorites";
 import { Badge } from "@/components/ui/badge";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
@@ -148,7 +144,6 @@ async function HomeContent() {
     ),
   ].sort();
 
-  const user = await getCurrentUser();
   // Deduplicate: a poem can appear in both recentPoems and featuredPoems.
   // Passing duplicate ids to get_poem_favorite_counts would multiply the
   // count for each duplicate occurrence.
@@ -216,7 +211,6 @@ async function HomeContent() {
                   }}
                   favorited={favIds.has(poem.id)}
                   favoriteCount={favoriteCounts.get(poem.id) ?? 0}
-                  showFavorite={Boolean(user)}
                 />
               );
             })}

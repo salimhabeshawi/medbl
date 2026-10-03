@@ -80,11 +80,18 @@ export default async function FavoritesPage({
       if (!poem) return null;
       const poet = firstRelation<PoetRow>(poem.poets) ?? null;
       const categoryRow = firstRelation<CategoryRow>(poem.categories);
-      return { poem: { ...poem, category: locale === "am" ? categoryRow?.name_am || categoryRow?.name_en || null : categoryRow?.name_en || categoryRow?.name_am || null }, poet } satisfies FavoriteDisplayRow;
+      return {
+        poem: {
+          ...poem,
+          category:
+            locale === "am"
+              ? categoryRow?.name_am || categoryRow?.name_en || null
+              : categoryRow?.name_en || categoryRow?.name_am || null,
+        },
+        poet,
+      } satisfies FavoriteDisplayRow;
     })
-    .filter(
-      (row): row is FavoriteDisplayRow => row !== null,
-    );
+    .filter((row): row is FavoriteDisplayRow => row !== null);
 
   // Filter options come from THIS user's favorites only — never the site-wide
   // category/poet registries.
@@ -118,18 +125,41 @@ export default async function FavoritesPage({
             .includes(q)
         : true,
     );
-  const favoriteCounts = await getFavoriteCounts(rows.map((row) => row.poem.id));
+  const favoriteCounts = await getFavoriteCounts(
+    rows.map((row) => row.poem.id),
+  );
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <BackLink href="/">{tFav("back")}</BackLink>
-      <div className="mb-8"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">{tFav("eyebrow")}</p><h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">{tFav("title")}</h1><p className="text-sm leading-7 text-muted-foreground">{tFav("subtitle")}</p></div>
-      <div className="mb-8"><UniversalSearch defaultValue={q} placeholder={tFav("searchPlaceholder")} /></div>
+      <BackLink fallbackHref="/">{tFav("back")}</BackLink>
+      <div className="mb-8">
+        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+          {tFav("eyebrow")}
+        </p>
+        <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {tFav("title")}
+        </h1>
+        <p className="text-sm leading-7 text-muted-foreground">
+          {tFav("subtitle")}
+        </p>
+      </div>
+      <div className="mb-8">
+        <UniversalSearch
+          defaultValue={q}
+          placeholder={tFav("searchPlaceholder")}
+        />
+      </div>
 
       {error ? (
-        <EmptyState title={tFav("errorTitle")} description={tFav("errorDesc")} />
+        <EmptyState
+          title={tFav("errorTitle")}
+          description={tFav("errorDesc")}
+        />
       ) : rows.length === 0 ? (
-        <EmptyState title={tFav("emptyTitle")} description={tFav("emptyDesc")} />
+        <EmptyState
+          title={tFav("emptyTitle")}
+          description={tFav("emptyDesc")}
+        />
       ) : (
         <>
           <ListFilters
@@ -141,11 +171,20 @@ export default async function FavoritesPage({
           {filteredRows.length > 0 ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredRows.map((row) => (
-                <FavoriteRow key={row.poem.id} poem={row.poem} poet={row.poet} favoriteCount={favoriteCounts.get(row.poem.id) ?? 0} viewCount={row.poem.view_count ?? 0} />
+                <FavoriteRow
+                  key={row.poem.id}
+                  poem={row.poem}
+                  poet={row.poet}
+                  favoriteCount={favoriteCounts.get(row.poem.id) ?? 0}
+                  viewCount={row.poem.view_count ?? 0}
+                />
               ))}
             </div>
           ) : (
-            <EmptyState title={tFav("noMatchTitle")} description={tFav("noMatchDesc")} />
+            <EmptyState
+              title={tFav("noMatchTitle")}
+              description={tFav("noMatchDesc")}
+            />
           )}
         </>
       )}

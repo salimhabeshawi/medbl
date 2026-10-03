@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { FormSkeleton } from "@/components/page-skeletons";
+import { SubmissionFormSkeleton } from "@/components/page-skeletons";
 
 export default function SubmitLoading() {
   return (
@@ -7,7 +7,7 @@ export default function SubmitLoading() {
       <Skeleton className="mb-10 h-10 w-64" />
       <Skeleton className="mb-3 h-10 w-72" />
       <Skeleton className="mb-10 h-5 w-full max-w-xl" />
-      <FormSkeleton />
+      <SubmissionFormSkeleton />
     </div>
   );
 }

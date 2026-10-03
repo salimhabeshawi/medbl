@@ -30,7 +30,7 @@ export default async function ModerateSubmissionsPage() {
   if (error) {
     return (
       <div>
-        <BackLink href="/moderate">{tMod("backModeration")}</BackLink>
+        <BackLink fallbackHref="/moderate">{tMod("backModeration")}</BackLink>
         <h2 className="mb-6 font-serif text-2xl font-semibold">
           {tMod("pendingHeading")}
         </h2>
@@ -44,7 +44,10 @@ export default async function ModerateSubmissionsPage() {
   }
 
   const submissions = data ?? [];
-  const { data: categoryRows } = await supabase.from("categories").select("id, name_am, name_en").order("name_en");
+  const { data: categoryRows } = await supabase
+    .from("categories")
+    .select("id, name_am, name_en")
+    .order("name_en");
   const categories = (categoryRows ?? []) as CategorySelectRecord[];
 
   // For proposals, fetch the top fuzzy-matched existing poets so the
@@ -66,7 +69,7 @@ export default async function ModerateSubmissionsPage() {
 
   return (
     <div>
-      <BackLink href="/moderate">{tMod("backModeration")}</BackLink>
+      <BackLink fallbackHref="/moderate">{tMod("backModeration")}</BackLink>
       <h2 className="mb-6 font-serif text-2xl font-semibold">
         {tMod("pendingSubmissions", { count: submissions.length })}
       </h2>
@@ -93,9 +96,7 @@ export default async function ModerateSubmissionsPage() {
                 categoryId={sub.category_id}
                 tags={Array.isArray(sub.tags) ? sub.tags : null}
                 poetId={sub.poet_id}
-                poetName={
-                  poet ? (poet.name_am ?? poet.name_en ?? null) : null
-                }
+                poetName={poet ? (poet.name_am ?? poet.name_en ?? null) : null}
                 proposal={proposal}
                 matches={matchesBySubmission.get(sub.id) ?? []}
                 createdAt={sub.created_at}
@@ -105,7 +106,10 @@ export default async function ModerateSubmissionsPage() {
           })}
         </ul>
       ) : (
-        <EmptyState title={tMod("queueClear")} description={tMod("queueClearDesc")} />
+        <EmptyState
+          title={tMod("queueClear")}
+          description={tMod("queueClearDesc")}
+        />
       )}
     </div>
   );

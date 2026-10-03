@@ -8,9 +8,8 @@ export default function FavoritesLoading() {
       <Skeleton className="mb-3 h-10 w-64" />
       <Skeleton className="mb-8 h-5 w-full max-w-xl" />
       <Skeleton className="mb-8 h-11 w-full rounded-lg" />
-      <div className="mb-6 flex gap-3">
-        <Skeleton className="h-10 w-52 rounded-lg" />
-        <Skeleton className="h-10 w-52 rounded-lg" />
+      <div className="mb-6">
+        <Skeleton className="h-8 w-28 rounded-lg" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, index) => (

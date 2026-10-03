@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PoemCardSkeleton } from "@/components/page-skeletons";
 
 export default function PoemLoading() {
   return (
@@ -13,7 +14,12 @@ export default function PoemLoading() {
               <Skeleton className="h-10 w-3/4" />
               <Skeleton className="h-4 w-40" />
             </div>
-            <Skeleton className="size-10 shrink-0 rounded-full" />
+            <div className="flex shrink-0 items-center gap-2">
+              <Skeleton className="h-8 w-12 rounded-full" />
+              <Skeleton className="size-8 rounded-full" />
+              <Skeleton className="size-8 rounded-full" />
+              <Skeleton className="size-8 rounded-full" />
+            </div>
           </div>
           <div className="flex gap-2">
             <Skeleton className="h-6 w-20 rounded-4xl" />
@@ -28,6 +34,25 @@ export default function PoemLoading() {
           <Skeleton className="h-4 w-48" />
         </CardContent>
       </Card>
+      <div className="mt-6 grid grid-cols-2 gap-3 py-2 sm:mt-8">
+        <Skeleton className="h-20 w-full rounded-lg" />
+        <Skeleton className="h-20 w-full rounded-lg" />
+      </div>
+      <section className="mt-12">
+        <Skeleton className="mb-6 h-8 w-48" />
+        <Skeleton className="mb-4 h-6 w-56" />
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <PoemCardSkeleton key={index} />
+          ))}
+        </div>
+        <Skeleton className="mb-4 h-6 w-56" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <PoemCardSkeleton key={index} />
+          ))}
+        </div>
+      </section>
     </article>
   );
 }

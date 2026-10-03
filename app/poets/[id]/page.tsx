@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser, getFavoriteCounts, getFavoritePoemIds } from "@/lib/favorites";
+import {
+  getCurrentUser,
+  getFavoriteCounts,
+  getFavoritePoemIds,
+} from "@/lib/favorites";
 import { EmptyState } from "@/components/empty-state";
 import { PoemCard } from "@/components/poem-card";
 import { BackLink } from "@/components/back-link";
@@ -44,7 +48,9 @@ export default async function PoetPage({
 
   const { data: poems } = await supabase
     .from("poems")
-    .select("id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, view_count, created_at")
+    .select(
+      "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, view_count, created_at",
+    )
     .eq("poet_id", id)
     .order("created_at", { ascending: false });
 
@@ -59,16 +65,20 @@ export default async function PoetPage({
 
   const user = await getCurrentUser();
   const favIds = await getFavoritePoemIds((poems ?? []).map((p) => p.id));
-  const favoriteCounts = await getFavoriteCounts((poems ?? []).map((p) => p.id));
+  const favoriteCounts = await getFavoriteCounts(
+    (poems ?? []).map((p) => p.id),
+  );
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <BackLink href="/poets">{tCommon("backToPoets")}</BackLink>
+      <BackLink fallbackHref="/poets">{tCommon("backToPoets")}</BackLink>
       <h1 className="mb-1 text-3xl font-bold">{poet.name_am}</h1>
       {poet.name_en ? (
         <p className="text-muted-foreground">{poet.name_en}</p>
       ) : null}
-      {years ? <p className="mt-1 text-sm text-muted-foreground">{years}</p> : null}
+      {years ? (
+        <p className="mt-1 text-sm text-muted-foreground">{years}</p>
+      ) : null}
 
       {poet.bio ? (
         <p className="mt-6 whitespace-pre-line leading-7 text-muted-foreground">
@@ -104,7 +114,10 @@ export default async function PoetPage({
             })}
           </div>
         ) : (
-          <EmptyState title={tPoets("noPublishedPoems")} description={tPoets("noPublishedPoemsDesc")} />
+          <EmptyState
+            title={tPoets("noPublishedPoems")}
+            description={tPoets("noPublishedPoemsDesc")}
+          />
         )}
       </section>
     </div>

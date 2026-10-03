@@ -19,7 +19,7 @@ export default async function LoginPage({
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm">
-        <BackLink href="/">{tAuth("backHome")}</BackLink>
+        <BackLink fallbackHref="/">{tAuth("backHome")}</BackLink>
         <Card className="w-full border-primary/15 shadow-lg">
           <CardContent className="p-8">
             <h1 className="mb-6 text-2xl font-bold">{tAuth("loginTitle")}</h1>
@@ -66,7 +66,10 @@ export default async function LoginPage({
                   className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
                 />
               </label>
-              <SubmitButton className="w-full" pendingLabel={tCommon("loading")}>
+              <SubmitButton
+                className="w-full"
+                pendingLabel={tCommon("loading")}
+              >
                 {tAuth("loginBtn")}
               </SubmitButton>
             </form>

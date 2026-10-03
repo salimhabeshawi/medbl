@@ -17,7 +17,7 @@ export default async function SignupPage({
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm">
-        <BackLink href="/">{tAuth("backHome")}</BackLink>
+        <BackLink fallbackHref="/">{tAuth("backHome")}</BackLink>
         <Card className="w-full border-primary/15 shadow-lg">
           <CardContent className="p-8">
             <h1 className="mb-6 text-2xl font-bold">{tAuth("signupTitle")}</h1>

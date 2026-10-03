@@ -12,8 +12,12 @@ export default function PoemsLoading() {
       <Skeleton className="mb-6 h-9 w-40" />
 
       <div className="mb-6">
-        <Skeleton className="h-11 w-full rounded-lg" />
-        <div className="mt-4 flex justify-center">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:grid-cols-[minmax(0,1fr)_13rem]">
+          <Skeleton className="h-11 w-full rounded-lg" />
+          <Skeleton className="size-11 rounded-lg sm:w-full" />
+        </div>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <Skeleton className="h-11 w-36 rounded-lg" />
           <Skeleton className="h-8 w-32 rounded-lg" />
         </div>
       </div>

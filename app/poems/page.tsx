@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { firstRelation } from "@/lib/relations";
-import {
-  getCurrentUser,
-  getFavoriteCounts,
-  getFavoritePoemIds,
-} from "@/lib/favorites";
+import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
 import { PoemCard } from "@/components/poem-card";
 import { PostPoemAction } from "@/components/post-poem-action";
+import { ListSortSelect, type ListSort } from "@/components/list-sort-select";
 import {
   Pagination,
   PaginationContent,
@@ -36,11 +32,13 @@ function pageUrl(params: {
   category: string;
   tag: string;
   page: number;
+  sort: ListSort;
 }): string {
   const search = new URLSearchParams();
   if (params.q) search.set("q", params.q);
   if (params.category) search.set("category", params.category);
   if (params.tag) search.set("tag", params.tag);
+  if (params.sort !== "date_desc") search.set("sort", params.sort);
   if (params.page > 1) search.set("page", String(params.page));
   const qs = search.toString();
   return qs ? `/poems?${qs}` : "/poems";
@@ -75,6 +73,25 @@ type CategoryRecord = {
   name_en: string | null;
 };
 
+type PoemPageRow = {
+  id: string;
+  title: string;
+  body: string;
+  category_id: string | null;
+  category_name_am: string | null;
+  category_name_en: string | null;
+  tags: string[] | null;
+  attribution_status: string;
+  poet_id: string;
+  poet_name_am: string;
+  poet_name_en: string | null;
+  poem_number: number;
+  view_count: number;
+  created_at: string;
+  like_count: number;
+  total_count: number;
+};
+
 export default async function PoemsPage({
   searchParams,
 }: {
@@ -83,6 +100,7 @@ export default async function PoemsPage({
     category?: string | string[];
     tag?: string | string[];
     page?: string | string[];
+    sort?: string | string[];
   }>;
 }) {
   const params = await searchParams;
@@ -90,6 +108,16 @@ export default async function PoemsPage({
   const category = param(params.category);
   const tag = param(params.tag);
   const page = Math.max(1, parseInt(param(params.page), 10) || 1);
+  const requestedSort = param(params.sort);
+  const sort: ListSort = [
+    "date_desc",
+    "date_asc",
+    "alphabetical",
+    "likes_desc",
+    "likes_asc",
+  ].includes(requestedSort)
+    ? (requestedSort as ListSort)
+    : "date_desc";
 
   const locale = await getLocale();
   const tPoems = await getTranslations("Poems");
@@ -97,35 +125,15 @@ export default async function PoemsPage({
 
   const supabase = await createClient();
 
-  // Disputed poems stay publicly visible (marked with the red disputed tag) —
-  // see AGENTS.md "Disputed poems" — so no attribution_status filter here.
-  let query = supabase
-    .from("poems")
-    .select(
-      "id, title, body, category_id, categories(id, name_am, name_en), tags, attribution_status, poem_number, view_count, poet_id, poets(name_am, name_en), created_at",
-      { count: "exact" },
-    )
-    .order("created_at", { ascending: false });
-
-  if (q) {
-    const { data: searchResults } = await supabase.rpc("search_poems", {
-      p_query: q,
-      p_limit: 100,
-    });
-    const ids = ((searchResults ?? []) as { id: string }[]).map(
-      (result) => result.id,
-    );
-    query =
-      ids.length > 0
-        ? query.in("id", ids)
-        : query.eq("id", "00000000-0000-0000-0000-000000000000");
-  }
-  if (category) query = query.eq("category_id", category);
-  if (tag) query = query.contains("tags", [tag]);
-
-  query = query.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-
-  const { data: poems, count } = await query;
+  const { data: poemRows } = await supabase.rpc("get_poems_page", {
+    p_sort: sort,
+    p_limit: PAGE_SIZE,
+    p_offset: (page - 1) * PAGE_SIZE,
+    p_query: q || null,
+    p_category_id: category || null,
+    p_tag: tag || null,
+  });
+  const poems = (poemRows ?? []) as PoemPageRow[];
   const { data: categoryRows } = await supabase
     .from("categories")
     .select("id, name_am, name_en")
@@ -139,21 +147,34 @@ export default async function PoemsPage({
       : selectedCategoryObj.name_en || selectedCategoryObj.name_am
     : category;
 
-  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
+  const totalCount = Number(poems[0]?.total_count ?? 0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const user = await getCurrentUser();
   const favIds = await getFavoritePoemIds((poems ?? []).map((p) => p.id));
-  const favoriteCounts = await getFavoriteCounts(
-    (poems ?? []).map((p) => p.id),
-  );
-
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <h1 className="mb-6 text-3xl font-bold">{tPoems("heading")}</h1>
 
       <div className="mb-6">
-        <UniversalSearch defaultValue={q} categories={categories} />
-        <div className="mt-4 flex justify-center">
+        <UniversalSearch
+          key={category || "all"}
+          defaultValue={q}
+          categories={categories}
+          selectedCategory={category}
+          syncCategoryToUrl
+        />
+        <div className="mt-4 flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+          <ListSortSelect
+            value={sort}
+            options={[
+              "date_desc",
+              "date_asc",
+              "alphabetical",
+              "likes_desc",
+              "likes_asc",
+            ]}
+          />
           <PostPoemAction />
         </div>
       </div>
@@ -185,27 +206,24 @@ export default async function PoemsPage({
       {poems && poems.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {poems.map((poem) => {
-            const poet = firstRelation<{
-              name_am: string;
-              name_en: string;
-            }>(poem.poets);
-            const catRelation = firstRelation<{
-              id: string;
-              name_am: string | null;
-              name_en: string | null;
-            }>(poem.categories);
             return (
               <PoemCard
                 key={poem.id}
                 poem={{
                   ...poem,
                   poemNumber: poem.poem_number,
-                  category: catRelation,
-                  poetName: poet?.name_am ?? poet?.name_en,
+                  category: poem.category_id
+                    ? {
+                        id: poem.category_id,
+                        name_am: poem.category_name_am,
+                        name_en: poem.category_name_en,
+                      }
+                    : null,
+                  poetName: poem.poet_name_am ?? poem.poet_name_en,
                   viewCount: poem.view_count ?? 0,
                 }}
                 favorited={favIds.has(poem.id)}
-                favoriteCount={favoriteCounts.get(poem.id) ?? 0}
+                favoriteCount={Number(poem.like_count ?? 0)}
                 showFavorite={Boolean(user)}
               />
             );
@@ -225,7 +243,7 @@ export default async function PoemsPage({
               <PaginationItem>
                 {page > 1 ? (
                   <PaginationPrevious
-                    href={pageUrl({ q, category, tag, page: page - 1 })}
+                    href={pageUrl({ q, category, tag, page: page - 1, sort })}
                     text={tCommon("previous")}
                     aria-label={tCommon("previous")}
                   />
@@ -247,7 +265,7 @@ export default async function PoemsPage({
                 ) : (
                   <PaginationItem key={item}>
                     <PaginationLink
-                      href={pageUrl({ q, category, tag, page: item })}
+                      href={pageUrl({ q, category, tag, page: item, sort })}
                       isActive={item === page}
                       aria-label={tCommon("pageOf", {
                         page: item,
@@ -263,7 +281,7 @@ export default async function PoemsPage({
               <PaginationItem>
                 {page < totalPages ? (
                   <PaginationNext
-                    href={pageUrl({ q, category, tag, page: page + 1 })}
+                    href={pageUrl({ q, category, tag, page: page + 1, sort })}
                     text={tCommon("next")}
                     aria-label={tCommon("next")}
                   />

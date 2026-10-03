@@ -198,6 +198,8 @@ Where all new poems land first. Nothing here is public until approved.
   provenance for a proposed poet, if applicable)
 - `status`: `pending` | `approved` | `rejected`
 - `reviewed_by`, `rejection_reason` (nullable)
+- `published_poem_id` (nullable FK to `poems`; set when approval creates the
+  published poem, `on delete set null`)
 - `created_at`
 
 ### `poems`
@@ -326,6 +328,19 @@ inside and are revoked from `public` / granted to specific roles.
   as an error state. Deliberately exposes counts only, so the dot
   never needs row-level access to the moderation queue. Authenticated
   only (`anon` has no EXECUTE grant).
+- `get_poems_page(p_sort, p_limit, p_offset, p_query, p_category_id, p_tag)` —
+  public sorted, paginated poem listing with like counts and an exact total;
+  disputed poems remain included.
+- `list_poets(p_sort, p_query)` — public poet listing with inclusive poem and
+  like counts plus thresholded `avg_likes_per_poem` (NULL below two poems).
+- `get_recommended_same_category(p_poem_id, p_limit)` — public random
+  recommendations from the same category, excluding the current and disputed
+  poems.
+- `get_recommended_same_poet(p_poem_id, p_limit)` — public random
+  recommendations from the same poet, excluding the current and disputed
+  poems.
+- `get_adjacent_poems(p_poem_id)` — public stable previous/next poem lookup
+  ordered by `poem_number`, with wraparound and disputed poems included.
 
 ## Row-Level Security — key points (do not weaken any of these)
 
@@ -833,6 +848,16 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
   31. Added shape-matched page and section skeleton loading states across
     data-fetching routes and client search results, following the existing
     `/poems` loading pattern — done
+  32. Added published submission-to-poem links, sorted paginated poem and poet
+    listings, submission status pills, submission sorting, and links from
+    approved submission cards to their published poems — done
+  33. Added randomized recommended reads by category/poet and wraparound
+    Previous/Next navigation by `poem_number` on poem detail pages — done
+   34. Added shared dynamic back navigation that returns to same-origin in-app
+     history when available and falls back to each page's sensible route — done
+  35. Updated loading skeletons across current page layouts, including
+    controls, responsive grids, moderation forms, adjacent navigation, and
+    recommended reads — done
 
 ## Guidelines for future changes
 
@@ -863,6 +888,21 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
   or dialog, toggling a disclosure, local form validation).
 - Any new page or section that fetches data must include a matching skeleton
   loading state, following the `/poems` pattern.
+- Any new back button must use the shared dynamic back-navigation component
+  rather than a hardcoded route.
+- Whenever a UI layout changes on a page or section with a loading skeleton,
+  update the matching skeleton in the same change; skeleton accuracy is part
+  of done, not a separate or later task.
 - Keep this file in sync with reality at the end of every feature step
   — update the relevant section(s) above rather than appending a change
   log at the bottom.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

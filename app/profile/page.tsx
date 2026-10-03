@@ -7,7 +7,7 @@ import { PoetDetailsForm } from "@/components/poet-details-form";
 import { ChangeEmailForm } from "@/components/change-email-form";
 import { ChangePasswordForm } from "@/components/change-password-form";
 import { UserRound, LockKeyhole } from "lucide-react";
-import { BackLink } from "@/components/back-link";
+import { StaticBackLink } from "@/components/back-link";
 import { getTranslations } from "next-intl/server";
 import { gcToEc } from "@/lib/calendar";
 
@@ -74,7 +74,7 @@ export default async function ProfilePage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <BackLink href={cameFrom ?? "/"}>{tProfile("back")}</BackLink>
+      <StaticBackLink href={cameFrom ?? "/"}>{tProfile("back")}</StaticBackLink>
       <div className="mb-10 max-w-2xl">
         <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
           {tProfile("eyebrow")}
