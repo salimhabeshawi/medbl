@@ -320,6 +320,8 @@ inside and are revoked from `public` / granted to specific roles.
   select from `reports` directly). Authenticated only.
 - `delete_category(p_category_id)` — staff-only; refuses while the
   category is still referenced by a poem or submission.
+- `update_category(p_category_id, p_name_am, p_name_en)` — staff-only;
+  updates a category's bilingual names through an authorized RPC.
 - `get_moderation_pending_counts()` — staff-only; returns one row of
   two `bigint` totals (`pending_submissions`, `open_reports`) for the
   header's notification dot. The body is gated on `where
