@@ -48,7 +48,7 @@ export async function SiteHeader() {
     : false;
 
   const links: NavLink[] = [
-    { href: "/", label: tNav("home"), icon: "home" },
+    { href: "/home", label: tNav("home"), icon: "home" },
     { href: "/poems", label: tNav("poems"), icon: "poems" },
     { href: "/poets", label: tNav("poets"), icon: "poets" },
     ...(user
@@ -76,7 +76,7 @@ export async function SiteHeader() {
   ];
 
   const browseLinks: NavLink[] = [
-    { href: "/", label: tNav("home"), icon: "home" },
+    { href: "/home", label: tNav("home"), icon: "home" },
     { href: "/poems", label: tNav("poems"), icon: "poems" },
     { href: "/poets", label: tNav("poets"), icon: "poets" },
     ...(user
@@ -107,7 +107,8 @@ export async function SiteHeader() {
           href="/"
           className="font-sans text-lg font-semibold text-primary transition hover:text-primary/80 md:text-xl"
         >
-          {tNav("medbl")}
+          <span>Medbl</span>
+          <span className="ml-2 text-sm font-normal">{tNav("medbl")}</span>
         </Link>
 
         {/* Desktop nav (md and up) - no hamburger */}

@@ -8,8 +8,10 @@ import { useTranslations } from "next-intl";
 
 export function SignupForm({
   action,
+  next,
 }: {
   action: (formData: FormData) => void | Promise<void>;
+  next?: string;
 }) {
   const [agreed, setAgreed] = useState(false);
   const tAuth = useTranslations("Auth");
@@ -18,6 +20,7 @@ export function SignupForm({
 
   return (
     <form action={action} className="form-stack">
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       <label className="flex flex-col gap-1 text-sm font-medium">
         {tAuth("emailLabel")}
         <Input
@@ -48,11 +51,11 @@ export function SignupForm({
           className="mt-1 size-4 accent-primary"
         />
         <span>
-          {tAuth("agreementPrefix")} {" "}
+          {tAuth("agreementPrefix")}{" "}
           <Link href="/terms" className="font-medium text-primary underline">
             {tFooter("terms")}
           </Link>{" "}
-          {tAuth("agreementAnd")} {" "}
+          {tAuth("agreementAnd")}{" "}
           <Link href="/privacy" className="font-medium text-primary underline">
             {tFooter("privacy")}
           </Link>

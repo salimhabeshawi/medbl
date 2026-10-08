@@ -208,7 +208,7 @@ export default async function MySubmissionsPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <BackLink fallbackHref="/">{tSubs("back")}</BackLink>
+      <BackLink fallbackHref="/home">{tSubs("back")}</BackLink>
       <div className="mb-10">
         <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
           {tSubs("eyebrow")}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { createCategory, updateCategory, deleteCategory, type CategoryFormState } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,76 @@ export type CategoryRecord = {
   name_en: string | null;
 };
 
+function EditableCategoryRow({
+  category,
+  onCancel,
+  onSaved,
+}: {
+  category: CategoryRecord;
+  onCancel: () => void;
+  onSaved: (nameAm: string, nameEn: string) => void;
+}) {
+  const tMod = useTranslations("Moderate");
+  const tCommon = useTranslations("Common");
+  const [editNameAm, setEditNameAm] = useState(category.name_am ?? "");
+  const [editNameEn, setEditNameEn] = useState(category.name_en ?? "");
+  const [updateState, updateFormAction, updatePending] = useActionState(
+    updateCategory,
+    {} as CategoryFormState,
+  );
+
+  useEffect(() => {
+    if (updateState.success) onSaved(editNameAm.trim(), editNameEn.trim());
+  }, [editNameAm, editNameEn, onSaved, updateState.success]);
+
+  return (
+    <>
+      <form
+        action={updateFormAction}
+        className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/30 bg-background p-3"
+      >
+        <input type="hidden" name="category_id" value={category.id} />
+        <Input
+          name="name_am"
+          value={editNameAm}
+          onChange={(event) => setEditNameAm(event.target.value)}
+          placeholder={tMod("nameAmPlaceholder")}
+          className="h-9 max-w-50"
+        />
+        <Input
+          name="name_en"
+          value={editNameEn}
+          onChange={(event) => setEditNameEn(event.target.value)}
+          placeholder={tMod("nameEnPlaceholder")}
+          className="h-9 max-w-50"
+        />
+        <Button
+          type="submit"
+          size="sm"
+          disabled={updatePending}
+          aria-busy={updatePending || undefined}
+        >
+          {updatePending ? (
+            <LoadingSpinner />
+          ) : (
+            <Check className="mr-1 size-3.5" />
+          )}
+          {updatePending ? tCommon("loading") : tMod("saveCategory")}
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+          <X className="mr-1 size-3.5" />
+          {tMod("cancel")}
+        </Button>
+      </form>
+      {updateState.error ? (
+        <Alert className="mt-2" variant="destructive">
+          <AlertDescription>{updateState.error}</AlertDescription>
+        </Alert>
+      ) : null}
+    </>
+  );
+}
+
 export function CategoryManager({ categories }: { categories: CategoryRecord[] }) {
   const tMod = useTranslations("Moderate");
   const tCommon = useTranslations("Common");
@@ -28,23 +98,25 @@ export function CategoryManager({ categories }: { categories: CategoryRecord[] }
   );
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editNameAm, setEditNameAm] = useState("");
-  const [editNameEn, setEditNameEn] = useState("");
-  const [updateState, updateFormAction, updatePending] = useActionState(
-    updateCategory,
-    {} as CategoryFormState,
-  );
+  const [categoryRows, setCategoryRows] = useState(categories);
 
   const startEdit = (cat: CategoryRecord) => {
     setEditingId(cat.id);
-    setEditNameAm(cat.name_am ?? "");
-    setEditNameEn(cat.name_en ?? "");
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditNameAm("");
-    setEditNameEn("");
+  };
+
+  const saveCategoryLocally = (categoryId: string, nameAm: string, nameEn: string) => {
+    setCategoryRows((current) =>
+      current.map((category) =>
+        category.id === categoryId
+          ? { ...category, name_am: nameAm, name_en: nameEn }
+          : category,
+      ),
+    );
+    cancelEdit();
   };
 
   return (
@@ -82,57 +154,29 @@ export function CategoryManager({ categories }: { categories: CategoryRecord[] }
           <AlertDescription>{state.success}</AlertDescription>
         </Alert>
       ) : null}
-      {updateState.error ? (
-        <Alert className="mt-3" variant="destructive">
-          <AlertDescription>{updateState.error}</AlertDescription>
-        </Alert>
-      ) : null}
-
       {/* Category list */}
       <div className="mt-6 space-y-2">
-        {categories.map((category) => {
+        {categoryRows.map((category) => {
           const isEditing = editingId === category.id;
           const missingAm = !category.name_am;
           const missingEn = !category.name_en;
           const categoryLabel = locale === "am"
             ? category.name_am || category.name_en
             : category.name_en || category.name_am;
+          const counterpartLabel = locale === "am"
+            ? category.name_en
+            : category.name_am;
 
           if (isEditing) {
             return (
-              <form
+              <EditableCategoryRow
                 key={category.id}
-                action={async (fd) => {
-                  await updateFormAction(fd);
-                  setEditingId(null);
-                }}
-                className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/30 bg-background p-3"
-              >
-                <input type="hidden" name="category_id" value={category.id} />
-                <Input
-                  name="name_am"
-                  value={editNameAm}
-                  onChange={(e) => setEditNameAm(e.target.value)}
-                  placeholder={tMod("nameAmPlaceholder")}
-                  className="h-9 max-w-[200px]"
-                />
-                <Input
-                  name="name_en"
-                  value={editNameEn}
-                  onChange={(e) => setEditNameEn(e.target.value)}
-                  placeholder={tMod("nameEnPlaceholder")}
-                  className="h-9 max-w-[200px]"
-                />
-                <Button type="submit" size="sm" disabled={updatePending} aria-busy={updatePending || undefined}>
-                  {updatePending ? <LoadingSpinner /> : null}
-                  <Check className="mr-1 size-3.5" />
-                  {updatePending ? tCommon("loading") : tMod("saveCategory")}
-                </Button>
-                <Button type="button" variant="ghost" size="sm" onClick={cancelEdit}>
-                  <X className="mr-1 size-3.5" />
-                  {tMod("cancel")}
-                </Button>
-              </form>
+                category={category}
+                onCancel={cancelEdit}
+                onSaved={(nameAm, nameEn) =>
+                  saveCategoryLocally(category.id, nameAm, nameEn)
+                }
+              />
             );
           }
 
@@ -145,9 +189,9 @@ export function CategoryManager({ categories }: { categories: CategoryRecord[] }
                 <span className="font-semibold text-foreground">
                   {categoryLabel}
                 </span>
-                {category.name_am && category.name_en ? (
+                {counterpartLabel ? (
                   <span className="text-xs text-muted-foreground">
-                    ({category.name_en})
+                    ({counterpartLabel})
                   </span>
                 ) : null}
 

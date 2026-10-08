@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Privacy Policy" };
 export default function PrivacyPage() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-      <BackLink fallbackHref="/">Back to home</BackLink>
+      <BackLink fallbackHref="/home">Back to home</BackLink>
       <header className="mb-10 border-b border-border/70 pb-8">
         <h1 className="mb-4 text-4xl font-semibold tracking-tight sm:text-5xl">
           Privacy Policy
@@ -74,6 +74,32 @@ export default function PrivacyPage() {
               trackers or sell any data to advertisers.
             </li>
           </ul>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-2xl font-semibold text-foreground">
+            Google user data
+          </h2>
+          <p>
+            When you choose Sign in with Google, Medbl receives only your email
+            address, name, and profile picture URL as provided by Google through
+            the basic openid, email, and profile scopes. We use this data only
+            to create and authenticate your account. It is never sold, never
+            used for advertising, never used to train AI models, and never
+            shared except with our infrastructure providers, Supabase for
+            authentication and database and Vercel for hosting, as needed to run
+            the service. Medbl&apos;s use of information received from Google
+            APIs adheres to the Google API Services User Data Policy, including
+            the Limited Use requirements. Data is retained while your account
+            exists and can be deleted on request at{" "}
+            <a
+              href="mailto:salimhabeshawi@gmail.com"
+              className="text-primary underline"
+            >
+              salimhabeshawi@gmail.com
+            </a>
+            .
+          </p>
         </section>
 
         <section className="space-y-4">
@@ -258,6 +284,71 @@ export default function PrivacyPage() {
               salimhabeshawi@gmail.com
             </a>
             .
+          </p>
+        </section>
+      </div>
+
+      <div
+        className="mt-16 space-y-8 border-t border-border/70 pt-10 text-base leading-8 text-foreground/90"
+        lang="am"
+      >
+        <h2 className="text-3xl font-semibold text-foreground">የግላዊነት መመሪያ</h2>
+        <p>
+          ይህ መመሪያ መድብል ምን መረጃ እንደሚሰበስብ፣ እንዴት እንደሚጠቀምበት እና የእርስዎ ምርጫዎች ምን እንደሆኑ
+          ያብራራል። መድብልን መጠቀም በዚህ መመሪያ የተገለጹትን አሰራሮች መቀበል ነው።
+        </p>
+        <section className="space-y-4">
+          <h3 className="text-2xl font-semibold text-foreground">
+            1. የምንሰበስበው መረጃ
+          </h3>
+          <p>
+            መለያ ለመፍጠር ኢሜይል፣ እንዲሁም በፈቃድዎ የገጣሚ መገለጫ፣ ግጥሞች፣ ሪፖርቶች እና ተወዳጅ ያደረጓቸውን
+            ይዘቶች እንሰበስባለን።
+          </p>
+        </section>
+        <section className="space-y-4">
+          <h3 className="text-2xl font-semibold text-foreground">
+            2. የGoogle ተጠቃሚ መረጃ
+          </h3>
+          {/* DRAFT TRANSLATION: Native Amharic review requested for this Google user data section. */}
+          <p>
+            በGoogle መግባትን ሲመርጡ መድብል ከGoogle በመሠረታዊ openid፣ email እና profile ፍቃዶች
+            የቀረበውን ኢሜይል አድራሻዎን፣ ስምዎን እና የመገለጫ ምስል URL ብቻ ይቀበላል። ይህ መረጃ መለያዎን
+            ለመፍጠርና ለማረጋገጥ ብቻ ይውላል፤ አይሸጥም፣ ለማስታወቂያ አይውልም፣ AI ሞዴሎችን ለማሰልጠን አይውልም።
+            አገልግሎቱን ለማስኬድ እንደሚያስፈልግ ከSupabase እና Vercel በስተቀር አይጋራም። የGoogle API
+            መረጃ አጠቃቀማችን የGoogle API Services User Data Policyን፣ Limited Use
+            መስፈርቶችን ጨምሮ፣ ይከተላል። መረጃው መለያዎ እስካለ ድረስ ይቀመጣል፣ በ
+            <a
+              href="mailto:salimhabeshawi@gmail.com"
+              className="text-primary underline"
+            >
+              salimhabeshawi@gmail.com
+            </a>{" "}
+            ጥያቄ ሊሰረዝ ይችላል።
+          </p>
+        </section>
+        <section className="space-y-4">
+          <h3 className="text-2xl font-semibold text-foreground">
+            3. መረጃ አጠቃቀም እና ጥበቃ
+          </h3>
+          <p>
+            መረጃዎን መለያ ለመፍጠርና ለማስተዳደር፣ መግቢያን ለማረጋገጥ፣ ግጥሞችን ለማስገባት እና የመድብሉን ደህንነት
+            ለመጠበቅ እንጠቀማለን። የግል መረጃዎን አንሸጥም እና ለማስታወቂያ አንጠቀምበትም።
+          </p>
+        </section>
+        <section className="space-y-4">
+          <h3 className="text-2xl font-semibold text-foreground">
+            4. መብቶች እና እውቂያ
+          </h3>
+          <p>
+            መረጃዎን ለማየት፣ ለማስተካከል ወይም መለያዎን ለመሰረዝ በ
+            <a
+              href="mailto:salimhabeshawi@gmail.com"
+              className="text-primary underline"
+            >
+              salimhabeshawi@gmail.com
+            </a>{" "}
+            ያግኙን። ይህ መመሪያ ሲቀየር በገጹ ላይ እናሳውቃለን።
           </p>
         </section>
       </div>

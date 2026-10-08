@@ -36,6 +36,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const target = internalPath(next) ?? "/";
+  const target = internalPath(next) ?? "/home";
   return NextResponse.redirect(`${origin}${target}`);
 }

@@ -31,10 +31,15 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Medbl — Amharic Poetry Platform",
+    default: "Medbl — Amharic Poetry Collection",
     template: "%s | Medbl",
   },
-  description: "Amharic poetry center — read, honor, share.",
+  description:
+    "Medbl is a community collection of Amharic poetry where visitors can read, discover, and share poems attributed to real poets.",
+  applicationName: "Medbl",
+  openGraph: {
+    siteName: "Medbl",
+  },
 };
 
 export default async function RootLayout({
@@ -50,6 +55,13 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${notoSansEthiopic.variable} ${lora.variable} ${inter.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
+      </head>
       <body className="flex min-h-full flex-col">
         {/*
           Both message sets are loaded server-side once and passed to

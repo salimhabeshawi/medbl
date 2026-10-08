@@ -131,7 +131,7 @@ export default async function FavoritesPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <BackLink fallbackHref="/">{tFav("back")}</BackLink>
+      <BackLink fallbackHref="/home">{tFav("back")}</BackLink>
       <div className="mb-8">
         <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
           {tFav("eyebrow")}

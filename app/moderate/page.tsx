@@ -56,7 +56,7 @@ export default async function ModerateOverviewPage() {
 
   return (
     <div>
-      <BackLink fallbackHref="/">{tMod("backHome")}</BackLink>
+      <BackLink fallbackHref="/home">{tMod("backHome")}</BackLink>
       <h2 className="mb-6 font-serif text-2xl font-semibold">
         {tMod("overview")}
       </h2>

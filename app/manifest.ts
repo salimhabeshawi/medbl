@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Medbl - Amharic Poetry",
     short_name: "Medbl",
     description: "Read, honor, and share Amharic poetry.",
-    start_url: "/",
+    start_url: "/home",
     display: "standalone",
     background_color: "#FBF3E6",
     theme_color: "#B5651D",

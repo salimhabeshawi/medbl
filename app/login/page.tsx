@@ -19,7 +19,7 @@ export default async function LoginPage({
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm">
-        <BackLink fallbackHref="/">{tAuth("backHome")}</BackLink>
+        <BackLink fallbackHref="/home">{tAuth("backHome")}</BackLink>
         <Card className="w-full border-primary/15 shadow-lg">
           <CardContent className="p-8">
             <h1 className="mb-6 text-2xl font-bold">{tAuth("loginTitle")}</h1>
@@ -46,6 +46,7 @@ export default async function LoginPage({
             </div>
 
             <form action={login} className="form-stack">
+              {next ? <input type="hidden" name="next" value={next} /> : null}
               <label className="flex flex-col gap-1 text-sm font-medium">
                 {tAuth("emailLabel")}
                 <Input

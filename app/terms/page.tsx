@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Terms of Service" };
 export default function TermsPage() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-      <BackLink fallbackHref="/">Back to home</BackLink>
+      <BackLink fallbackHref="/home">Back to home</BackLink>
       <header className="mb-10 border-b border-border/70 pb-8">
         <h1 className="mb-4 text-4xl font-semibold tracking-tight sm:text-5xl">
           Terms of Service
@@ -226,6 +226,66 @@ export default function TermsPage() {
               salimhabeshawi@gmail.com
             </a>
             .
+          </p>
+        </section>
+      </div>
+
+      <div
+        className="mt-16 space-y-8 border-t border-border/70 pt-10 text-base leading-8 text-foreground/90"
+        lang="am"
+      >
+        <h2 className="text-3xl font-semibold text-foreground">የአገልግሎት ውሎች</h2>
+        <p>
+          እንኳን ወደ መድብል በደህና መጡ። መድብል የአማርኛ ግጥሞችን ለመሰብሰብና ለማጋራት የተዘጋጀ የማህበረሰብ
+          መድረክ ነው። መለያ በመፍጠር ወይም መድብልን በመጠቀም እነዚህን ውሎች ተቀብለዋል።
+        </p>
+        <section className="space-y-4">
+          <h3 className="text-2xl font-semibold text-foreground">
+            1. መድብል ምንድነው?
+          </h3>
+          <p>
+            ሰዎች የአማርኛ ግጥሞችን እንዲያስሱ፣ ተወዳጅ እንዲያደርጓቸው እና የራሳቸውን ወይም የሌሎችን ግጥሞች
+            ለአወያይ ግምገማ እንዲያስገቡ ያስችላል።
+          </p>
+        </section>
+        <section className="space-y-4">
+          <h3 className="text-2xl font-semibold text-foreground">
+            2. መለያ እና ይዘት
+          </h3>
+          <p>
+            ትክክለኛ ኢሜይል መስጠት፣ የመለያዎን ደህንነት መጠበቅ እና የሚያስገቡት ግጥም ወይም የገጣሚ መረጃ ትክክለኛ
+            መሆኑን ማረጋገጥ አለብዎት። ማንኛውም ማስገባት ከመታተሙ በፊት ይገመገማል።
+          </p>
+        </section>
+        <section className="space-y-4">
+          <h3 className="text-2xl font-semibold text-foreground">
+            3. የቅጂ መብት እና ሪፖርት
+          </h3>
+          <p>
+            ሌላ ሰውን ማስመሰል፣ ሆን ብሎ የተሳሳተ አባትነት መስጠት፣ ማስፈራራት ወይም ያለፈቃድ የሌላ ሰውን የቅጂ
+            መብት መጣስ አይፈቀድም። ጥያቄዎችን እና የማስወገጃ ሪፖርቶችን በ
+            <a
+              href="mailto:salimhabeshawi@gmail.com"
+              className="text-primary underline"
+            >
+              salimhabeshawi@gmail.com
+            </a>{" "}
+            ይላኩ።
+          </p>
+        </section>
+        <section className="space-y-4">
+          <h3 className="text-2xl font-semibold text-foreground">
+            4. ለውጦች እና እውቂያ
+          </h3>
+          <p>
+            አስፈላጊ ለውጦችን በገጹ ላይ እናሳውቃለን። ስለእነዚህ ውሎች ጥያቄ ካለዎት በ
+            <a
+              href="mailto:salimhabeshawi@gmail.com"
+              className="text-primary underline"
+            >
+              salimhabeshawi@gmail.com
+            </a>{" "}
+            ያግኙን።
           </p>
         </section>
       </div>

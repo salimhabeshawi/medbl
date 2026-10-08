@@ -1,10 +1,8 @@
-"use client";
-
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-export function SiteFooter() {
-  const tFooter = useTranslations("Footer");
+export async function SiteFooter() {
+  const tFooter = await getTranslations("Footer");
 
   return (
     <footer className="border-t border-border bg-background py-8">
@@ -20,10 +18,10 @@ export function SiteFooter() {
           aria-label="Legal"
         >
           <Link href="/terms" className="hover:text-primary hover:underline">
-            {tFooter("terms")}
+            Terms
           </Link>
           <Link href="/privacy" className="hover:text-primary hover:underline">
-            {tFooter("privacy")}
+            Privacy
           </Link>
         </nav>
       </div>

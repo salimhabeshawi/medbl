@@ -343,6 +343,9 @@ inside and are revoked from `public` / granted to specific roles.
   poems.
 - `get_adjacent_poems(p_poem_id)` — public stable previous/next poem lookup
   ordered by `poem_number`, with wraparound and disputed poems included.
+- `get_site_stats()` — public security-definer aggregate counts for published
+  poems, real poets with published poems (excluding the seeded Folk poetry
+  pseudo-poet), and favorites.
 
 ## Row-Level Security — key points (do not weaken any of these)
 
@@ -402,7 +405,10 @@ browse/search. Moderators, from a report card, can:
 
 ## Pages / routes (current)
 
-- `/` — home: featured poets (`get_featured_poets`), featured poems
+- `/` — public marketing landing page: bilingual purpose statement, collection
+  stats, featured poem/poets, themes, attribution guidance, and calls to
+  read or contribute. It always renders the Latin-script name `Medbl`.
+- `/home` — signed-in app home: featured poets (`get_featured_poets`), featured poems
   (`get_featured_poems`), recent poems, with favorite counts.
 - `/poems`, `/poems/[id]` — poem browse and detail. The poem page hosts
   favorite toggle, report dialog, and the disputed tag when applicable.
@@ -435,6 +441,16 @@ browse/search. Moderators, from a report card, can:
 There is no standalone `/categories` or `/search` page: search is the
 `UniversalSearch` component in the header (calls `search_poems`), and
 category administration lives on `/moderate`.
+
+### Landing page
+
+The public `/` landing page must always render the Latin-script name `Medbl`
+and a bilingual purpose statement readable without JavaScript, cookies, or
+login. Landing copy is server-rendered; scroll reveals use the pre-paint `js`
+class plus IntersectionObserver and only hide content under `.js`, count-up
+animation starts from server-rendered final values, and all effects animate
+only opacity/transform. Every landing animation must respect
+`prefers-reduced-motion: reduce`.
 
 ## Profile page (`/profile`)
 
@@ -863,6 +879,12 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
   36. Added 12-per-page pagination to `/poets`, including paginated `list_poets()`
     results, sort-preserving page links, total counts, and matching loading
     controls/skeletons — done
+   37. Made the public home and legal pages bilingual, server-rendered, and
+     readable without cookies, JavaScript, or login, with explicit Medbl
+     branding and Google user-data disclosure — done
+   38. Moved the app home to `/home` and added the public bilingual Medbl
+     landing page at `/`, including public collection stats and
+     progressive-enhancement scroll animation rules — done
 
 ## Guidelines for future changes
 
@@ -901,6 +923,8 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
 - Keep this file in sync with reality at the end of every feature step
   — update the relevant section(s) above rather than appending a change
   log at the bottom.
+- The public home and legal pages must always be readable without JavaScript,
+  cookies, or login, and must show the app name `Medbl` in Latin script.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

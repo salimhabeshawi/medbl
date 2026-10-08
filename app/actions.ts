@@ -7,7 +7,9 @@ import { ecToGc } from "@/lib/calendar";
 
 // Translate raw Supabase Auth errors into plain language before showing
 // them to users. Unknown errors fall through unchanged.
-function humanAuthError(error: { message?: string } | null | undefined): string {
+function humanAuthError(
+  error: { message?: string } | null | undefined,
+): string {
   const msg = error?.message ?? "";
   if (/password should contain/i.test(msg)) {
     return "That password is too weak — mix upper and lower case letters, a number, and a symbol.";
@@ -18,7 +20,10 @@ function humanAuthError(error: { message?: string } | null | undefined): string 
   if (/reauthentication/i.test(msg)) {
     return "For security, please log out and log back in first, then retry changing your password.";
   }
-  if (/nonce has expired|code.?has expired|otp.*(expired|invalid|not valid)/i.test(msg)) {
+  if (
+    /nonce has expired|code.?has expired|otp.*(expired|invalid|not valid)/i
+      .test(msg)
+  ) {
     return "That code is invalid or has expired. Go back and request a new one.";
   }
   const min = msg.match(/at least (\d+) characters/i)?.[1];
@@ -37,6 +42,11 @@ function humanAuthError(error: { message?: string } | null | undefined): string 
   return msg || "Something went wrong. Please try again.";
 }
 
+function authInternalPath(value: string | null): string | null {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
+
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
@@ -44,6 +54,7 @@ export async function login(formData: FormData) {
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
   };
+  const next = authInternalPath(String(formData.get("next") ?? ""));
 
   const { error } = await supabase.auth.signInWithPassword(data);
 
@@ -52,7 +63,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect(next ?? "/home");
 }
 
 export async function signup(formData: FormData) {
@@ -62,6 +73,7 @@ export async function signup(formData: FormData) {
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
   };
+  const next = authInternalPath(String(formData.get("next") ?? ""));
 
   const { data: signUpData, error } = await supabase.auth.signUp(data);
 
@@ -84,13 +96,15 @@ export async function signup(formData: FormData) {
     // on_auth_user_created trigger when the user confirms, so just tell
     // them to check their inbox.
     redirect(
-      `/login?message=${encodeURIComponent(
-        "Account created. Check your email to confirm before logging in.",
-      )}`,
+      `/login?message=${
+        encodeURIComponent(
+          "Account created. Check your email to confirm before logging in.",
+        )
+      }`,
     );
   }
 
-  redirect("/");
+  redirect(next ?? "/home");
 }
 
 export async function signOut() {
@@ -133,7 +147,10 @@ export async function toggleFavorite(
     const { data: counts } = await supabase.rpc("get_poem_favorite_counts", {
       p_poem_ids: [poemId],
     });
-    return { favorited: false, favoriteCount: Number(counts?.[0]?.favorite_count ?? 0) };
+    return {
+      favorited: false,
+      favoriteCount: Number(counts?.[0]?.favorite_count ?? 0),
+    };
   }
 
   const { error } = await supabase
@@ -152,7 +169,10 @@ export async function toggleFavorite(
   const { data: counts } = await supabase.rpc("get_poem_favorite_counts", {
     p_poem_ids: [poemId],
   });
-  return { favorited: true, favoriteCount: Number(counts?.[0]?.favorite_count ?? 0) };
+  return {
+    favorited: true,
+    favoriteCount: Number(counts?.[0]?.favorite_count ?? 0),
+  };
 }
 
 function escapeLike(value: string): string {
@@ -219,21 +239,29 @@ function normalizePoemResults(rows: unknown[]): UniversalPoemResult[] {
       id: String(poem.id),
       title: String(poem.title ?? ""),
       body: String(poem.body ?? ""),
-      category_id: typeof poem.category_id === "string" ? poem.category_id : null,
-      category_name_am: typeof poem.category_name_am === "string" ? poem.category_name_am : relatedCategory?.name_am ?? null,
-      category_name_en: typeof poem.category_name_en === "string" ? poem.category_name_en : relatedCategory?.name_en ?? null,
+      category_id: typeof poem.category_id === "string"
+        ? poem.category_id
+        : null,
+      category_name_am: typeof poem.category_name_am === "string"
+        ? poem.category_name_am
+        : relatedCategory?.name_am ?? null,
+      category_name_en: typeof poem.category_name_en === "string"
+        ? poem.category_name_en
+        : relatedCategory?.name_en ?? null,
       tags: Array.isArray(poem.tags) ? (poem.tags as string[]) : null,
       attribution_status: String(poem.attribution_status ?? "community"),
       poet_name_am: String(poem.poet_name_am ?? relatedPoet?.name_am ?? ""),
-      poet_name_en:
-        (poem.poet_name_en as string | null | undefined) ??
+      poet_name_en: (poem.poet_name_en as string | null | undefined) ??
         relatedPoet?.name_en ??
         null,
     };
   });
 }
 
-export async function searchPoems(query: string, category?: string): Promise<UniversalPoemResult[]> {
+export async function searchPoems(
+  query: string,
+  category?: string,
+): Promise<UniversalPoemResult[]> {
   const supabase = await createClient();
   const trimmed = query.trim();
   const selectedCategory = category?.trim();
@@ -241,7 +269,10 @@ export async function searchPoems(query: string, category?: string): Promise<Uni
 
   const escaped = escapeLike(trimmed);
   if (!selectedCategory) {
-    const rpcResult = await supabase.rpc("search_poems", { p_query: trimmed, p_limit: 30 });
+    const rpcResult = await supabase.rpc("search_poems", {
+      p_query: trimmed,
+      p_limit: 30,
+    });
     if (!rpcResult.error && rpcResult.data && rpcResult.data.length > 0) {
       return normalizePoemResults(rpcResult.data);
     }
@@ -249,15 +280,34 @@ export async function searchPoems(query: string, category?: string): Promise<Uni
 
   let queryBuilder = supabase
     .from("poems")
-    .select("id, title, body, category_id, categories(name_am, name_en), tags, attribution_status, poets(name_am, name_en)")
+    .select(
+      "id, title, body, category_id, categories(name_am, name_en), tags, attribution_status, poets(name_am, name_en)",
+    )
     .neq("attribution_status", "disputed")
     .order("created_at", { ascending: false });
-  if (trimmed) queryBuilder = queryBuilder.or(`title.ilike.%${escaped}%,body.ilike.%${escaped}%`);
-  if (selectedCategory) queryBuilder = queryBuilder.eq("category_id", selectedCategory);
+  if (trimmed) {
+    queryBuilder = queryBuilder.or(
+      `title.ilike.%${escaped}%,body.ilike.%${escaped}%`,
+    );
+  }
+  if (selectedCategory) {
+    queryBuilder = queryBuilder.eq("category_id", selectedCategory);
+  }
   const { data } = await queryBuilder.limit(50);
 
   const needle = trimmed.toLocaleLowerCase();
-  return normalizePoemResults(data ?? []).filter((poem) => !needle || [poem.title, poem.body, poem.category_name_am, poem.category_name_en, ...(poem.tags ?? []), poem.poet_name_am, poem.poet_name_en].filter(Boolean).join(" ").toLocaleLowerCase().includes(needle));
+  return normalizePoemResults(data ?? []).filter((poem) =>
+    !needle ||
+    [
+      poem.title,
+      poem.body,
+      poem.category_name_am,
+      poem.category_name_en,
+      ...(poem.tags ?? []),
+      poem.poet_name_am,
+      poem.poet_name_en,
+    ].filter(Boolean).join(" ").toLocaleLowerCase().includes(needle)
+  );
 }
 
 export type FormState = { error?: string; success?: boolean };
@@ -290,7 +340,9 @@ export async function createCategory(
     name_en: nameEn,
     created_by: user.id,
   });
-  if (error?.code === "23505") return { error: "That category already exists." };
+  if (error?.code === "23505") {
+    return { error: "That category already exists." };
+  }
   if (error) return { error: "Could not add category." };
   revalidatePath("/submit");
   revalidatePath("/moderate");
@@ -305,16 +357,29 @@ export async function updateCategory(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "You must be logged in." };
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (!requireModeratorRole(profile?.role)) return { error: "You are not authorized to edit categories." };
+  const { data: profile } = await supabase.from("profiles").select("role").eq(
+    "id",
+    user.id,
+  ).maybeSingle();
+  if (!requireModeratorRole(profile?.role)) {
+    return { error: "You are not authorized to edit categories." };
+  }
 
   const categoryId = String(formData.get("category_id") ?? "").trim();
   const nameAm = String(formData.get("name_am") ?? "").trim();
   const nameEn = String(formData.get("name_en") ?? "").trim();
-  if (!categoryId || !nameAm || !nameEn) return { error: "Both category names are required." };
+  if (!categoryId || !nameAm || !nameEn) {
+    return { error: "Both category names are required." };
+  }
 
-  const { error } = await supabase.from("categories").update({ name_am: nameAm, name_en: nameEn }).eq("id", categoryId);
-  if (error?.code === "23505") return { error: "That category name already exists." };
+  const { error } = await supabase.rpc("update_category", {
+    p_category_id: categoryId,
+    p_name_am: nameAm,
+    p_name_en: nameEn,
+  });
+  if (error?.code === "23505") {
+    return { error: "That category name already exists." };
+  }
   if (error) return { error: "Could not update category." };
   revalidatePath("/submit");
   revalidatePath("/moderate");
@@ -325,7 +390,10 @@ export async function deleteCategory(formData: FormData): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  const { data: profile } = await supabase.from("profiles").select("role").eq(
+    "id",
+    user.id,
+  ).maybeSingle();
   if (!requireModeratorRole(profile?.role)) return;
   const categoryId = String(formData.get("category_id") ?? "").trim();
   if (!categoryId) return;
@@ -410,16 +478,14 @@ export async function submitPoem(
   }
   if (poetId && proposedNameAm) {
     return {
-      error:
-        "Either select an existing poet or propose a new one — not both.",
+      error: "Either select an existing poet or propose a new one — not both.",
     };
   }
   if (!title) return { error: "Title is required." };
   if (!body.trim()) return { error: "Poem text is required." };
   if (!source && !isOwnSubmission) {
     return {
-      error:
-        "Source is required — it helps our moderators verify attribution.",
+      error: "Source is required — it helps our moderators verify attribution.",
     };
   }
   if (poetId) {
@@ -537,8 +603,8 @@ export async function updateMySubmission(
     .select("poet_id")
     .eq("id", user.id)
     .maybeSingle();
-  const isOwnPoem =
-    Boolean(submission.poet_id) && submission.poet_id === profile?.poet_id;
+  const isOwnPoem = Boolean(submission.poet_id) &&
+    submission.poet_id === profile?.poet_id;
 
   const updates: Record<string, unknown> = {
     title,
@@ -570,7 +636,8 @@ export async function updateMySubmission(
     }
     if (poetId && proposedNameAm) {
       return {
-        error: "Either select an existing poet or propose a new one — not both.",
+        error:
+          "Either select an existing poet or propose a new one — not both.",
       };
     }
     if (!source) {
@@ -926,7 +993,9 @@ export async function markReportDisputed(
     .update({ attribution_status: "disputed" })
     .eq("id", poem.id);
   if (disputeError) {
-    return { error: `Could not mark the poem as disputed: ${disputeError.message}` };
+    return {
+      error: `Could not mark the poem as disputed: ${disputeError.message}`,
+    };
   }
 
   // Stamp every open report on this poem so any of its cards can later
@@ -1004,7 +1073,10 @@ export async function republishDisputedPoem(
     .update({ status: "resolved", resolved_by: user.id })
     .eq("id", reportId);
   if (resolveError) {
-    return { error: `Poem republished, but could not resolve the report: ${resolveError.message}` };
+    return {
+      error:
+        `Poem republished, but could not resolve the report: ${resolveError.message}`,
+    };
   }
 
   revalidatePath("/moderate");
@@ -1057,7 +1129,9 @@ export async function removeDisputedPoem(
     return { error: "The poem no longer exists." };
   }
   if (poem.attribution_status !== "disputed") {
-    return { error: "Only a disputed poem can be removed. Mark it disputed first." };
+    return {
+      error: "Only a disputed poem can be removed. Mark it disputed first.",
+    };
   }
 
   // Favorites and reports cascade-delete with the poem.
@@ -1230,8 +1304,7 @@ export async function savePoetProfile(
   // Redirect-after-save: explicit ?redirect= target wins, then the page
   // the user came from, then home. (Account settings don't route through
   // this action, so they never trigger this.)
-  const target =
-    internalPath(String(formData.get("redirect_to") ?? "")) ??
+  const target = internalPath(String(formData.get("redirect_to") ?? "")) ??
     internalPath(String(formData.get("came_from") ?? "")) ??
     "/";
   redirect(target);

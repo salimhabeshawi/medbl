@@ -25,7 +25,7 @@ export default async function NotFound() {
           </p>
           <div className="mt-6 flex flex-col gap-2 sm:flex-row">
             <Button asChild variant="outline" size="sm">
-              <Link href="/">{t("backHome")}</Link>
+              <Link href="/home">{t("backHome")}</Link>
             </Button>
             <Button asChild size="sm">
               <Link href="/poems">{t("browsePoems")}</Link>

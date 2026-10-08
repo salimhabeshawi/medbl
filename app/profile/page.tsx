@@ -35,7 +35,7 @@ export default async function ProfilePage({
   const redirectTo = internalPath(rawRedirect ?? null);
 
   // Fallback target when no ?redirect= param exists: the page the user
-  // navigated here from (Referer), else home.
+  // navigated here from (Referer), else the app home.
   const h = await headers();
   const referer = h.get("referer");
   let cameFrom: string | null = null;
@@ -74,7 +74,9 @@ export default async function ProfilePage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <StaticBackLink href={cameFrom ?? "/"}>{tProfile("back")}</StaticBackLink>
+      <StaticBackLink href={cameFrom ?? "/home"}>
+        {tProfile("back")}
+      </StaticBackLink>
       <div className="mb-10 max-w-2xl">
         <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
           {tProfile("eyebrow")}
@@ -117,7 +119,7 @@ export default async function ProfilePage({
           }}
           linked={Boolean(profile?.poet_id)}
           redirectTo={redirectTo}
-          cameFrom={cameFrom ?? "/"}
+          cameFrom={cameFrom ?? "/home"}
         />
       </section>
 

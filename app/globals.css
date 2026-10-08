@@ -129,3 +129,169 @@ h5,
 h6 {
   font-family: var(--font-lora), var(--font-noto-ethiopic), serif;
 }
+
+.js .reveal:not([data-in]) {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.js .reveal {
+  transition: opacity 650ms ease var(--reveal-delay, 0ms), transform 650ms ease var(--reveal-delay, 0ms);
+}
+
+.js .reveal[data-in] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.landing-hero {
+  background: linear-gradient(135deg, color-mix(in oklch, var(--accent), transparent 20%), var(--background) 58%, color-mix(in oklch, var(--secondary), transparent 92%));
+}
+
+.landing-noise {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  color: var(--foreground);
+  mix-blend-mode: multiply;
+}
+
+.dark .landing-noise { mix-blend-mode: screen; }
+
+.landing-border-motif {
+  pointer-events: none;
+  position: absolute;
+  inset: 1rem;
+  border: 1px solid color-mix(in oklch, var(--primary), transparent 72%);
+  opacity: 0.75;
+}
+
+.landing-border-motif::after {
+  content: "";
+  position: absolute;
+  inset: 0.4rem;
+  border: 1px dashed color-mix(in oklch, var(--secondary), transparent 72%);
+}
+
+.landing-glyph {
+  pointer-events: none;
+  position: absolute;
+  color: var(--primary);
+  opacity: 0.07;
+  font-family: var(--font-noto-ethiopic), sans-serif;
+  font-size: clamp(8rem, 20vw, 18rem);
+  line-height: 1;
+  animation: landing-drift 18s ease-in-out infinite alternate;
+}
+
+.landing-glyph-one { left: 3%; top: 8%; }
+.landing-glyph-two { right: 12%; top: 1%; animation-delay: -5s; }
+.landing-glyph-three { right: 2%; bottom: 0; color: var(--secondary); animation-delay: -10s; }
+.landing-glyph-four { left: 35%; bottom: -8%; color: var(--secondary); animation-delay: -14s; }
+
+.landing-poem-panel {
+  isolation: isolate;
+  transform: rotate(-1.8deg);
+  transition: transform 450ms ease;
+}
+
+.landing-poem-panel::before,
+.landing-poem-panel::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0.65rem;
+  border: 1px solid color-mix(in oklch, var(--primary), transparent 82%);
+  border-radius: 0.65rem;
+  pointer-events: none;
+}
+
+.landing-poem-panel::after {
+  inset: auto 12% 0.65rem;
+  height: 1px;
+  border: 0;
+  background: var(--primary);
+  opacity: 0.22;
+  transform: scaleX(0.35);
+  transition: transform 500ms ease, opacity 500ms ease;
+}
+
+.landing-poem-panel:hover {
+  transform: translateY(-4px) rotate(0deg);
+}
+
+.landing-poem-panel:hover::after {
+  opacity: 0.7;
+  transform: scaleX(1);
+}
+
+.landing-poem-number {
+  transform: rotate(7deg);
+  transition: transform 500ms ease, color 500ms ease;
+}
+
+.landing-poem-panel:hover .landing-poem-number {
+  color: color-mix(in oklch, var(--primary), transparent 5%);
+  transform: rotate(-4deg) translateY(-4px);
+}
+
+.landing-poem-title,
+.landing-poem-excerpt {
+  transition: transform 500ms ease;
+}
+
+.landing-poem-panel:hover .landing-poem-title { transform: translateX(4px); }
+.landing-poem-panel:hover .landing-poem-excerpt { transform: translateX(7px); }
+
+.landing-poet-card {
+  transform: rotate(var(--landing-card-tilt, 0deg));
+  transition: transform 400ms ease;
+}
+
+.landing-poet-card-1 { --landing-card-tilt: -2.2deg; }
+.landing-poet-card-2 { --landing-card-tilt: 1.8deg; }
+.landing-poet-card-3 { --landing-card-tilt: -1.6deg; }
+
+.landing-poet-card:hover {
+  z-index: 1;
+  transform: translateY(-7px) rotate(0deg) scale(1.02);
+}
+
+.landing-theme-pill {
+  display: inline-block;
+  transition: transform 300ms ease;
+}
+
+.landing-theme-pill:nth-child(1) { transform: translateY(2px) rotate(-4deg); }
+.landing-theme-pill:nth-child(2) { transform: translateY(-3px) rotate(3deg); }
+.landing-theme-pill:nth-child(3) { transform: translateY(1px) rotate(-2deg); }
+.landing-theme-pill:nth-child(4) { transform: translateY(-4px) rotate(5deg); }
+.landing-theme-pill:nth-child(5) { transform: translateY(3px) rotate(-3deg); }
+.landing-theme-pill:nth-child(6) { transform: translateY(-2px) rotate(2deg); }
+.landing-theme-pill:nth-child(7) { transform: translateY(2px) rotate(-5deg); }
+.landing-theme-pill:nth-child(8) { transform: translateY(-3px) rotate(3deg); }
+.landing-theme-pill:hover { transform: translateY(-6px) rotate(0deg) scale(1.08); }
+
+@keyframes landing-drift {
+  from { transform: translate3d(0, 0, 0) rotate(-4deg); }
+  to { transform: translate3d(0, 18px, 0) rotate(4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal:not([data-in]) { opacity: 1; transform: none; }
+  .js .reveal { transition: none; }
+  .landing-glyph { animation: none; }
+  .landing-poem-panel,
+  .landing-poem-panel::after,
+  .landing-poem-number,
+  .landing-poem-title,
+  .landing-poem-excerpt,
+  .landing-poet-card,
+  .landing-theme-pill { transition: none; transform: none; }
+  .landing-poem-panel:hover,
+  .landing-poem-panel:hover .landing-poem-number,
+  .landing-poem-panel:hover .landing-poem-title,
+  .landing-poem-panel:hover .landing-poem-excerpt,
+  .landing-poet-card:hover,
+  .landing-theme-pill:hover { transform: none; }
+}
