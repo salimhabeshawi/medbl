@@ -38,7 +38,6 @@ export default async function SignupPage({
               <div className="h-px flex-1 bg-border" />
             </div>
 
-            <SignupForm action={signup} />
             <SignupForm
               action={signup}
               next={typeof next === "string" ? next : undefined}
