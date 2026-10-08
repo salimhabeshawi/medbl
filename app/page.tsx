@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { getCurrentUser } from "@/lib/favorites";
 import { LandingHero } from "@/components/landing/hero";
 import { WhatIsMedbl } from "@/components/landing/what-is-medbl";
 import { HowItWorks } from "@/components/landing/how-it-works";
@@ -10,12 +8,6 @@ import { LandingStats } from "@/components/landing/stats";
 import { LandingFeaturedPoem } from "@/components/landing/featured-poem";
 import { LandingFeaturedPoets } from "@/components/landing/featured-poets";
 import { LandingThemes } from "@/components/landing/themes";
-import {
-  LandingPoemSkeleton,
-  LandingPoetsSkeleton,
-  LandingStatsSkeleton,
-  LandingThemesSkeleton,
-} from "@/components/landing/loading";
 
 export const metadata: Metadata = {
   title: "Medbl — Amharic Poetry Collection",
@@ -39,9 +31,8 @@ const websiteJsonLd = {
     "Medbl is a community collection of Amharic poetry by real poets.",
 };
 
-export default async function LandingPage() {
-  const user = await getCurrentUser();
-  const authenticated = Boolean(user);
+export default function LandingPage() {
+  const authenticated = false;
   return (
     <>
       <script
@@ -50,19 +41,11 @@ export default async function LandingPage() {
       />
       <LandingHero authenticated={authenticated} />
       <WhatIsMedbl />
-      <Suspense fallback={<LandingStatsSkeleton />}>
-        <LandingStats />
-      </Suspense>
+      <LandingStats />
       <HowItWorks />
-      <Suspense fallback={<LandingPoemSkeleton />}>
-        <LandingFeaturedPoem authenticated={authenticated} />
-      </Suspense>
-      <Suspense fallback={<LandingPoetsSkeleton />}>
-        <LandingFeaturedPoets authenticated={authenticated} />
-      </Suspense>
-      <Suspense fallback={<LandingThemesSkeleton />}>
-        <LandingThemes authenticated={authenticated} />
-      </Suspense>
+      <LandingFeaturedPoem authenticated={authenticated} />
+      <LandingFeaturedPoets authenticated={authenticated} />
+      <LandingThemes authenticated={authenticated} />
       <LandingTrust />
       <LandingFinalCta authenticated={authenticated} />
     </>

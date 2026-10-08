@@ -104,27 +104,6 @@ async function getFeaturedPoets(
 export default function Home() {
   return (
     <>
-      <section className="mx-auto max-w-4xl px-4 pt-10 sm:px-6 sm:pt-14">
-        <h1 className="font-serif text-4xl font-semibold tracking-normal text-foreground sm:text-5xl">
-          Medbl
-        </h1>
-        <div className="mt-5 max-w-3xl space-y-4 text-base leading-7 text-foreground/90">
-          <h2 className="text-2xl font-semibold text-foreground">About Medbl</h2>
-          <p>
-            Medbl is a community collection of Amharic poetry where visitors
-            can read poems attributed to real poets, favorite them, and signed-in
-            users can submit their own poems or other poets&apos; poems for
-            moderator review. Signing in by email or Google is only used to
-            create and access an account.
-          </p>
-          <p lang="am" className="font-sans">
-            መድብል ጎብኚዎች ለእውነተኛ ገጣሚያን የተመደቡ የአማርኛ ግጥሞችን ማንበብና ተወዳጅ
-            ማድረግ የሚችሉበት የማህበረሰብ ስብስብ ነው። የገቡ ተጠቃሚዎች የራሳቸውን ወይም
-            የሌሎች ገጣሚያንን ግጥሞች ለአወያይ ግምገማ ማስገባት ይችላሉ። በኢሜይል ወይም
-            በGoogle መግባት መለያ ለመፍጠርና ለመጠቀም ብቻ ይውላል።
-          </p>
-        </div>
-      </section>
       <Suspense fallback={<HomeLoading />}>
         <HomeContent />
       </Suspense>

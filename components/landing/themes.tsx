@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Compass } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Reveal } from "./reveal";
 
@@ -10,14 +9,17 @@ export async function LandingThemes({
 }: {
   authenticated: boolean;
 }) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("categories")
-    .select("id, name_am, name_en")
-    .order("name_am");
-  if (error || !data?.length) return null;
   const locale = await getLocale();
   const t = await getTranslations("Landing");
+  const categories = [
+    [t("sampleThemeLoveAm"), t("sampleThemeLoveEn")],
+    [t("sampleThemeCultureAm"), t("sampleThemeCultureEn")],
+    [t("sampleThemeNatureAm"), t("sampleThemeNatureEn")],
+    [t("sampleThemeSpiritAm"), t("sampleThemeSpiritEn")],
+    [t("sampleThemeSocietyAm"), t("sampleThemeSocietyEn")],
+    [t("sampleThemeHistoryAm"), t("sampleThemeHistoryEn")],
+    [t("sampleThemeModernAm"), t("sampleThemeModernEn")],
+  ] as const;
   return (
     <section
       className="border-y border-border/70 bg-accent/25"
@@ -44,15 +46,13 @@ export async function LandingThemes({
             </a>
           </Button>
           <div className="landing-themes mt-8 flex flex-wrap gap-3">
-            {data.map((category) => (
-              <span key={category.id} className="landing-theme-pill">
+            {categories.map(([nameAm, nameEn]) => (
+              <span key={nameEn} className="landing-theme-pill">
                 <Badge
                   variant="outline"
                   className="h-auto rounded-lg px-4 py-2 text-sm"
                 >
-                  {locale === "am"
-                    ? category.name_am || category.name_en
-                    : category.name_en || category.name_am}
+                  {locale === "am" ? nameAm || nameEn : nameEn || nameAm}
                 </Badge>
               </span>
             ))}
