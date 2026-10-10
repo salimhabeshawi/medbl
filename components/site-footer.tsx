@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Logo } from "@/components/brand/logo";
 
 export async function SiteFooter() {
   const tFooter = await getTranslations("Footer");
@@ -7,9 +8,12 @@ export async function SiteFooter() {
   return (
     <footer className="border-t border-border bg-background py-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-2 px-4 text-center sm:px-6">
-        <p className="font-sans text-base font-semibold text-primary">
-          {tFooter("medbl")}
-        </p>
+        <Link href="/" aria-label="Medbl">
+          <Logo
+            variant="lockup-horizontal"
+            className="h-10 origin-left scale-[1.75] text-foreground"
+          />
+        </Link>
         <p className="font-serif text-sm italic text-secondary">
           {tFooter("tagline")}
         </p>

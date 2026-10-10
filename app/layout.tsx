@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Ethiopic, Lora, Inter } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
@@ -40,6 +40,10 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "Medbl",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#B5651D",
 };
 
 export default async function RootLayout({

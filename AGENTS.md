@@ -89,6 +89,13 @@ hand-rolled equivalents, so the app stays visually consistent as new
 features are added. Install additional shadcn components as needed
 rather than building custom versions of things shadcn already provides.
 
+## Branding
+
+- Brand assets live in `app/` for favicon/icon/apple-icon/opengraph/twitter images, `public/icons/` for PWA icons, and `public/brand/` for in-site logos.
+- The in-site logo must always be rendered through `components/brand/logo.tsx`; never re-type the wordmark or use ad hoc logo images.
+- Brand assets must not be edited by hand; they come from the brand kit's master vector.
+- Use the existing Design system palette: parchment `#FBF3E6`, coffee brown `#2E2018`, terracotta `#B5651D`, olive `#5B6B3F`, and warm tan `#D9C7AC`; use Lora for headings, Inter for body/UI text, and Noto Sans Ethiopic for Amharic.
+
 ## Signup / login — keep these simple, always
 
 Signup and login collect ONLY email and password (plus the Google OAuth
@@ -885,6 +892,8 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
    38. Moved the app home to `/home` and added the public bilingual Medbl
      landing page at `/`, including public collection stats and
      progressive-enhancement scroll animation rules — done
+  39. Integrated the Medbl brand kit assets, manifest icons, social images,
+      favicons, and shared current-color logo component across the site — done
 
 ## Guidelines for future changes
 

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Medbl mark parchment</title>
+  <desc id="desc">Medbl vector logo asset</desc>
+<g xmlns="http://www.w3.org/2000/svg" id="medbl-favicon-mark" fill="#FBF3E6" stroke="none">
+    <path id="top-solid-fan" d="M134 238 C242 180 351 189 458 286 C491 316 514 355 531 405 C570 327 626 230 719 166 C807 163 875 171 921 188 C803 248 677 305 571 429 C548 456 529 488 514 520 C489 485 462 463 430 444 C331 382 231 320 135 270 Z" />
+    <path id="outer-book-stroke" d="M144 251 C143 390 148 566 176 742 C181 771 194 790 213 790 C387 769 610 731 813 727 C806 562 796 398 781 250" fill="none" stroke="#FBF3E6" stroke-width="68" stroke-linecap="round" stroke-linejoin="round" />
+    <path id="bottom-page-edge" d="M190 779 C369 760 590 727 823 724" fill="none" stroke="#FBF3E6" stroke-width="57" stroke-linecap="round" />
+    <path id="left-inner-stroke" d="M294 438 C300 513 312 586 330 648" fill="none" stroke="#FBF3E6" stroke-width="62" stroke-linecap="round" />
+    <path id="right-inner-stroke" d="M706 424 C704 508 712 577 729 632" fill="none" stroke="#FBF3E6" stroke-width="62" stroke-linecap="round" />
+    <path id="center-bookmark" d="M519 550 C500 568 503 619 509 683 L518 786 L606 780 L586 676 C578 633 573 596 583 563 C589 538 554 516 530 539 C525 543 522 547 519 550 Z" />
+    <circle id="left-bottom-soft-corner" cx="190" cy="790" r="40" />
+    <circle id="right-top-soft-corner" cx="806" cy="242" r="42" />
+  </g>
+
+</svg>

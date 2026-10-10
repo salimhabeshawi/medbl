@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from "next-intl/server";
 import { Reveal } from "./reveal";
+import { Logo } from "@/components/brand/logo";
 
 export async function LandingHero({
   authenticated,
@@ -52,21 +53,15 @@ export async function LandingHero({
       </div>
       <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:py-36">
         <Reveal className="max-w-4xl">
-          <p
-            className="font-sans text-5xl font-semibold tracking-normal text-primary sm:text-7xl"
-            lang="am"
-          >
-            መድብል
-          </p>
           <h1
             id="landing-title"
-            className="mt-3 font-serif text-5xl font-semibold tracking-normal text-foreground sm:text-7xl lg:text-8xl"
+            className="flex flex-wrap items-center gap-4 text-foreground sm:gap-6"
           >
-            Medbl
+            <Logo variant="lockup-stacked" className="h-40 text-foreground sm:h-52" />
+            <span className="max-w-xs font-serif text-2xl font-semibold leading-tight sm:text-4xl">
+              Where Amharic poetry lives on.
+            </span>
           </h1>
-          <p className="mt-7 max-w-2xl font-serif text-2xl leading-tight text-foreground sm:text-4xl">
-            {t("headline")}
-          </p>
           <p className="mt-6 max-w-xl text-base leading-8 text-muted-foreground sm:text-lg">
             {t("subhead")}
           </p>

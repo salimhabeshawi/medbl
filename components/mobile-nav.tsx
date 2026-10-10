@@ -31,6 +31,7 @@ import {
   X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Logo } from "@/components/brand/logo";
 
 type LinkDef = {
   href: string;
@@ -102,8 +103,11 @@ export function MobileNav({
         className="w-72 gap-0 border-l-foreground/20 bg-background p-0 text-foreground"
       >
         <SheetHeader className="flex-row items-center justify-between border-b border-background/15 p-4">
-          <SheetTitle className="font-sans text-base font-semibold text-primary">
-            መድብል
+          <SheetTitle>
+            <Logo
+              variant="lockup-horizontal"
+              className="h-10 origin-left scale-[1.75] text-foreground"
+            />
           </SheetTitle>
           <SheetClose asChild>
             <Button

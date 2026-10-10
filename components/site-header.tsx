@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { SubmissionMenu } from "./submission-menu";
 import { LanguageToggle } from "./language-toggle";
 import { getTranslations } from "next-intl/server";
+import { Logo } from "@/components/brand/logo";
 
 type NavIcon =
   | "home"
@@ -105,10 +106,13 @@ export async function SiteHeader() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6 md:py-3.5">
         <Link
           href="/"
-          className="font-sans text-lg font-semibold text-primary transition hover:text-primary/80 md:text-xl"
+          aria-label="Medbl"
+          className="transition hover:opacity-80"
         >
-          <span>Medbl</span>
-          <span className="ml-2 text-sm font-normal">{tNav("medbl")}</span>
+          <Logo
+            variant="lockup-horizontal"
+            className="h-10 origin-left scale-[1.75] text-foreground"
+          />
         </Link>
 
         {/* Desktop nav (md and up) - no hamburger */}
