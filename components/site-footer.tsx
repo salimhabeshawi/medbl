@@ -11,7 +11,7 @@ export async function SiteFooter() {
         <Link href="/" aria-label="Medbl">
           <Logo
             variant="lockup-horizontal"
-            className="h-10 origin-left scale-[1.75] text-foreground"
+            className="h-8 origin-left scale-125 text-foreground"
           />
         </Link>
         <p className="font-serif text-sm italic text-secondary">

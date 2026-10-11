@@ -82,7 +82,12 @@ export function MobileNav({
   const tSubmit = useTranslations("Submit");
   const tSubmissions = useTranslations("MySubmissions");
 
-  const primaryLinks = links.filter((l) => l.href !== "/profile" && l.href !== "/submit" && l.href !== "/my-submissions");
+  const primaryLinks = links.filter(
+    (l) =>
+      l.href !== "/profile" &&
+      l.href !== "/submit" &&
+      l.href !== "/my-submissions",
+  );
   const profileLink = links.find((l) => l.href === "/profile");
 
   return (
@@ -106,7 +111,7 @@ export function MobileNav({
           <SheetTitle>
             <Logo
               variant="lockup-horizontal"
-              className="h-10 origin-left scale-[1.75] text-foreground"
+              className="h-8 origin-left scale-125 text-foreground"
             />
           </SheetTitle>
           <SheetClose asChild>
@@ -171,13 +176,20 @@ export function MobileNav({
             </p>
             <div className="flex flex-col gap-1">
               <SheetClose asChild>
-                <Link href="/submit" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10">
+                <Link
+                  href="/submit"
+                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10"
+                >
                   <Plus className="size-4 text-primary" /> {tSubmit("title")}
                 </Link>
               </SheetClose>
               <SheetClose asChild>
-                <Link href="/my-submissions" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10">
-                  <ClipboardList className="size-4 text-primary" /> {tSubmissions("title")}
+                <Link
+                  href="/my-submissions"
+                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10"
+                >
+                  <ClipboardList className="size-4 text-primary" />{" "}
+                  {tSubmissions("title")}
                 </Link>
               </SheetClose>
             </div>

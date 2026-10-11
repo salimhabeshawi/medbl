@@ -2,8 +2,14 @@ import { cn } from "cn";
 
 const VARIANTS = {
   mark: { src: "/brand/medbl-mark-currentcolor.svg", ratio: "1 / 1" },
-  "lockup-horizontal": { src: "/brand/medbl-lockup-horizontal-currentcolor.svg", ratio: "1600 / 560" },
-  "lockup-stacked": { src: "/brand/medbl-lockup-stacked-currentcolor.svg", ratio: "1 / 1" },
+  "lockup-horizontal": {
+    src: "/brand/medbl-lockup-horizontal-currentcolor.svg",
+    ratio: "1600 / 560",
+  },
+  "lockup-stacked": {
+    src: "/brand/medbl-lockup-stacked-currentcolor.svg",
+    ratio: "1 / 1",
+  },
 } as const;
 
 type Props = {

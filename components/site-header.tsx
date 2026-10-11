@@ -111,7 +111,7 @@ export async function SiteHeader() {
         >
           <Logo
             variant="lockup-horizontal"
-            className="h-10 origin-left scale-[1.75] text-foreground"
+            className="h-8 origin-left scale-125 text-foreground"
           />
         </Link>
 

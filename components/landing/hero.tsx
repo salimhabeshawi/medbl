@@ -57,7 +57,10 @@ export async function LandingHero({
             id="landing-title"
             className="flex flex-wrap items-center gap-4 text-foreground sm:gap-6"
           >
-            <Logo variant="lockup-stacked" className="h-40 text-foreground sm:h-52" />
+            <Logo
+              variant="lockup-stacked"
+              className="h-40 text-foreground sm:h-52"
+            />
             <span className="max-w-xs font-serif text-2xl font-semibold leading-tight sm:text-4xl">
               Where Amharic poetry lives on.
             </span>
