@@ -29,6 +29,9 @@ export function FavoriteToggle({
   // pending = server request is in flight (button disabled, spinner shown)
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // True only right after this visitor likes the poem, so the heart "pops"
+  // once on confirmation — never for hearts that load already filled.
+  const [justLiked, setJustLiked] = useState(false);
   // Prevent a second click while a request is already in flight.
   const inFlight = useRef(false);
   const tPoems = useTranslations("Poems");
@@ -37,6 +40,7 @@ export function FavoriteToggle({
     if (inFlight.current) return;
     inFlight.current = true;
     setError(null);
+    setJustLiked(false);
 
     // ── Optimistic update ────────────────────────────────────────────────────
     // Apply the expected result immediately so the UI responds in the same
@@ -70,6 +74,7 @@ export function FavoriteToggle({
     // Correct with the authoritative server values.
     // In the normal case these match the optimistic values exactly.
     setFavorited(result.favorited);
+    setJustLiked(result.favorited);
     if (result.favoriteCount !== undefined) {
       setFavoriteCount(result.favoriteCount);
     }
@@ -103,7 +108,11 @@ export function FavoriteToggle({
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               ) : (
                 <Heart
-                  className={favorited ? "size-4 fill-current" : "size-4"}
+                  className={
+                    favorited
+                      ? `size-4 fill-current ${justLiked ? "motion-safe:animate-heart-pop" : ""}`
+                      : "size-4"
+                  }
                   aria-hidden="true"
                 />
               )}

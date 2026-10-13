@@ -5,7 +5,7 @@ import { firstRelation } from "@/lib/relations";
 import { FavoriteRow } from "@/components/favorite-row";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
-import { getFavoriteCounts } from "@/lib/favorites";
+import { getCurrentUser, getFavoriteCounts } from "@/lib/favorites";
 import { optionList, type ListFilterOption } from "@/lib/filter-options";
 import { ListFilters } from "@/components/list-filters";
 import { BackLink } from "@/components/back-link";
@@ -61,9 +61,7 @@ export default async function FavoritesPage({
   const tFav = await getTranslations("Favorites");
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   const { data: favorites, error } = await supabase

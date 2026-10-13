@@ -40,7 +40,3 @@ export function Reveal({
     </div>
   );
 }
-
-export function RevealGroup({ children }: { children: ReactNode }) {
-  return <div className="reveal-group">{children}</div>;
-}

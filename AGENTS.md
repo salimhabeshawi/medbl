@@ -459,6 +459,15 @@ animation starts from server-rendered final values, and all effects animate
 only opacity/transform. Every landing animation must respect
 `prefers-reduced-motion: reduce`.
 
+Landing sections show real data only — the featured poem
+(`get_featured_poems`), featured poets (`get_featured_poets`) and themes
+(`categories`, excluding `Uncategorized`) — and render nothing when there is
+no data, never placeholder poems or poets. Data sections stream behind the
+skeletons in `components/landing/loading.tsx`. Sections are built from
+`LandingSection` / `SectionHeading` (`components/landing/section.tsx`), and
+landing-only CSS lives in `components/landing/landing.css` (imported by
+`app/page.tsx`), not in `globals.css`.
+
 ## Profile page (`/profile`)
 
 Requires auth (redirect to `/login` if not logged in). Two independent
@@ -592,7 +601,9 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
   (submission, profile, moderation actions, report resolution).
 - `lib/` helpers: `lib/supabase/` (browser/server clients + middleware
   session refresh), `lib/favorites.ts`, `lib/moderation.ts`,
-  `lib/relations.ts`.
+  `lib/relations.ts`, and `lib/nav.ts` (the shared `NavLink` type, icon map
+  and `isActivePath()` — the header builds ONE link list on the server and
+  passes it to both `DesktopNav` and `MobileNav`).
 
 ## Build order — completed so far
 

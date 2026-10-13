@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
-import { getFavoriteCounts } from "@/lib/favorites";
+import { getCurrentUser, getFavoriteCounts } from "@/lib/favorites";
 import { optionList, type ListFilterOption } from "@/lib/filter-options";
 import { EmptyState } from "@/components/empty-state";
 import { ListFilters } from "@/components/list-filters";
@@ -100,9 +100,7 @@ export default async function MySubmissionsPage({
   const supabase = await createClient();
   const tSubs = await getTranslations("MySubmissions");
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   // Every column the pending-submission edit form needs is fetched here, so the

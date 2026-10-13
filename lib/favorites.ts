@@ -1,12 +1,19 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 
-export async function getCurrentUser() {
+/**
+ * The signed-in user for this request. `auth.getUser()` is a network call to
+ * Supabase Auth, and the header, the page and helpers like
+ * getFavoritePoemIds all need the answer — `cache` makes it one call per
+ * server request instead of one per caller.
+ */
+export const getCurrentUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
-}
+});
 
 export async function getFavoritePoemIds(
   poemIds: string[],

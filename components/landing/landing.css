@@ -1,0 +1,214 @@
+/*
+ * Landing-page-only styles (scroll reveals, hero texture, tilted cards).
+ * Imported by app/page.tsx so other routes never download them.
+ *
+ * Motion is mobile-first: phones get short, light reveals and no ambient
+ * animation; the drifting glyphs and hover choreography are layered on only
+ * for wider screens and real pointers. Everything animates opacity/transform
+ * only, and all of it is switched off under prefers-reduced-motion.
+ */
+
+/* ── Scroll reveals ─────────────────────────────────────────────────────── */
+
+.js .reveal:not([data-in]) {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.js .reveal {
+  transition:
+    opacity 320ms var(--ease-out-soft) var(--reveal-delay, 0ms),
+    transform 320ms var(--ease-out-soft) var(--reveal-delay, 0ms);
+}
+
+.js .reveal[data-in] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (min-width: 768px) {
+  .js .reveal:not([data-in]) {
+    transform: translateY(12px);
+  }
+
+  .js .reveal {
+    transition-duration: 420ms;
+  }
+}
+
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+
+.landing-hero {
+  background: linear-gradient(135deg, color-mix(in oklch, var(--accent), transparent 20%), var(--background) 58%, color-mix(in oklch, var(--secondary), transparent 92%));
+}
+
+/* Paper grain: the same fractal-noise filter the hero used to run inline over
+   its full area, now computed once on a 200px tile and repeated. */
+.landing-noise {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+.dark .landing-noise { mix-blend-mode: screen; }
+
+.landing-border-motif {
+  pointer-events: none;
+  position: absolute;
+  inset: 1rem;
+  border: 1px solid color-mix(in oklch, var(--primary), transparent 72%);
+  opacity: 0.75;
+}
+
+.landing-border-motif::after {
+  content: "";
+  position: absolute;
+  inset: 0.4rem;
+  border: 1px dashed color-mix(in oklch, var(--secondary), transparent 72%);
+}
+
+/* The Ge'ez glyphs are a still watermark on phones; they only drift on
+   wider screens, where the extra compositing is cheap. */
+.landing-glyph {
+  pointer-events: none;
+  position: absolute;
+  color: var(--primary);
+  opacity: 0.07;
+  font-family: var(--font-noto-ethiopic), sans-serif;
+  font-size: clamp(8rem, 20vw, 18rem);
+  line-height: 1;
+  transform: rotate(var(--glyph-tilt, 0deg));
+}
+
+.landing-glyph-one { left: 3%; top: 8%; --glyph-tilt: -4deg; }
+.landing-glyph-two { right: 12%; top: 1%; --glyph-tilt: 3deg; animation-delay: -5s; }
+.landing-glyph-three { right: 2%; bottom: 0; color: var(--secondary); --glyph-tilt: -2deg; animation-delay: -10s; }
+.landing-glyph-four { left: 35%; bottom: -8%; color: var(--secondary); --glyph-tilt: 4deg; animation-delay: -14s; }
+
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .landing-glyph {
+    will-change: transform;
+    animation: landing-drift 18s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes landing-drift {
+  from { transform: translate3d(0, 0, 0) rotate(-4deg); }
+  to { transform: translate3d(0, 18px, 0) rotate(4deg); }
+}
+
+/* ── Featured poem panel ────────────────────────────────────────────────── */
+
+.landing-poem-panel {
+  isolation: isolate;
+  transform: rotate(-1.8deg);
+}
+
+.landing-poem-panel::before,
+.landing-poem-panel::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0.65rem;
+  border: 1px solid color-mix(in oklch, var(--primary), transparent 82%);
+  border-radius: 0.65rem;
+  pointer-events: none;
+}
+
+.landing-poem-panel::after {
+  inset: auto 12% 0.65rem;
+  height: 1px;
+  border: 0;
+  background: var(--primary);
+  opacity: 0.22;
+  transform: scaleX(0.35);
+}
+
+.landing-poem-number {
+  transform: rotate(7deg);
+}
+
+/* ── Featured poets & theme pills (resting tilts) ───────────────────────── */
+
+.landing-poet-card {
+  transform: rotate(var(--landing-card-tilt, 0deg));
+}
+
+.landing-poet-card-1 { --landing-card-tilt: -2.2deg; }
+.landing-poet-card-2 { --landing-card-tilt: 1.8deg; }
+.landing-poet-card-3 { --landing-card-tilt: -1.6deg; }
+
+.landing-theme-pill {
+  display: inline-block;
+  transform: translateY(var(--pill-y, 0)) rotate(var(--pill-r, 0deg));
+}
+
+.landing-theme-pill:nth-child(8n + 1) { --pill-y: 2px; --pill-r: -4deg; }
+.landing-theme-pill:nth-child(8n + 2) { --pill-y: -3px; --pill-r: 3deg; }
+.landing-theme-pill:nth-child(8n + 3) { --pill-y: 1px; --pill-r: -2deg; }
+.landing-theme-pill:nth-child(8n + 4) { --pill-y: -4px; --pill-r: 5deg; }
+.landing-theme-pill:nth-child(8n + 5) { --pill-y: 3px; --pill-r: -3deg; }
+.landing-theme-pill:nth-child(8n + 6) { --pill-y: -2px; --pill-r: 2deg; }
+.landing-theme-pill:nth-child(8n + 7) { --pill-y: 2px; --pill-r: -5deg; }
+.landing-theme-pill:nth-child(8n + 8) { --pill-y: -3px; --pill-r: 3deg; }
+
+/* ── Touch: a quick straighten-and-press, no lingering hover state ──────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-poet-card,
+  .landing-theme-pill {
+    transition: transform var(--duration-fast) var(--ease-out-soft);
+  }
+
+  .landing-poet-card:active,
+  .landing-theme-pill:active {
+    transform: rotate(0deg) scale(0.98);
+  }
+}
+
+/* ── Pointer devices: the full hover choreography ───────────────────────── */
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .landing-poem-panel {
+    transition: transform 450ms var(--ease-out-soft);
+  }
+
+  .landing-poem-panel::after {
+    transition: transform 500ms var(--ease-out-soft), opacity 500ms var(--ease-out-soft);
+  }
+
+  .landing-poem-number,
+  .landing-poem-title,
+  .landing-poem-excerpt {
+    transition: transform 500ms var(--ease-out-soft), color 500ms var(--ease-out-soft);
+  }
+
+  .landing-poem-panel:hover { transform: translateY(-4px) rotate(0deg); }
+  .landing-poem-panel:hover::after { opacity: 0.7; transform: scaleX(1); }
+  .landing-poem-panel:hover .landing-poem-number {
+    color: color-mix(in oklch, var(--primary), transparent 5%);
+    transform: rotate(-4deg) translateY(-4px);
+  }
+  .landing-poem-panel:hover .landing-poem-title { transform: translateX(4px); }
+  .landing-poem-panel:hover .landing-poem-excerpt { transform: translateX(7px); }
+
+  .landing-poet-card { transition-duration: 400ms; }
+  .landing-poet-card:hover {
+    z-index: 1;
+    transform: translateY(-7px) rotate(0deg) scale(1.02);
+  }
+
+  .landing-theme-pill { transition-duration: 300ms; }
+  .landing-theme-pill:hover { transform: translateY(-6px) rotate(0deg) scale(1.08); }
+}
+
+/* ── Reduced motion: content simply appears; resting tilts stay ─────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal:not([data-in]) { opacity: 1; transform: none; }
+  .js .reveal { transition: none; }
+}

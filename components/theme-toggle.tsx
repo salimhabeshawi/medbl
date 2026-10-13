@@ -31,10 +31,10 @@ export function ThemeToggle({
   if (variant === "mobile") {
     return (
       <div className="space-y-2 px-4 py-2">
-        <p className="text-xs font-medium uppercase text-background/60">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {t("theme")}
         </p>
-        <div className="grid grid-cols-3 gap-1 rounded-lg border border-background/15 bg-background/5 p-1">
+        <div className="grid grid-cols-3 gap-1 rounded-lg border border-border bg-accent/40 p-1">
           {options.map((option) => {
             const Icon = option.icon;
             const active = value === option.value;
@@ -43,11 +43,12 @@ export function ThemeToggle({
               <button
                 key={option.value}
                 type="button"
+                aria-pressed={active}
                 onClick={() => setTheme(option.value)}
                 className={
                   active
-                    ? "flex items-center justify-center gap-1.5 rounded-md bg-background px-2 py-2 text-xs font-medium text-foreground"
-                    : "flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-medium text-muted-foreground transition hover:bg-background/10"
+                    ? "flex items-center justify-center gap-1.5 rounded-md bg-card px-2 py-2 text-xs font-medium text-foreground shadow-sm"
+                    : "flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-xs font-medium text-muted-foreground transition hover:text-foreground"
                 }
               >
                 <Icon className="size-3.5" aria-hidden="true" />
@@ -67,7 +68,7 @@ export function ThemeToggle({
           variant="outline"
           size="icon-sm"
           className="rounded-full border-border bg-background text-foreground"
-          aria-label="Theme"
+          aria-label={t("theme")}
         >
           <Sun className="size-4 dark:hidden" aria-hidden="true" />
           <Moon className="hidden size-4 dark:block" aria-hidden="true" />

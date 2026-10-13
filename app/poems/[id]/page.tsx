@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
-import { getFavoriteCounts } from "@/lib/favorites";
+import { getCurrentUser, getFavoriteCounts } from "@/lib/favorites";
 import { PoemActions } from "@/components/poem-actions";
 import { ReportPoem } from "@/components/report-poem";
 import { AttributionBadge } from "@/components/attribution-badge";
@@ -170,9 +170,7 @@ export default async function PoemPage({
     { dateStyle: "medium", timeZone: "Africa/Addis_Ababa" },
   ).format(new Date(poem.created_at));
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   let initialFavorited = false;
   let alreadyReported = false;

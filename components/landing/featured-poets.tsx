@@ -1,56 +1,62 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PenLine } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { Reveal, RevealGroup } from "./reveal";
+import { createClient } from "@/lib/supabase/server";
+import { Reveal } from "./reveal";
+import { LandingSection, SectionHeading } from "./section";
+
+type FeaturedPoetRow = {
+  id: string;
+  name_am: string;
+  name_en: string | null;
+  poem_count: number;
+};
 
 export async function LandingFeaturedPoets({
   authenticated,
 }: {
   authenticated: boolean;
 }) {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("get_featured_poets", { p_limit: 4 });
+  const poets = (data as FeaturedPoetRow[] | null) ?? [];
+  if (poets.length === 0) return null;
+
   const t = await getTranslations("Landing");
   const tPoets = await getTranslations("Poets");
-  const poets = [
-    [t("samplePoetOneAm"), t("samplePoetOneEn"), 8],
-    [t("samplePoetTwoAm"), t("samplePoetTwoEn"), 5],
-    [t("samplePoetThreeAm"), t("samplePoetThreeEn"), 11],
-    [t("samplePoetFourAm"), t("samplePoetFourEn"), 6],
-  ] as const;
   return (
-    <section
-      className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24"
-      aria-labelledby="featured-poets-title"
-    >
+    <LandingSection labelledBy="featured-poets-title">
       <Reveal>
-        <h2
+        <SectionHeading
           id="featured-poets-title"
-          className="font-serif text-3xl font-semibold sm:text-5xl"
-        >
-          {t("featuredPoetsTitle")}
-        </h2>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
-          {t("featuredPoetsDescription")}
-        </p>
+          title={t("featuredPoetsTitle")}
+          description={t("featuredPoetsDescription")}
+        />
         <Button asChild variant="outline" size="sm" className="mt-5">
-          <a href={authenticated ? "/home" : "/signup"}>
+          <Link href={authenticated ? "/home" : "/signup"}>
             <PenLine aria-hidden="true" />
             {authenticated ? t("meetTheVoices") : t("addYourVoice")}
-          </a>
+          </Link>
         </Button>
       </Reveal>
-      <RevealGroup>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {poets.map(([nameAm, nameEn, poemCount], index) => (
-            <Reveal key={nameAm} delay={index * 90}>
-              <div
-                className={`landing-poet-card landing-poet-card-${index % 4} rounded-lg border border-border bg-card p-5`}
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {poets.map((poet, index) => {
+          const poemCount = Number(poet.poem_count);
+          return (
+            <Reveal key={poet.id} delay={index * 90}>
+              <Link
+                href={`/poets/${poet.id}`}
+                className={`landing-poet-card landing-poet-card-${(index % 3) + 1} block h-full rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/50`}
               >
                 <p className="font-sans text-lg font-semibold" lang="am">
-                  {nameAm}
+                  {poet.name_am}
                 </p>
-                {nameEn ? (
-                  <p className="mt-1 text-sm text-muted-foreground">{nameEn}</p>
+                {poet.name_en ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {poet.name_en}
+                  </p>
                 ) : null}
                 <p className="mt-4 text-sm leading-6 text-muted-foreground">
                   {t("poetCardDescription", { count: poemCount })}
@@ -58,11 +64,11 @@ export async function LandingFeaturedPoets({
                 <Badge variant="outline" className="mt-5">
                   {tPoets("poemCount", { count: poemCount })}
                 </Badge>
-              </div>
+              </Link>
             </Reveal>
-          ))}
-        </div>
-      </RevealGroup>
-    </section>
+          );
+        })}
+      </div>
+    </LandingSection>
   );
 }

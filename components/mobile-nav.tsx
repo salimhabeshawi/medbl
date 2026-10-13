@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/actions";
 import { ModerationDot } from "@/components/moderation-dot";
@@ -16,63 +16,48 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import {
-  BookOpen,
-  ClipboardList,
-  Heart,
-  Home,
-  LogIn,
-  LogOut,
-  Menu,
-  Plus,
-  ShieldCheck,
-  UserRound,
-  UsersRound,
-  X,
-} from "lucide-react";
+import { LogIn, LogOut, Menu, Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/brand/logo";
+import { isActivePath, navIcons, type NavIcon, type NavLink } from "@/lib/nav";
 
-type LinkDef = {
+/** One row of the sheet. Closes the sheet on navigation. */
+function MobileNavItem({
+  href,
+  icon,
+  active,
+  children,
+}: {
   href: string;
-  label: string;
-  /** Staff-only: render the pending-moderation dot next to the label. */
-  dot?: boolean;
-  icon:
-    | "home"
-    | "poems"
-    | "poets"
-    | "submit"
-    | "favorites"
-    | "submissions"
-    | "profile"
-    | "moderate";
-};
+  icon: NavIcon;
+  active: boolean;
+  children: ReactNode;
+}) {
+  const Icon = navIcons[icon];
 
-const icons = {
-  home: Home,
-  poems: BookOpen,
-  poets: UsersRound,
-  submit: Plus,
-  favorites: Heart,
-  submissions: ClipboardList,
-  profile: UserRound,
-  moderate: ShieldCheck,
-};
-
-function isActive(pathname: string, href: string) {
-  if (href === "/") {
-    return pathname === "/";
-  }
-
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return (
+    <SheetClose asChild>
+      <Link
+        href={href}
+        aria-current={active ? "page" : undefined}
+        className={
+          active
+            ? "flex items-center gap-3 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-foreground transition"
+            : "flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-accent/60"
+        }
+      >
+        <Icon className="size-4 text-primary" aria-hidden="true" />
+        {children}
+      </Link>
+    </SheetClose>
+  );
 }
 
 export function MobileNav({
   links,
   role,
 }: {
-  links: LinkDef[];
+  links: NavLink[];
   role: "member" | "moderator" | "admin" | null;
 }) {
   const pathname = usePathname();
@@ -81,14 +66,6 @@ export function MobileNav({
   const tNav = useTranslations("Nav");
   const tSubmit = useTranslations("Submit");
   const tSubmissions = useTranslations("MySubmissions");
-
-  const primaryLinks = links.filter(
-    (l) =>
-      l.href !== "/profile" &&
-      l.href !== "/submit" &&
-      l.href !== "/my-submissions",
-  );
-  const profileLink = links.find((l) => l.href === "/profile");
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -107,18 +84,15 @@ export function MobileNav({
         showCloseButton={false}
         className="w-72 gap-0 border-l-foreground/20 bg-background p-0 text-foreground"
       >
-        <SheetHeader className="flex-row items-center justify-between border-b border-background/15 p-4">
+        <SheetHeader className="flex-row items-center justify-between border-b border-border p-4">
           <SheetTitle>
-            <Logo
-              variant="lockup-horizontal"
-              className="h-8 origin-left scale-125 text-foreground"
-            />
+            <Logo variant="lockup-horizontal" className="h-10 text-foreground" />
           </SheetTitle>
           <SheetClose asChild>
             <Button
               variant="ghost"
               size="icon-sm"
-              className="text-foreground hover:bg-background/10 hover:text-foreground"
+              className="text-foreground hover:bg-accent hover:text-foreground"
               aria-label={tNav("closeMenu")}
             >
               <X />
@@ -126,82 +100,60 @@ export function MobileNav({
           </SheetClose>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-1 py-3">
-          {primaryLinks.map((link) => {
-            const Icon = icons[link.icon];
-            const active = isActive(pathname, link.href);
-
-            return (
-              <SheetClose key={link.href} asChild>
-                <Link
-                  href={link.href}
-                  className={
-                    active
-                      ? "flex items-center gap-3 rounded-md bg-background/10 px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-background/15"
-                      : "flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-background/10"
-                  }
-                >
-                  <Icon className="size-4 text-primary" aria-hidden="true" />
-                  {link.label}
-                  {link.dot ? <ModerationDot /> : null}
-                </Link>
-              </SheetClose>
-            );
-          })}
-          {profileLink && role ? (
+          {links.map((link) => (
+            <MobileNavItem
+              key={link.href}
+              href={link.href}
+              icon={link.icon}
+              active={isActivePath(pathname, link.href)}
+            >
+              {link.label}
+              {link.dot ? <ModerationDot /> : null}
+            </MobileNavItem>
+          ))}
+          {role ? (
             <>
-              <div className="mx-3 my-2 h-px bg-background/15" />
-              <SheetClose asChild>
-                <Link
-                  href={`${profileLink.href}?redirect=${redirectParam}`}
-                  className={
-                    isActive(pathname, profileLink.href)
-                      ? "flex items-center gap-3 rounded-md bg-background/10 px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-background/15"
-                      : "flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-background/10"
-                  }
-                >
-                  <UserRound
-                    className="size-4 text-primary"
-                    aria-hidden="true"
-                  />
-                  {tNav("profile")}
-                </Link>
-              </SheetClose>
+              <div className="mx-3 my-2 h-px bg-border" />
+              <MobileNavItem
+                href={`/profile?redirect=${redirectParam}`}
+                icon="profile"
+                active={isActivePath(pathname, "/profile")}
+              >
+                {tNav("profile")}
+              </MobileNavItem>
             </>
           ) : null}
         </nav>
         {role ? (
-          <div className="border-t border-background/15 px-4 py-3">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="border-t border-border px-1 py-3">
+            <p className="mb-2 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {tNav("submit")}
             </p>
             <div className="flex flex-col gap-1">
-              <SheetClose asChild>
-                <Link
-                  href="/submit"
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10"
-                >
-                  <Plus className="size-4 text-primary" /> {tSubmit("title")}
-                </Link>
-              </SheetClose>
-              <SheetClose asChild>
-                <Link
-                  href="/my-submissions"
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-background/10"
-                >
-                  <ClipboardList className="size-4 text-primary" />{" "}
-                  {tSubmissions("title")}
-                </Link>
-              </SheetClose>
+              <MobileNavItem
+                href="/submit"
+                icon="submit"
+                active={isActivePath(pathname, "/submit")}
+              >
+                {tSubmit("title")}
+              </MobileNavItem>
+              <MobileNavItem
+                href="/my-submissions"
+                icon="submissions"
+                active={isActivePath(pathname, "/my-submissions")}
+              >
+                {tSubmissions("title")}
+              </MobileNavItem>
             </div>
           </div>
         ) : null}
         <ThemeToggle variant="mobile" />
-        <div className="mt-auto flex flex-col gap-2 border-t border-background/15 p-4">
+        <div className="mt-auto flex flex-col gap-2 border-t border-border p-4">
           {role ? (
             <form action={signOut}>
               <SubmitButton
                 variant="ghost"
-                className="w-full cursor-pointer justify-start text-destructive hover:bg-background/10 hover:text-destructive"
+                className="w-full cursor-pointer justify-start text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
                 <LogOut className="size-4" />
                 {tNav("logout")}
@@ -213,7 +165,7 @@ export function MobileNav({
                 <Button
                   asChild
                   variant="outline"
-                  className="w-full border-background/20 bg-transparent text-foreground hover:bg-background/10 hover:text-foreground"
+                  className="w-full border-border bg-transparent text-foreground hover:bg-accent hover:text-foreground"
                 >
                   <Link href="/login">
                     <LogIn className="size-4" />
