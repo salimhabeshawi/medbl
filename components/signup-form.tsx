@@ -21,17 +21,16 @@ export function SignupForm({
   return (
     <form action={action} className="form-stack">
       {next ? <input type="hidden" name="next" value={next} /> : null}
-      <label className="flex flex-col gap-1 text-sm font-medium">
+      <label className="flex flex-col gap-1.5 text-sm font-medium">
         {tAuth("emailLabel")}
         <Input
           type="email"
           name="email"
           required
           autoComplete="email"
-          className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm font-medium">
+      <label className="flex flex-col gap-1.5 text-sm font-medium">
         {tAuth("passwordLabel")}
         <Input
           type="password"
@@ -39,7 +38,6 @@ export function SignupForm({
           required
           minLength={6}
           autoComplete="new-password"
-          className="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-400"
         />
       </label>
       <label className="flex items-start gap-2 text-sm font-normal leading-6">
@@ -62,6 +60,7 @@ export function SignupForm({
         </span>
       </label>
       <SubmitButton
+        size="lg"
         className="w-full"
         disabled={!agreed}
         pendingLabel={tCommon("loading")}

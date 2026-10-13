@@ -210,3 +210,40 @@ export function PasswordFormSkeleton() {
     </Card>
   );
 }
+
+/** /login and /signup: mirrors AuthShell. `extraRow` adds signup's terms row. */
+export function AuthSkeleton({ extraRow = false }: { extraRow?: boolean }) {
+  return (
+    <div className="flex flex-1 items-center justify-center px-4 py-10 sm:py-16">
+      <div className="w-full max-w-sm">
+        <Skeleton className="mb-8 h-4 w-24" />
+        <div className="manuscript-sheet px-6 py-9 sm:px-9 sm:py-10">
+          <div className="flex flex-col items-center">
+            <Skeleton className="size-11 rounded-full" />
+            <Skeleton className="mt-4 h-8 w-36" />
+          </div>
+          <Skeleton className="mx-auto mb-6 mt-4 h-px w-32" />
+          <Skeleton className="h-11 w-full rounded-lg" />
+          <div className="my-6 flex items-center gap-3">
+            <Skeleton className="h-px flex-1" />
+            <Skeleton className="h-4 w-5" />
+            <Skeleton className="h-px flex-1" />
+          </div>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-9 w-full rounded-md" />
+            </div>
+            {extraRow ? <Skeleton className="h-10 w-full" /> : null}
+            <Skeleton className="h-10 w-full rounded-lg" />
+          </div>
+          <Skeleton className="mx-auto mt-6 h-4 w-44" />
+        </div>
+      </div>
+    </div>
+  );
+}
