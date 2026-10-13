@@ -89,6 +89,34 @@ hand-rolled equivalents, so the app stays visually consistent as new
 features are added. Install additional shadcn components as needed
 rather than building custom versions of things shadcn already provides.
 
+**Manuscript language (reusable pieces — use these, don't re-create them):**
+
+- `components/manuscript/ornament.tsx` — `Ornament`: the Ethiopic section
+  mark ፨ between fading hairlines; the standard section divider.
+- `components/manuscript/folio.tsx` — `Folio`: a poem number as "#N" in Lora
+  plus the same number in Ge'ez numerals (`lib/ethiopic.ts`,
+  `toEthiopicNumeral`). The Ge'ez form is decorative (`aria-hidden`); "#N"
+  stays the accessible rendering.
+- `components/manuscript/poet-seal.tsx` — `PoetSeal`: a poet's first Ge'ez
+  letter in a double ring; `components/poet-card.tsx` (`PoetCard`) is the
+  shared poet tile.
+- `components/manuscript/verse.tsx` — `Verse`: renders a poem body with
+  stanzas as paragraphs, text exactly as stored; sized by `--verse-scale`,
+  which `ReadingToolbar` (`components/manuscript/reading-toolbar.tsx`) sets
+  from the reader's saved text-size preference.
+- `components/manuscript/section-header.tsx` (`SectionHeader`) for section
+  rows and `components/page-header.tsx` (`PageHeader`) for page titles.
+- `.manuscript-sheet` (globals.css): card paper with an inset double rule —
+  the surface for focal content (poem page, poet header, home welcome).
+- The body carries a tiled, alpha-only paper-grain background; never add a
+  fixed or blended full-screen texture layer.
+- Motion: use the `--ease-out-soft` / `--ease-spring` easings and
+  `--duration-fast|base|slow` tokens from `globals.css`. Raw-CSS hover
+  effects go inside `@media (hover: hover) and (pointer: fine)`; ambient
+  animation is for `md:` and up only; everything honours reduced motion.
+- Width: grid/browse pages use `max-w-6xl`; reading and form pages keep a
+  narrower measure (`max-w-4xl` or less).
+
 ## Branding
 
 - Brand assets live in `app/` for favicon/icon/apple-icon/opengraph/twitter images, `public/icons/` for PWA icons, and `public/brand/` for in-site logos.

@@ -112,7 +112,9 @@
     "ctaTitle": "Add your voice to the anthology.",
     "ctaDescription": "Read what has been remembered, then help the collection grow with a poem of your own.",
     "createAccount": "Create an account",
-    "submitPoem": "Submit a poem"
+    "submitPoem": "Submit a poem",
+    "latestVerse": "Newest in the collection",
+    "readPoem": "Read the poem"
   },
   "Poets": {
     "registry": "The registry",

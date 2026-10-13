@@ -101,6 +101,28 @@
   to { transform: translate3d(0, 18px, 0) rotate(4deg); }
 }
 
+/* ── Hero verse card (lg+ only) ─────────────────────────────────────────── */
+
+.hero-verse {
+  transform: rotate(2deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-verse {
+    animation: fade-up 600ms var(--ease-out-soft) 180ms both;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hero-verse {
+    transition: transform 450ms var(--ease-out-soft);
+  }
+
+  .hero-verse:hover {
+    transform: translateY(-4px) rotate(0deg);
+  }
+}
+
 /* ── Featured poem panel ────────────────────────────────────────────────── */
 
 .landing-poem-panel {

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 import { CountUp } from "./count-up";
 import { Reveal } from "./reveal";
+import { toEthiopicNumeral } from "@/lib/ethiopic";
 
 export async function LandingStats() {
   const supabase = await createClient();
@@ -35,6 +36,14 @@ export async function LandingStats() {
             <p className="font-serif text-4xl font-semibold tabular-nums text-primary sm:text-6xl">
               <CountUp value={value} />
             </p>
+            {value > 0 ? (
+              <p
+                aria-hidden="true"
+                className="mt-1 font-sans text-xs text-primary/55 sm:text-sm"
+              >
+                {toEthiopicNumeral(value)}
+              </p>
+            ) : null}
             <p className="mt-2 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:text-sm sm:tracking-[0.15em]">
               {t(`stats${key[0].toUpperCase()}${key.slice(1)}`)}
             </p>

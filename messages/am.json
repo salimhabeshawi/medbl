@@ -114,7 +114,10 @@
     "ctaTitle": "ድምጽዎን በመድብሉ ላይ ያክሉ።",
     "ctaDescription": "የተጠበቀውን ያንብቡ፣ ከዚያም በራስዎ ግጥም ስብስቡ እንዲያድግ ያግዙ።",
     "createAccount": "መለያ ይፍጠሩ",
-    "submitPoem": "ግጥም ያስገቡ"
+    "submitPoem": "ግጥም ያስገቡ",
+    "latestVerse": "በስብስቡ ውስጥ አዲሱ",
+    "readPoem": "ግጥሙን ያንብቡ",
+    "_heroVerseNote": "Draft Amharic for latestVerse / readPoem — please review."
   },
   "Poets": {
     "registry": "የገጣሚያን መዝገብ",

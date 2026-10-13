@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
+import { HeroSearch } from "./hero-search";
+import { HeroVerse } from "./hero-verse";
 
 export async function LandingHero({
   authenticated,
@@ -30,10 +33,10 @@ export async function LandingHero({
       <div className="landing-glyph landing-glyph-four" aria-hidden="true">
         ጥ
       </div>
-      <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:py-36">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-16 lg:py-28">
         {/* Above the fold, so no scroll observer: a CSS entrance that starts
             on first paint, without waiting for JavaScript. */}
-        <div className="max-w-4xl motion-safe:animate-fade-up">
+        <div className="motion-safe:animate-fade-up">
           <h1
             id="landing-title"
             className="flex flex-wrap items-center gap-4 text-foreground sm:gap-6"
@@ -49,7 +52,8 @@ export async function LandingHero({
           <p className="mt-6 max-w-xl text-base leading-8 text-muted-foreground sm:text-lg">
             {t("subhead")}
           </p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <HeroSearch />
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
               <Link href={authenticated ? "/home" : "/poems"}>
                 <BookOpen aria-hidden="true" />
@@ -65,6 +69,13 @@ export async function LandingHero({
               </Button>
             ) : null}
           </div>
+        </div>
+        {/* Large screens only: phones get the headline, search and actions
+            without an extra card to scroll past. */}
+        <div className="hidden lg:block">
+          <Suspense fallback={null}>
+            <HeroVerse />
+          </Suspense>
         </div>
       </div>
     </section>
