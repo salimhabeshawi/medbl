@@ -33,13 +33,17 @@ export function PoemCardSkeleton() {
 
 export function PoetCardSkeleton() {
   return (
-    <Card className="border-border bg-card shadow-none">
-      <CardContent className="space-y-3 p-5">
-        <Skeleton className="h-6 w-3/4" />
+    <div className="flex h-full items-start gap-4 rounded-xl border border-border bg-card p-4 sm:p-5">
+      <Skeleton className="size-12 shrink-0 rounded-full" />
+      <div className="min-w-0 flex-1 space-y-2">
+        <Skeleton className="h-5 w-3/4" />
         <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-5 w-20 rounded-4xl" />
-      </CardContent>
-    </Card>
+        <div className="flex gap-2 pt-1">
+          <Skeleton className="h-5 w-16 rounded-4xl" />
+          <Skeleton className="h-5 w-14 rounded-4xl" />
+        </div>
+      </div>
+    </div>
   );
 }
 

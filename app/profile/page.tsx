@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/favorites";
+import { PageHeader } from "@/components/page-header";
 import { PoetDetailsForm } from "@/components/poet-details-form";
 import { ChangeEmailForm } from "@/components/change-email-form";
 import { ChangePasswordForm } from "@/components/change-password-form";
@@ -77,17 +78,11 @@ export default async function ProfilePage({
       <StaticBackLink href={cameFrom ?? "/home"}>
         {tProfile("back")}
       </StaticBackLink>
-      <div className="mb-10 max-w-2xl">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-          {tProfile("eyebrow")}
-        </p>
-        <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-          {tProfile("title")}
-        </h1>
-        <p className="text-sm leading-7 text-muted-foreground sm:text-base">
-          {tProfile("poetIntro")}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow={tProfile("eyebrow")}
+        title={tProfile("title")}
+        subtitle={tProfile("poetIntro")}
+      />
 
       {redirectTo?.startsWith("/submit") ? (
         <p className="mb-8 rounded-lg border border-primary/25 bg-accent/40 px-4 py-4 text-sm leading-6 text-foreground">

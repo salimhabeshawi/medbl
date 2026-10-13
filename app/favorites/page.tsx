@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
+import { PageHeader } from "@/components/page-header";
 import { FavoriteRow } from "@/components/favorite-row";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
@@ -128,19 +129,13 @@ export default async function FavoritesPage({
   );
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <BackLink fallbackHref="/home">{tFav("back")}</BackLink>
-      <div className="mb-8">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
-          {tFav("eyebrow")}
-        </p>
-        <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-          {tFav("title")}
-        </h1>
-        <p className="text-sm leading-7 text-muted-foreground">
-          {tFav("subtitle")}
-        </p>
-      </div>
+      <PageHeader
+        eyebrow={tFav("eyebrow")}
+        title={tFav("title")}
+        subtitle={tFav("subtitle")}
+      />
       <div className="mb-8">
         <UniversalSearch
           defaultValue={q}

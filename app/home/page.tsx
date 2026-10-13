@@ -10,6 +10,9 @@ import { PoemCard } from "@/components/poem-card";
 import { PostPoemAction } from "@/components/post-poem-action";
 import { getLocale, getTranslations } from "next-intl/server";
 import { HomeLoading } from "@/components/home-loading";
+import { Ornament } from "@/components/manuscript/ornament";
+import { SectionHeader } from "@/components/manuscript/section-header";
+import { PoetCard } from "@/components/poet-card";
 
 type FeaturedPoet = {
   id: string;
@@ -166,15 +169,16 @@ async function HomeContent() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <section className="-mx-4 mb-12 border-y border-border bg-accent px-4 py-8 text-center sm:mx-0 sm:rounded-lg sm:border">
-        <h2 className="mb-2 text-2xl font-semibold tracking-normal text-foreground">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+      <section className="manuscript-sheet mb-14 px-5 py-10 text-center sm:px-10 sm:py-14">
+        <h1 className="mx-auto max-w-2xl text-balance font-serif text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
           {tHome("heroTitle")}
-        </h2>
-        <p className="mx-auto max-w-2xl text-sm leading-6 text-secondary">
+        </h1>
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-secondary sm:text-base">
           {tHome("heroSubtitle")}
         </p>
-        <div className="mx-auto mt-6 max-w-2xl text-left">
+        <Ornament className="mx-auto my-6 max-w-48" />
+        <div className="mx-auto max-w-2xl text-left">
           <UniversalSearch categories={categories} />
           <div className="mt-4 flex justify-center">
             <PostPoemAction />
@@ -182,13 +186,13 @@ async function HomeContent() {
         </div>
       </section>
 
-      <section className="mb-12">
-        <div className="mb-4 flex items-baseline justify-between">
-          <h2 className="text-2xl font-semibold">{tHome("recentPoems")}</h2>
-          <Link href="/poems" className="text-sm underline">
-            {tHome("browsePoems")}
-          </Link>
-        </div>
+      <section className="mb-14" aria-labelledby="recent-poems">
+        <SectionHeader
+          id="recent-poems"
+          title={tHome("recentPoems")}
+          href="/poems"
+          linkLabel={tHome("browsePoems")}
+        />
         {recentPoems && recentPoems.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recentPoems.map((poem) => {
@@ -225,13 +229,13 @@ async function HomeContent() {
         )}
       </section>
 
-      <section className="mb-12">
-        <div className="mb-4 flex items-baseline justify-between">
-          <h2 className="text-2xl font-semibold">{tHome("featuredPoems")}</h2>
-          <Link href="/poems" className="text-sm underline">
-            {tHome("browsePoems")}
-          </Link>
-        </div>
+      <section className="mb-14" aria-labelledby="featured-poems">
+        <SectionHeader
+          id="featured-poems"
+          title={tHome("featuredPoems")}
+          href="/poems"
+          linkLabel={tHome("browsePoems")}
+        />
         {featuredPoems && featuredPoems.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {featuredPoems.map((poem) => (
@@ -260,25 +264,22 @@ async function HomeContent() {
         )}
       </section>
 
-      <section className="mb-12">
-        <div className="mb-4 flex items-baseline justify-between">
-          <h2 className="text-2xl font-semibold">
-            {tHome("discoverByCategory")}
-          </h2>
-          <Link href="/poems" className="text-sm underline">
-            {tHome("browsePoems")}
-          </Link>
-        </div>
+      <section className="mb-14" aria-labelledby="discover-by-category">
+        <SectionHeader
+          id="discover-by-category"
+          title={tHome("discoverByCategory")}
+          href="/poems"
+          linkLabel={tHome("browsePoems")}
+        />
         {categories.length > 0 ? (
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2.5">
             {categories.map((category) => (
-              <Link key={category.id} href={`/poems?category=${category.id}`}>
-                <Badge
-                  variant="outline"
-                  className="h-auto cursor-pointer rounded-lg px-4 py-2 text-sm hover:bg-accent"
-                >
-                  {getCategoryLabel(category)}
-                </Badge>
+              <Link
+                key={category.id}
+                href={`/poems?category=${category.id}`}
+                className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/60 hover:bg-accent hover:text-primary active:scale-[0.97] motion-reduce:active:scale-100"
+              >
+                {getCategoryLabel(category)}
               </Link>
             ))}
           </div>
@@ -290,28 +291,27 @@ async function HomeContent() {
         )}
       </section>
 
-      <section className="mb-12">
-        <div className="mb-4 flex items-baseline justify-between">
-          <h2 className="text-2xl font-semibold">{tHome("featuredPoets")}</h2>
-          <Link href="/poets" className="text-sm underline">
-            {tHome("viewAllPoets")}
-          </Link>
-        </div>
+      <section aria-labelledby="featured-poets">
+        <SectionHeader
+          id="featured-poets"
+          title={tHome("featuredPoets")}
+          href="/poets"
+          linkLabel={tHome("viewAllPoets")}
+        />
         {featuredPoets && featuredPoets.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          // Phones: a swipeable row that peeks the next card; wider screens:
+          // the usual grid.
+          <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
             {featuredPoets.map((poet) => (
-              <Link
+              <div
                 key={poet.id}
-                href={`/poets/${poet.id}`}
-                className="content-card rounded-lg border border-border bg-card p-4"
+                className="w-[78%] shrink-0 snap-start sm:w-auto"
               >
-                <div className="font-semibold">{poet.name_am}</div>
-                {poet.name_en ? (
-                  <div className="text-sm text-muted-foreground">
-                    {poet.name_en}
-                  </div>
-                ) : null}
-                <div className="mt-4 flex flex-wrap gap-2">
+                <PoetCard
+                  id={poet.id}
+                  nameAm={poet.name_am}
+                  nameEn={poet.name_en}
+                >
                   <Badge variant="outline">
                     {tPoets("poemCount", { count: poet.poem_count })}
                   </Badge>
@@ -330,8 +330,8 @@ async function HomeContent() {
                       })}
                     </Badge>
                   ) : null}
-                </div>
-              </Link>
+                </PoetCard>
+              </div>
             ))}
           </div>
         ) : (

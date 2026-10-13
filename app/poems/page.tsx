@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, getFavoritePoemIds } from "@/lib/favorites";
+import { PageHeader } from "@/components/page-header";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
 import { PoemCard } from "@/components/poem-card";
@@ -153,8 +154,8 @@ export default async function PoemsPage({
   const user = await getCurrentUser();
   const favIds = await getFavoritePoemIds((poems ?? []).map((p) => p.id));
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-6 text-3xl font-bold">{tPoems("heading")}</h1>
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+      <PageHeader title={tPoems("heading")} />
 
       <div className="mb-6">
         <UniversalSearch

@@ -9,6 +9,9 @@ import {
 import { EmptyState } from "@/components/empty-state";
 import { PoemCard } from "@/components/poem-card";
 import { BackLink } from "@/components/back-link";
+import { Ornament } from "@/components/manuscript/ornament";
+import { PoetSeal } from "@/components/manuscript/poet-seal";
+import { SectionHeader } from "@/components/manuscript/section-header";
 import { getTranslations } from "next-intl/server";
 import { firstRelation } from "@/lib/relations";
 import { formatStoredGcYearDisplay } from "@/lib/calendar";
@@ -70,24 +73,31 @@ export default async function PoetPage({
   );
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <BackLink fallbackHref="/poets">{tCommon("backToPoets")}</BackLink>
-      <h1 className="mb-1 text-3xl font-bold">{poet.name_am}</h1>
-      {poet.name_en ? (
-        <p className="text-muted-foreground">{poet.name_en}</p>
-      ) : null}
-      {years ? (
-        <p className="mt-1 text-sm text-muted-foreground">{years}</p>
-      ) : null}
+      <header className="manuscript-sheet flex flex-col items-center px-5 py-10 text-center sm:px-12 sm:py-14">
+        <PoetSeal name={poet.name_am} size="lg" />
+        <h1 className="mt-5 text-balance font-serif text-3xl font-semibold leading-tight sm:text-5xl">
+          {poet.name_am}
+        </h1>
+        {poet.name_en ? (
+          <p className="mt-2 text-muted-foreground">{poet.name_en}</p>
+        ) : null}
+        {years ? (
+          <p className="mt-1 text-sm text-secondary">{years}</p>
+        ) : null}
+        {poet.bio ? (
+          <>
+            <Ornament className="mx-auto my-6 w-full max-w-48" />
+            <p className="max-w-2xl whitespace-pre-line text-base leading-8 text-foreground/80">
+              {poet.bio}
+            </p>
+          </>
+        ) : null}
+      </header>
 
-      {poet.bio ? (
-        <p className="mt-6 whitespace-pre-line leading-7 text-muted-foreground">
-          {poet.bio}
-        </p>
-      ) : null}
-
-      <section className="mt-12">
-        <h2 className="mb-4 text-2xl font-semibold">{tCommon("poems")}</h2>
+      <section className="mt-14" aria-labelledby="poet-poems">
+        <SectionHeader id="poet-poems" title={tCommon("poems")} />
         {poems && poems.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {poems.map((poem) => {
