@@ -4,15 +4,15 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
 import { getCurrentUser, getFavoriteCounts } from "@/lib/favorites";
-import { PoemActions } from "@/components/poem-actions";
 import { ReportPoem } from "@/components/report-poem";
 import { AttributionBadge } from "@/components/attribution-badge";
 import { PoemCard } from "@/components/poem-card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { BackLink } from "@/components/back-link";
+import { Folio } from "@/components/manuscript/folio";
+import { Ornament } from "@/components/manuscript/ornament";
+import { ReadingToolbar } from "@/components/manuscript/reading-toolbar";
+import { Verse } from "@/components/manuscript/verse";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
@@ -243,166 +243,166 @@ export default async function PoemPage({
     recommendedPoetPoems.length > 0 && Boolean(poet?.name_am);
 
   return (
-    <article className="mx-auto max-w-4xl px-4 py-10 sm:py-14">
+    <article className="mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <BackLink fallbackHref="/poems">{tCommon("back")}</BackLink>
-      <Card className="border border-border bg-card shadow-none">
-        <CardHeader className="gap-5 border-b border-border bg-accent/45 px-5 py-5 sm:px-8 sm:py-7">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              {/* The detail number matches poem cards, scaled up for emphasis. */}
-              {typeof poem.poem_number === "number" ? (
-                <p
-                  className="mb-2 font-bold tabular-nums text-4xl leading-none text-muted-foreground sm:text-5xl"
-                  aria-label={`#${poem.poem_number}`}
-                >
-                  #{poem.poem_number}
-                </p>
-              ) : null}
-              <CardTitle className="mb-2 text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
-                {poem.title}
-              </CardTitle>
-              {poet?.name_am || poet?.name_en ? (
-                <p className="text-sm text-secondary">
-                  {tPoems("submittedBy")}{" "}
-                  <Link
-                    href={`/poets/${poet.id}`}
-                    className="font-medium underline underline-offset-4 hover:text-primary"
-                  >
-                    {poet.name_am ?? poet.name_en}
-                  </Link>
-                </p>
-              ) : null}
-              <p className="mt-2 text-xs text-muted-foreground">
-                {tPoems("publishedOn")}: {publishedDate}
-              </p>
-            </div>
-            <PoemActions
-              poemId={poem.id}
-              title={poem.title}
-              body={poem.body}
-              poetNameAm={poet?.name_am ?? ""}
-              initialFavorited={initialFavorited}
-              initialFavoriteCount={favoriteCounts.get(poem.id) ?? 0}
-              canFavorite={Boolean(user)}
-              viewCount={poem.view_count ?? 0}
-            />
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            <AttributionBadge status={poem.attribution_status} />
-            {category && categoryLabel ? (
-              <Badge asChild variant="outline">
-                <Link href={`/poems?category=${category.id}`}>
-                  {categoryLabel}
-                </Link>
-              </Badge>
+      {/* The toolbar is sticky inside this wrapper: it floats at the bottom
+          of the screen while the poem scrolls, then settles under the page. */}
+      <div>
+        <div className="manuscript-sheet px-5 pb-10 pt-10 sm:px-14 sm:pb-14 sm:pt-14">
+          <header className="flex flex-col items-center text-center">
+            {typeof poem.poem_number === "number" ? (
+              <Folio number={poem.poem_number} size="lg" />
             ) : null}
-            {Array.isArray(poem.tags)
-              ? poem.tags.map((tag: string) => (
-                  <Badge key={tag} asChild variant="outline">
-                    <Link href={`/poems?tag=${encodeURIComponent(tag)}`}>
-                      #{tag}
-                    </Link>
-                  </Badge>
-                ))
-              : null}
-          </div>
-          {poem.attribution_status === "disputed" ? (
-            <p className="text-xs text-destructive">
-              {tPoems("disputedNotice")}
+            <h1 className="mt-4 max-w-2xl text-balance font-serif text-3xl font-semibold leading-tight text-foreground sm:text-5xl">
+              {poem.title}
+            </h1>
+            {poet?.name_am || poet?.name_en ? (
+              <p className="mt-4 text-base text-secondary">
+                {tPoems("submittedBy")}{" "}
+                <Link
+                  href={`/poets/${poet.id}`}
+                  className="font-medium underline decoration-secondary/40 underline-offset-4 transition-colors hover:text-primary hover:decoration-primary"
+                >
+                  {poet.name_am ?? poet.name_en}
+                </Link>
+              </p>
+            ) : null}
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <AttributionBadge status={poem.attribution_status} />
+              {category && categoryLabel ? (
+                <Badge asChild variant="outline">
+                  <Link href={`/poems?category=${category.id}`}>
+                    {categoryLabel}
+                  </Link>
+                </Badge>
+              ) : null}
+              {Array.isArray(poem.tags)
+                ? poem.tags.map((tag: string) => (
+                    <Badge key={tag} asChild variant="outline">
+                      <Link href={`/poems?tag=${encodeURIComponent(tag)}`}>
+                        #{tag}
+                      </Link>
+                    </Badge>
+                  ))
+                : null}
+            </div>
+            {poem.attribution_status === "disputed" ? (
+              <p className="mt-4 max-w-md rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                {tPoems("disputedNotice")}
+              </p>
+            ) : null}
+          </header>
+
+          <Ornament className="mx-auto my-9 max-w-56 sm:my-11" />
+
+          <Verse
+            body={poem.body}
+            className="mx-auto max-w-2xl text-foreground"
+          />
+
+          <Ornament className="mx-auto mb-7 mt-10 max-w-56 sm:mt-12" />
+
+          {/* Colophon: where the poem came from, like the closing note of a
+              manuscript. */}
+          <footer className="flex flex-col items-center gap-1.5 text-center text-xs text-muted-foreground">
+            <p>
+              {tPoems("publishedOn")}: {publishedDate}
             </p>
-          ) : null}
-        </CardHeader>
-
-        <CardContent className="px-5 py-6 sm:px-8 sm:py-8">
-          <div className="whitespace-pre-wrap text-center text-lg leading-9 text-foreground">
-            {poem.body}
-          </div>
-
-          <Separator className="my-8" />
-
-          {poem.source ? (
-            <p className="text-xs text-muted-foreground">
-              {tPoems("source")}: {poem.source}
-            </p>
-          ) : null}
-
-          <div className="mt-4">
-            {user ? (
-              <ReportPoem poemId={poem.id} alreadyReported={alreadyReported} />
-            ) : (
-              <p className="text-xs text-muted-foreground">
+            {poem.source ? (
+              <p className="max-w-md">
+                {tPoems("source")}: {poem.source}
+              </p>
+            ) : null}
+            <div className="mt-3">
+              {user ? (
+                <ReportPoem
+                  poemId={poem.id}
+                  alreadyReported={alreadyReported}
+                />
+              ) : (
                 <Link href="/login" className="underline hover:text-primary">
                   {tPoems("loginToReport")}
-                </Link>{" "}
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                </Link>
+              )}
+            </div>
+          </footer>
+        </div>
+
+        <ReadingToolbar
+          poemId={poem.id}
+          title={poem.title}
+          body={poem.body}
+          poetNameAm={poet?.name_am ?? ""}
+          initialFavorited={initialFavorited}
+          initialFavoriteCount={favoriteCounts.get(poem.id) ?? 0}
+          canFavorite={Boolean(user)}
+          viewCount={poem.view_count ?? 0}
+        />
+      </div>
 
       {adjacent && adjacent.total_poems > 1 ? (
         <nav
           aria-label={`${tCommon("previous")} / ${tCommon("next")}`}
-          className="mt-6 grid grid-cols-2 gap-3 py-2 sm:mt-8"
+          className="mt-10 grid grid-cols-2 gap-3 sm:gap-4"
         >
           {adjacent.prev_id ? (
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="h-auto min-h-16 w-full min-w-0 justify-start whitespace-normal border-border bg-muted/40 px-2 py-3 text-left hover:border-primary hover:bg-accent focus-visible:border-primary sm:min-h-20 sm:px-5"
+            <Link
+              href={`/poems/${adjacent.prev_id}`}
+              className="content-card group flex min-w-0 flex-col items-start gap-1.5 rounded-xl border px-3 py-3.5 text-left sm:px-5 sm:py-4"
             >
-              <Link href={`/poems/${adjacent.prev_id}`}>
-                <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
-                  <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                    <ChevronLeft
-                      className="size-4 shrink-0"
-                      aria-hidden="true"
-                    />
-                    {tCommon("previous")}
-                  </span>
-                  <span className="line-clamp-2 w-full text-sm font-semibold text-foreground sm:text-base">
-                    #{adjacent.prev_number} · {adjacent.prev_title}
-                  </span>
-                </span>
-              </Link>
-            </Button>
-          ) : null}
+              <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                <ChevronLeft
+                  className="size-4 shrink-0 transition-transform group-hover:-translate-x-0.5"
+                  aria-hidden="true"
+                />
+                {tCommon("previous")}
+              </span>
+              {adjacent.prev_number != null ? (
+                <Folio number={adjacent.prev_number} />
+              ) : null}
+              <span className="line-clamp-2 w-full font-serif text-sm font-semibold text-foreground sm:text-base">
+                {adjacent.prev_title}
+              </span>
+            </Link>
+          ) : (
+            <span />
+          )}
           {adjacent.next_id ? (
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="h-auto min-h-16 w-full min-w-0 justify-end whitespace-normal border-border bg-muted/40 px-2 py-3 text-right hover:border-primary hover:bg-accent focus-visible:border-primary sm:min-h-20 sm:px-5"
+            <Link
+              href={`/poems/${adjacent.next_id}`}
+              className="content-card group flex min-w-0 flex-col items-end gap-1.5 rounded-xl border px-3 py-3.5 text-right sm:px-5 sm:py-4"
             >
-              <Link href={`/poems/${adjacent.next_id}`}>
-                <span className="flex min-w-0 flex-1 flex-col items-end gap-1">
-                  <span className="flex items-center justify-end gap-1 text-xs font-medium text-muted-foreground">
-                    {tCommon("next")}
-                    <ChevronRight
-                      className="size-4 shrink-0"
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <span className="line-clamp-2 w-full text-sm font-semibold text-foreground sm:text-base">
-                    #{adjacent.next_number} · {adjacent.next_title}
-                  </span>
-                </span>
-              </Link>
-            </Button>
+              <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                {tCommon("next")}
+                <ChevronRight
+                  className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </span>
+              {adjacent.next_number != null ? (
+                <Folio number={adjacent.next_number} />
+              ) : null}
+              <span className="line-clamp-2 w-full font-serif text-sm font-semibold text-foreground sm:text-base">
+                {adjacent.next_title}
+              </span>
+            </Link>
           ) : null}
         </nav>
       ) : null}
 
       {hasRecommendedCategory || hasRecommendedPoet ? (
-        <section className="mt-12">
-          <h2 className="mb-6 text-2xl font-semibold">
+        <section className="mt-16" aria-labelledby="recommended-reads">
+          <h2
+            id="recommended-reads"
+            className="text-center font-serif text-2xl font-semibold sm:text-3xl"
+          >
             {tPoems("recommendedReads")}
           </h2>
+          <Ornament className="mx-auto mb-8 mt-4 max-w-40" />
           {hasRecommendedCategory ? (
-            <div className="mb-8">
-              <h3 className="mb-4 text-xl font-semibold">
+            <div className="mb-10">
+              <h3 className="mb-4 text-lg font-semibold">
                 {tPoems("moreInCategory", { category: categoryLabel ?? "" })}
               </h3>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -412,7 +412,7 @@ export default async function PoemPage({
           ) : null}
           {hasRecommendedPoet ? (
             <div>
-              <h3 className="mb-4 text-xl font-semibold">
+              <h3 className="mb-4 text-lg font-semibold">
                 {tPoems("moreByPoet", { poet: poet?.name_am ?? "" })}
               </h3>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

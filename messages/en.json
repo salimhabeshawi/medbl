@@ -187,7 +187,9 @@
     "likesCount": "{count} likes",
     "verifiedTooltip": "This poem's attribution has been confirmed by a moderator against a reliable source.",
     "communityTooltip": "This poem's attribution was accepted by a moderator but not independently verified against a reliable source.",
-    "disputedTooltip": "This poem's attribution has been disputed and is currently under review by moderators."
+    "disputedTooltip": "This poem's attribution has been disputed and is currently under review by moderators.",
+    "textSize": "Text size",
+    "textSizeValue": "Text size: {size}"
   },
   "Submit": {
     "title": "Submit a Poem",

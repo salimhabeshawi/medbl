@@ -101,9 +101,49 @@
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
+  /* Paper grain: a 160px tile of desaturated noise at ~4% alpha, scrolling
+     with the page (no fixed layer, no blend mode) so it costs one decoded
+     image and nothing per frame. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.18 0 0 0 0 0.13 0 0 0 0 0.09 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
   color: var(--foreground);
   font-family: var(--font-inter), var(--font-noto-ethiopic), sans-serif;
+}
+
+.dark body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.97 0 0 0 0 0.92 0 0 0 0 0.87 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* A page of the manuscript: card paper with a hairline double rule inset
+   from the edge, echoing the landing hero's border motif. */
+.manuscript-sheet {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background-color: var(--card);
+  box-shadow:
+    0 1px 0 color-mix(in oklch, var(--foreground), transparent 94%),
+    0 18px 40px -28px color-mix(in oklch, var(--foreground), transparent 70%);
+}
+
+.manuscript-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0.5rem;
+  z-index: -1;
+  border: 1px solid color-mix(in oklch, var(--primary), transparent 80%);
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .manuscript-sheet::before {
+    inset: 0.75rem;
+    outline: 1px dashed color-mix(in oklch, var(--secondary), transparent 82%);
+    outline-offset: -0.35rem;
+  }
 }
 
 button,
@@ -169,4 +209,28 @@ h4,
 h5,
 h6 {
   font-family: var(--font-lora), var(--font-noto-ethiopic), serif;
+}
+
+/* Poem body on the reading page. The scale is the reader's own preference
+   (ReadingToolbar writes --verse-scale on <html>); stanzas get real gaps. */
+.verse {
+  font-size: calc(1.125rem * var(--verse-scale, 1));
+  line-height: 2.05;
+  text-align: center;
+  overflow-wrap: anywhere;
+  transition: font-size var(--duration-base) var(--ease-out-soft);
+}
+
+.verse > p + p {
+  margin-top: 1.6em;
+}
+
+@media (min-width: 640px) {
+  .verse {
+    font-size: calc(1.25rem * var(--verse-scale, 1));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verse { transition: none; }
 }

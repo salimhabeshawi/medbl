@@ -1,53 +1,48 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PoemCardSkeleton } from "@/components/page-skeletons";
 
 export default function PoemLoading() {
   return (
-    <article className="mx-auto max-w-4xl px-4 py-10 sm:py-14">
+    <article className="mx-auto max-w-4xl px-4 py-8 sm:py-12">
       <Skeleton className="mb-8 h-4 w-24" />
-      <Card className="border border-border bg-card shadow-none">
-        <CardHeader className="gap-5 border-b border-border bg-accent/45 px-5 py-5 sm:px-8 sm:py-7">
-          <div className="flex justify-between gap-5">
-            <div className="min-w-0 flex-1 space-y-3">
-              <Skeleton className="h-12 w-20" />
-              <Skeleton className="h-10 w-3/4" />
-              <Skeleton className="h-4 w-40" />
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <Skeleton className="h-8 w-12 rounded-full" />
-              <Skeleton className="size-8 rounded-full" />
-              <Skeleton className="size-8 rounded-full" />
-              <Skeleton className="size-8 rounded-full" />
-            </div>
-          </div>
-          <div className="flex gap-2">
+      <div className="manuscript-sheet px-5 pb-10 pt-10 sm:px-14 sm:pb-14 sm:pt-14">
+        <div className="flex flex-col items-center">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="mt-4 h-10 w-3/4 max-w-md" />
+          <Skeleton className="mt-4 h-5 w-40" />
+          <div className="mt-5 flex gap-2">
             <Skeleton className="h-6 w-20 rounded-4xl" />
             <Skeleton className="h-6 w-24 rounded-4xl" />
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4 px-5 py-8 sm:px-8">
-          <Skeleton className="mx-auto h-5 w-5/6" />
-          <Skeleton className="mx-auto h-5 w-4/5" />
-          <Skeleton className="mx-auto h-5 w-3/4" />
-          <Skeleton className="mt-8 h-px w-full" />
-          <Skeleton className="h-4 w-48" />
-        </CardContent>
-      </Card>
-      <div className="mt-6 grid grid-cols-2 gap-3 py-2 sm:mt-8">
-        <Skeleton className="h-20 w-full rounded-lg" />
-        <Skeleton className="h-20 w-full rounded-lg" />
-      </div>
-      <section className="mt-12">
-        <Skeleton className="mb-6 h-8 w-48" />
-        <Skeleton className="mb-4 h-6 w-56" />
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }, (_, index) => (
-            <PoemCardSkeleton key={index} />
-          ))}
         </div>
+        <Skeleton className="mx-auto my-9 h-px w-56 sm:my-11" />
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-4">
+          <Skeleton className="h-5 w-5/6" />
+          <Skeleton className="h-5 w-4/5" />
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="h-5 w-4/6" />
+          <Skeleton className="mt-6 h-5 w-5/6" />
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="h-5 w-4/5" />
+        </div>
+        <Skeleton className="mx-auto mb-7 mt-10 h-px w-56 sm:mt-12" />
+        <div className="flex flex-col items-center gap-2">
+          <Skeleton className="h-3 w-40" />
+          <Skeleton className="h-3 w-52" />
+        </div>
+      </div>
+      <div className="mt-6 flex justify-center">
+        <Skeleton className="h-13 w-72 rounded-full" />
+      </div>
+      <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4">
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full rounded-xl" />
+      </div>
+      <section className="mt-16">
+        <Skeleton className="mx-auto h-8 w-48" />
+        <Skeleton className="mx-auto mb-8 mt-4 h-px w-40" />
         <Skeleton className="mb-4 h-6 w-56" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }, (_, index) => (
             <PoemCardSkeleton key={index} />
           ))}

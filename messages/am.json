@@ -191,7 +191,10 @@
     "_attributionTooltipsNote": "DRAFT TRANSLATIONS — the three attribution tooltip strings below are first-pass drafts and must be reviewed/refined by a native Amharic speaker (attribution nuance matters). JSON has no comment syntax, so this note lives as an unused key instead.",
     "verifiedTooltip": "የዚህ ግጥም ደራሲነት በአወያይ ከታመነ ምንጭ ጋር ተረጋግጧል።",
     "communityTooltip": "የዚህ ግጥም ደራሲነት በአወያይ ተቀባይነት አግኝቷል፤ ነገር ግን ገለልተኛ ማረጋገጫ አላገኘም።",
-    "disputedTooltip": "የዚህ ግጥም ደራሲነት አጠያያቂ ሆኖ በአወያዮች እየተጠና ነው።"
+    "disputedTooltip": "የዚህ ግጥም ደራሲነት አጠያያቂ ሆኖ በአወያዮች እየተጠና ነው።",
+    "textSize": "የፊደል መጠን",
+    "textSizeValue": "የፊደል መጠን፦ {size}",
+    "_textSizeNote": "Draft Amharic for textSize / textSizeValue — please review."
   },
   "Submit": {
     "title": "ግጥም አስገባ",

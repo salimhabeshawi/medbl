@@ -3,23 +3,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function PoemCardSkeleton() {
   return (
-    <Card className="border-border bg-card shadow-none">
-      <CardHeader className="gap-3">
-        <div className="flex items-center justify-between gap-2">
-          <Skeleton className="h-4 w-8" />
+    <Card className="h-full gap-0 border-border bg-card py-0 shadow-none">
+      <CardHeader className="gap-0 px-5 pt-5">
+        <div className="flex min-h-9 items-center justify-between gap-2">
+          <Skeleton className="h-4 w-14" />
           <div className="flex items-center gap-2">
             <Skeleton className="h-8 w-12 rounded-full" />
             <Skeleton className="size-8 rounded-full" />
           </div>
         </div>
-        <Skeleton className="h-5 w-3/4" />
+        <Skeleton className="mt-3 h-6 w-3/4" />
+        <Skeleton className="mt-2 h-4 w-28" />
       </CardHeader>
-      <CardContent className="space-y-3">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-2/3" />
-        <div className="flex flex-wrap gap-2 pt-1">
+      <CardContent className="flex flex-1 flex-col px-5 pb-5">
+        <div className="mt-4 space-y-3">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-11/12" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+        <div className="mt-auto flex flex-wrap gap-2 border-t border-dashed border-border/80 pt-4">
           <Skeleton className="h-5 w-20 rounded-4xl" />
           <Skeleton className="h-5 w-16 rounded-4xl" />
           <Skeleton className="h-5 w-14 rounded-4xl" />
