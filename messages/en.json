@@ -80,6 +80,30 @@
     "addYourVoice": "Add your voice",
     "discoverThemes": "Discover the themes",
     "findYourPlace": "Find your place in the collection",
+    "samplePoemTitle": "When the Dawn Remembers",
+    "samplePoemBody": "At dawn, the quiet hills remember\nthe names carried softly by the wind.\nA single bird opens the morning\nand every old path becomes a beginning.",
+    "samplePoetOneAm": "ማህሌት ገብረ",
+    "samplePoetOneEn": "Mahlet Gebre",
+    "samplePoetTwoAm": "ዮናስ ተስፋዬ",
+    "samplePoetTwoEn": "Yonas Tesfaye",
+    "samplePoetThreeAm": "ሚሚ አበበ",
+    "samplePoetThreeEn": "Mimi Abebe",
+    "samplePoetFourAm": "ሰላም ኃይሉ",
+    "samplePoetFourEn": "Selam Hailu",
+    "sampleThemeLoveAm": "ፍቅር",
+    "sampleThemeLoveEn": "Love",
+    "sampleThemeCultureAm": "ባህል",
+    "sampleThemeCultureEn": "Culture",
+    "sampleThemeNatureAm": "ተፈጥሮ",
+    "sampleThemeNatureEn": "Nature",
+    "sampleThemeSpiritAm": "መንፈሳዊነት",
+    "sampleThemeSpiritEn": "Spirituality",
+    "sampleThemeSocietyAm": "ህብረተሰብ",
+    "sampleThemeSocietyEn": "Society",
+    "sampleThemeHistoryAm": "ታሪክ",
+    "sampleThemeHistoryEn": "History",
+    "sampleThemeModernAm": "ዘመናዊ",
+    "sampleThemeModernEn": "Contemporary",
     "goHome": "Go to home",
     "whatEyebrow": "A living collection",
     "whatTitle": "What is Medbl?",
@@ -112,9 +136,7 @@
     "ctaTitle": "Add your voice to the anthology.",
     "ctaDescription": "Read what has been remembered, then help the collection grow with a poem of your own.",
     "createAccount": "Create an account",
-    "submitPoem": "Submit a poem",
-    "latestVerse": "Newest in the collection",
-    "readPoem": "Read the poem"
+    "submitPoem": "Submit a poem"
   },
   "Poets": {
     "registry": "The registry",
@@ -187,11 +209,11 @@
     "favoriteAddTooltip": "Add favorite",
     "favoriteRemoveTooltip": "Remove favorite",
     "likesCount": "{count} likes",
+    "textSize": "Text size",
+    "textSizeValue": "Text size: {size}",
     "verifiedTooltip": "This poem's attribution has been confirmed by a moderator against a reliable source.",
     "communityTooltip": "This poem's attribution was accepted by a moderator but not independently verified against a reliable source.",
-    "disputedTooltip": "This poem's attribution has been disputed and is currently under review by moderators.",
-    "textSize": "Text size",
-    "textSizeValue": "Text size: {size}"
+    "disputedTooltip": "This poem's attribution has been disputed and is currently under review by moderators."
   },
   "Submit": {
     "title": "Submit a Poem",
@@ -436,9 +458,7 @@
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "copyright": "All rights reserved.",
-    "medbl": "Medbl",
-    "browse": "Browse",
-    "contribute": "Contribute"
+    "medbl": "Medbl"
   },
   "Common": {
     "save": "Save",

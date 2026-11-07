@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { FavoriteToggle } from "@/components/favorite-toggle";
 import { AttributionBadge } from "@/components/attribution-badge";
 import { PoemViewCount } from "@/components/poem-view-count";
-import { Folio } from "@/components/manuscript/folio";
 import { useLocale, useTranslations } from "next-intl";
 import { Heart } from "lucide-react";
 
@@ -63,31 +64,24 @@ export function PoemCard({
   );
 
   return (
-    <Card className="content-card group relative h-full gap-0 overflow-hidden border-border bg-card py-0 shadow-none">
-      {/* A terracotta rule draws across the top edge on hover/focus. */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-x-5 top-0 h-0.5 origin-left scale-x-0 rounded-full bg-primary transition-transform duration-(--duration-slow) ease-(--ease-out-soft) group-hover:scale-x-100 group-has-focus-visible:scale-x-100"
-      />
+    <Card className="content-card relative border-border bg-card shadow-none">
       <Link
         href={`/poems/${poem.id}`}
-        className="absolute inset-0 z-0 rounded-xl outline-none"
+        className="absolute inset-0 z-0 rounded-xl"
         aria-label={`${tPoems("openPoem")}: ${poem.title}`}
       />
-      <CardHeader className="pointer-events-none relative z-10 gap-0 px-5 pt-5">
-        {/* Folio top-left, view/favorite stats top-right; the title gets its
-            own full-width line below, so long titles never wrap because of
+      <CardHeader className="relative z-10 gap-2 pointer-events-none">
+        {/* Poem number top-left, view/favorite stats top-right; the title gets
+            its own full-width line below, so long titles never wrap because of
             the stats. */}
         {poem.poemNumber != null ||
         showFavorite ||
         showFavoriteCount ||
         poem.viewCount != null ? (
-          <div className="flex min-h-9 items-center justify-between gap-2">
-            {poem.poemNumber != null ? (
-              <Folio number={poem.poemNumber} />
-            ) : (
-              <span />
-            )}
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold tabular-nums text-base text-muted-foreground">
+              {poem.poemNumber != null ? `#${poem.poemNumber}` : null}
+            </span>
             {showFavorite || showFavoriteCount || poem.viewCount != null ? (
               <div className="pointer-events-auto flex items-center gap-2">
                 {poem.viewCount != null ? (
@@ -124,22 +118,22 @@ export function PoemCard({
             ) : null}
           </div>
         ) : null}
-        <CardTitle className="mt-3 line-clamp-2 font-serif text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
-          {poem.title}
+        <CardTitle className="font-sans text-base text-foreground">
+          <span>{poem.title}</span>
         </CardTitle>
+      </CardHeader>
+      <CardContent className="relative z-10 pointer-events-none space-y-3">
         {poem.poetName ? (
-          <p className="mt-1 text-sm text-secondary">
+          <p className="text-sm text-secondary">
             {tPoems("by")} {poem.poetName}
           </p>
         ) : null}
-      </CardHeader>
-      <CardContent className="pointer-events-none relative z-10 flex flex-1 flex-col px-5 pb-5">
         {poem.body ? (
-          <p className="mt-4 whitespace-pre-line text-[0.94rem] leading-7 text-foreground/75 mask-[linear-gradient(to_bottom,black_55%,transparent)]">
+          <p className="whitespace-pre-line text-sm leading-6 text-muted-foreground">
             {firstFourLines(poem.body)}
           </p>
         ) : null}
-        <div className="mt-auto flex flex-wrap gap-2 border-t border-dashed border-border/80 pt-4">
+        <div className="flex flex-wrap gap-2">
           {renderAttribution(poem.attribution_status)}
           {displayCategory ? (
             <Badge variant="outline">{displayCategory}</Badge>

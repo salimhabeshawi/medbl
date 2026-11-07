@@ -1,8 +1,7 @@
 import { cn } from "cn";
 
 const VARIANTS = {
-  // Rendered as a mask, so only the shape matters — the fill comes from currentColor.
-  mark: { src: "/brand/medbl-mark-black.svg", ratio: "1 / 1" },
+  mark: { src: "/brand/medbl-mark-currentcolor.svg", ratio: "1 / 1" },
   "lockup-horizontal": {
     src: "/brand/medbl-lockup-horizontal-currentcolor.svg",
     ratio: "1600 / 560",

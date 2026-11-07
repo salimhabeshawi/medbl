@@ -89,34 +89,6 @@ hand-rolled equivalents, so the app stays visually consistent as new
 features are added. Install additional shadcn components as needed
 rather than building custom versions of things shadcn already provides.
 
-**Manuscript language (reusable pieces — use these, don't re-create them):**
-
-- `components/manuscript/ornament.tsx` — `Ornament`: the Ethiopic section
-  mark ፨ between fading hairlines; the standard section divider.
-- `components/manuscript/folio.tsx` — `Folio`: a poem number as "#N" in Lora
-  plus the same number in Ge'ez numerals (`lib/ethiopic.ts`,
-  `toEthiopicNumeral`). The Ge'ez form is decorative (`aria-hidden`); "#N"
-  stays the accessible rendering.
-- `components/manuscript/poet-seal.tsx` — `PoetSeal`: a poet's first Ge'ez
-  letter in a double ring; `components/poet-card.tsx` (`PoetCard`) is the
-  shared poet tile.
-- `components/manuscript/verse.tsx` — `Verse`: renders a poem body with
-  stanzas as paragraphs, text exactly as stored; sized by `--verse-scale`,
-  which `ReadingToolbar` (`components/manuscript/reading-toolbar.tsx`) sets
-  from the reader's saved text-size preference.
-- `components/manuscript/section-header.tsx` (`SectionHeader`) for section
-  rows and `components/page-header.tsx` (`PageHeader`) for page titles.
-- `.manuscript-sheet` (globals.css): card paper with an inset double rule —
-  the surface for focal content (poem page, poet header, home welcome).
-- The body carries a tiled, alpha-only paper-grain background; never add a
-  fixed or blended full-screen texture layer.
-- Motion: use the `--ease-out-soft` / `--ease-spring` easings and
-  `--duration-fast|base|slow` tokens from `globals.css`. Raw-CSS hover
-  effects go inside `@media (hover: hover) and (pointer: fine)`; ambient
-  animation is for `md:` and up only; everything honours reduced motion.
-- Width: grid/browse pages use `max-w-6xl`; reading and form pages keep a
-  narrower measure (`max-w-4xl` or less).
-
 ## Branding
 
 - Brand assets live in `app/` for favicon/icon/apple-icon/opengraph/twitter images, `public/icons/` for PWA icons, and `public/brand/` for in-site logos.
@@ -487,15 +459,6 @@ animation starts from server-rendered final values, and all effects animate
 only opacity/transform. Every landing animation must respect
 `prefers-reduced-motion: reduce`.
 
-Landing sections show real data only — the featured poem
-(`get_featured_poems`), featured poets (`get_featured_poets`) and themes
-(`categories`, excluding `Uncategorized`) — and render nothing when there is
-no data, never placeholder poems or poets. Data sections stream behind the
-skeletons in `components/landing/loading.tsx`. Sections are built from
-`LandingSection` / `SectionHeading` (`components/landing/section.tsx`), and
-landing-only CSS lives in `components/landing/landing.css` (imported by
-`app/page.tsx`), not in `globals.css`.
-
 ## Profile page (`/profile`)
 
 Requires auth (redirect to `/login` if not logged in). Two independent
@@ -629,9 +592,7 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
   (submission, profile, moderation actions, report resolution).
 - `lib/` helpers: `lib/supabase/` (browser/server clients + middleware
   session refresh), `lib/favorites.ts`, `lib/moderation.ts`,
-  `lib/relations.ts`, and `lib/nav.ts` (the shared `NavLink` type, icon map
-  and `isActivePath()` — the header builds ONE link list on the server and
-  passes it to both `DesktopNav` and `MobileNav`).
+  `lib/relations.ts`.
 
 ## Build order — completed so far
 

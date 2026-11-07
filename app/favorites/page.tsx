@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
-import { PageHeader } from "@/components/page-header";
 import { FavoriteRow } from "@/components/favorite-row";
 import { UniversalSearch } from "@/components/universal-search";
 import { EmptyState } from "@/components/empty-state";
-import { getCurrentUser, getFavoriteCounts } from "@/lib/favorites";
+import { getFavoriteCounts } from "@/lib/favorites";
 import { optionList, type ListFilterOption } from "@/lib/filter-options";
 import { ListFilters } from "@/components/list-filters";
 import { BackLink } from "@/components/back-link";
@@ -62,7 +61,9 @@ export default async function FavoritesPage({
   const tFav = await getTranslations("Favorites");
   const supabase = await createClient();
 
-  const user = await getCurrentUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: favorites, error } = await supabase
@@ -129,13 +130,19 @@ export default async function FavoritesPage({
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       <BackLink fallbackHref="/home">{tFav("back")}</BackLink>
-      <PageHeader
-        eyebrow={tFav("eyebrow")}
-        title={tFav("title")}
-        subtitle={tFav("subtitle")}
-      />
+      <div className="mb-8">
+        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+          {tFav("eyebrow")}
+        </p>
+        <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {tFav("title")}
+        </h1>
+        <p className="text-sm leading-7 text-muted-foreground">
+          {tFav("subtitle")}
+        </p>
+      </div>
       <div className="mb-8">
         <UniversalSearch
           defaultValue={q}

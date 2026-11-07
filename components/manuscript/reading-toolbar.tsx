@@ -1,20 +1,20 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, type ComponentProps } from "react";
+import {
+  useEffect,
+  useSyncExternalStore,
+  type ChangeEvent,
+  type ComponentProps,
+} from "react";
 import { ALargeSmall } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PoemActions } from "@/components/poem-actions";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
-const SCALES = [1, 1.15, 1.3, 0.9] as const;
 const STORAGE_KEY = "medbl:verse-scale";
 const CHANGE_EVENT = "medbl:verse-scale-change";
+const MIN_SCALE = 0.8;
+const MAX_SCALE = 1.5;
+const SCALE_STEP = 0.05;
 
 // The preference lives in localStorage, outside React, so it is read through
 // useSyncExternalStore: the server snapshot is always 100%, and the client
@@ -22,7 +22,7 @@ const CHANGE_EVENT = "medbl:verse-scale-change";
 function readScale(): number {
   try {
     const raw = Number(window.localStorage.getItem(STORAGE_KEY));
-    if ((SCALES as readonly number[]).includes(raw)) return raw;
+    if (raw >= MIN_SCALE && raw <= MAX_SCALE) return raw;
   } catch {
     // Storage unavailable (private window, blocked site data): default size.
   }
@@ -43,10 +43,8 @@ function subscribe(onChange: () => void) {
  * control, kept within thumb reach at the bottom of the screen while the
  * poem scrolls, and settling under the page once the reader reaches the end.
  *
- * Text size is a per-reader convenience: it cycles 100% → 115% → 130% → 90%
- * and is remembered in localStorage (wrapped in try/catch — private windows
- * and blocked storage just fall back to 100%). It is purely client-side, so
- * no loading state.
+ * Text size is a per-reader convenience controlled by a range slider and
+ * remembered in localStorage. It is purely client-side, so no loading state.
  */
 export function ReadingToolbar(props: ComponentProps<typeof PoemActions>) {
   const tPoems = useTranslations("Poems");
@@ -57,9 +55,8 @@ export function ReadingToolbar(props: ComponentProps<typeof PoemActions>) {
     document.documentElement.style.setProperty("--verse-scale", String(scale));
   }, [scale]);
 
-  function cycleScale() {
-    const index = (SCALES as readonly number[]).indexOf(scale);
-    const next = SCALES[(index + 1) % SCALES.length];
+  function updateScale(event: ChangeEvent<HTMLInputElement>) {
+    const next = Number(event.target.value);
     try {
       window.localStorage.setItem(STORAGE_KEY, String(next));
     } catch {
@@ -76,27 +73,31 @@ export function ReadingToolbar(props: ComponentProps<typeof PoemActions>) {
   return (
     <div className="sticky bottom-3 z-30 mt-6 flex justify-center sm:bottom-5">
       <div className="flex items-center gap-2 rounded-full border border-border bg-card/90 px-2.5 py-2 shadow-[0_12px_32px_-16px_color-mix(in_oklch,var(--foreground),transparent_60%)] backdrop-blur-md supports-[backdrop-filter]:bg-card/80">
-        <PoemActions {...props} />
+        <PoemActions {...props} showFavorite={false} />
         <span aria-hidden="true" className="mx-0.5 h-6 w-px bg-border" />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={cycleScale}
-                aria-label={tPoems("textSizeValue", { size: percent })}
-                className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
-              >
-                <ALargeSmall className="size-4" aria-hidden="true" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {tPoems("textSize")} · {percent}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex items-center gap-2 px-1">
+          <ALargeSmall
+            className="size-4 shrink-0 text-secondary"
+            aria-hidden="true"
+          />
+          <label htmlFor="poem-text-size" className="sr-only">
+            {tPoems("textSizeValue", { size: percent })}
+          </label>
+          <input
+            id="poem-text-size"
+            type="range"
+            min={MIN_SCALE}
+            max={MAX_SCALE}
+            step={SCALE_STEP}
+            value={scale}
+            onChange={updateScale}
+            aria-label={tPoems("textSizeValue", { size: percent })}
+            className="h-2 w-24 cursor-pointer accent-primary sm:w-32"
+          />
+          <span className="min-w-10 text-right text-xs font-medium text-muted-foreground">
+            {percent}
+          </span>
+        </div>
       </div>
     </div>
   );

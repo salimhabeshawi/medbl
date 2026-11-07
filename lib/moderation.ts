@@ -1,6 +1,4 @@
-import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentUser } from "@/lib/favorites";
 
 export type UserRole = "member" | "moderator" | "admin";
 
@@ -13,15 +11,17 @@ export function isModerator(role: UserRole): boolean {
  * RLS gates the profiles read to the caller's own row (profiles_select_own),
  * which is exactly what a moderation check needs.
  */
-export const getCurrentUserWithRole = cache(async (): Promise<{
+export async function getCurrentUserWithRole(): Promise<{
   id: string;
   email?: string;
   role: UserRole;
-} | null> => {
-  const user = await getCurrentUser();
+} | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
@@ -33,7 +33,7 @@ export const getCurrentUserWithRole = cache(async (): Promise<{
     email: user.email ?? undefined,
     role: profile?.role ?? "member",
   };
-});
+}
 
 export type ModerationPendingCounts = {
   pendingSubmissions: number;

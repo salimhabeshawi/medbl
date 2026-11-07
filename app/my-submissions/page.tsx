@@ -3,9 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { firstRelation } from "@/lib/relations";
-import { getCurrentUser, getFavoriteCounts } from "@/lib/favorites";
+import { getFavoriteCounts } from "@/lib/favorites";
 import { optionList, type ListFilterOption } from "@/lib/filter-options";
-import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { ListFilters } from "@/components/list-filters";
 import {
@@ -101,7 +100,9 @@ export default async function MySubmissionsPage({
   const supabase = await createClient();
   const tSubs = await getTranslations("MySubmissions");
 
-  const user = await getCurrentUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   // Every column the pending-submission edit form needs is fetched here, so the
@@ -208,11 +209,17 @@ export default async function MySubmissionsPage({
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       <BackLink fallbackHref="/home">{tSubs("back")}</BackLink>
-      <PageHeader
-        eyebrow={tSubs("eyebrow")}
-        title={tSubs("title")}
-        subtitle={tSubs("subtitle")}
-      />
+      <div className="mb-10">
+        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary">
+          {tSubs("eyebrow")}
+        </p>
+        <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {tSubs("title")}
+        </h1>
+        <p className="text-sm leading-7 text-muted-foreground">
+          {tSubs("subtitle")}
+        </p>
+      </div>
 
       <section>
         <h2 className="mb-4 font-serif text-2xl font-semibold">

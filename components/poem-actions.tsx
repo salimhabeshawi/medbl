@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FavoriteToggle } from "@/components/favorite-toggle";
-import { PoemViewCount } from "@/components/poem-view-count";
 import {
   Tooltip,
   TooltipContent,
@@ -22,7 +21,9 @@ export function PoemActions({
   initialFavorited,
   initialFavoriteCount,
   canFavorite,
-  viewCount,
+  showFavorite = true,
+  showFavoriteCount = false,
+  showCopyShare = true,
 }: {
   poemId: string;
   title: string;
@@ -31,7 +32,9 @@ export function PoemActions({
   initialFavorited: boolean;
   initialFavoriteCount: number;
   canFavorite: boolean;
-  viewCount: number;
+  showFavorite?: boolean;
+  showFavoriteCount?: boolean;
+  showCopyShare?: boolean;
 }) {
   const tPoems = useTranslations("Poems");
 
@@ -75,14 +78,14 @@ export function PoemActions({
   return (
     <TooltipProvider>
       <div className="flex shrink-0 items-center gap-2">
-        <PoemViewCount viewCount={viewCount} />
-        {canFavorite ? (
+        {showFavorite && canFavorite ? (
           <FavoriteToggle
             poemId={poemId}
             initialFavorited={initialFavorited}
             initialFavoriteCount={initialFavoriteCount}
+            showCount={showFavoriteCount}
           />
-        ) : (
+        ) : showFavorite ? (
           <>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -106,39 +109,43 @@ export function PoemActions({
               {initialFavoriteCount}
             </span>
           </>
-        )}
+        ) : null}
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={copyPoem}
-              aria-label={tPoems("copyPoem")}
-              className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
-            >
-              <Copy className="size-4" aria-hidden="true" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{tPoems("copyPoem")}</TooltipContent>
-        </Tooltip>
+        {showCopyShare ? (
+          <>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={copyPoem}
+                  aria-label={tPoems("copyPoem")}
+                  className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
+                >
+                  <Copy className="size-4" aria-hidden="true" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{tPoems("copyPoem")}</TooltipContent>
+            </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={sharePoem}
-              aria-label={tPoems("sharePoem")}
-              className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
-            >
-              <Share2 className="size-4" aria-hidden="true" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{tPoems("sharePoem")}</TooltipContent>
-        </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={sharePoem}
+                  aria-label={tPoems("sharePoem")}
+                  className="rounded-full border-border bg-card text-secondary shadow-none transition hover:border-primary/60 hover:bg-accent"
+                >
+                  <Share2 className="size-4" aria-hidden="true" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{tPoems("sharePoem")}</TooltipContent>
+            </Tooltip>
+          </>
+        ) : null}
       </div>
     </TooltipProvider>
   );

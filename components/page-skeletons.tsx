@@ -3,25 +3,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function PoemCardSkeleton() {
   return (
-    <Card className="h-full gap-0 border-border bg-card py-0 shadow-none">
-      <CardHeader className="gap-0 px-5 pt-5">
-        <div className="flex min-h-9 items-center justify-between gap-2">
-          <Skeleton className="h-4 w-14" />
+    <Card className="border-border bg-card shadow-none">
+      <CardHeader className="gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <Skeleton className="h-4 w-8" />
           <div className="flex items-center gap-2">
             <Skeleton className="h-8 w-12 rounded-full" />
             <Skeleton className="size-8 rounded-full" />
           </div>
         </div>
-        <Skeleton className="mt-3 h-6 w-3/4" />
-        <Skeleton className="mt-2 h-4 w-28" />
+        <Skeleton className="h-5 w-3/4" />
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col px-5 pb-5">
-        <div className="mt-4 space-y-3">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-11/12" />
-          <Skeleton className="h-4 w-2/3" />
-        </div>
-        <div className="mt-auto flex flex-wrap gap-2 border-t border-dashed border-border/80 pt-4">
+      <CardContent className="space-y-3">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+        <div className="flex flex-wrap gap-2 pt-1">
           <Skeleton className="h-5 w-20 rounded-4xl" />
           <Skeleton className="h-5 w-16 rounded-4xl" />
           <Skeleton className="h-5 w-14 rounded-4xl" />
@@ -33,17 +31,13 @@ export function PoemCardSkeleton() {
 
 export function PoetCardSkeleton() {
   return (
-    <div className="flex h-full items-start gap-4 rounded-xl border border-border bg-card p-4 sm:p-5">
-      <Skeleton className="size-12 shrink-0 rounded-full" />
-      <div className="min-w-0 flex-1 space-y-2">
-        <Skeleton className="h-5 w-3/4" />
+    <Card className="border-border bg-card shadow-none">
+      <CardContent className="space-y-3 p-5">
+        <Skeleton className="h-6 w-3/4" />
         <Skeleton className="h-4 w-1/2" />
-        <div className="flex gap-2 pt-1">
-          <Skeleton className="h-5 w-16 rounded-4xl" />
-          <Skeleton className="h-5 w-14 rounded-4xl" />
-        </div>
-      </div>
-    </div>
+        <Skeleton className="h-5 w-20 rounded-4xl" />
+      </CardContent>
+    </Card>
   );
 }
 
@@ -208,42 +202,5 @@ export function PasswordFormSkeleton() {
         <Skeleton className="h-10 w-36 rounded-lg" />
       </CardContent>
     </Card>
-  );
-}
-
-/** /login and /signup: mirrors AuthShell. `extraRow` adds signup's terms row. */
-export function AuthSkeleton({ extraRow = false }: { extraRow?: boolean }) {
-  return (
-    <div className="flex flex-1 items-center justify-center px-4 py-10 sm:py-16">
-      <div className="w-full max-w-sm">
-        <Skeleton className="mb-8 h-4 w-24" />
-        <div className="manuscript-sheet px-6 py-9 sm:px-9 sm:py-10">
-          <div className="flex flex-col items-center">
-            <Skeleton className="size-11 rounded-full" />
-            <Skeleton className="mt-4 h-8 w-36" />
-          </div>
-          <Skeleton className="mx-auto mb-6 mt-4 h-px w-32" />
-          <Skeleton className="h-11 w-full rounded-lg" />
-          <div className="my-6 flex items-center gap-3">
-            <Skeleton className="h-px flex-1" />
-            <Skeleton className="h-4 w-5" />
-            <Skeleton className="h-px flex-1" />
-          </div>
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-9 w-full rounded-md" />
-            </div>
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-9 w-full rounded-md" />
-            </div>
-            {extraRow ? <Skeleton className="h-10 w-full" /> : null}
-            <Skeleton className="h-10 w-full rounded-lg" />
-          </div>
-          <Skeleton className="mx-auto mt-6 h-4 w-44" />
-        </div>
-      </div>
-    </div>
   );
 }
