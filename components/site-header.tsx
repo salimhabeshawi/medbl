@@ -49,7 +49,7 @@ export async function SiteHeader() {
     : false;
 
   const links: NavLink[] = [
-    { href: "/home", label: tNav("home"), icon: "home" },
+    { href: "/", label: tNav("home"), icon: "home" },
     { href: "/poems", label: tNav("poems"), icon: "poems" },
     { href: "/poets", label: tNav("poets"), icon: "poets" },
     ...(user
@@ -77,7 +77,7 @@ export async function SiteHeader() {
   ];
 
   const browseLinks: NavLink[] = [
-    { href: "/home", label: tNav("home"), icon: "home" },
+    { href: "/", label: tNav("home"), icon: "home" },
     { href: "/poems", label: tNav("poems"), icon: "poems" },
     { href: "/poets", label: tNav("poets"), icon: "poets" },
     ...(user

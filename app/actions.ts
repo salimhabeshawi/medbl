@@ -63,7 +63,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect(next ?? "/home");
+  redirect(next ?? "/");
 }
 
 export async function signup(formData: FormData) {
@@ -104,7 +104,7 @@ export async function signup(formData: FormData) {
     );
   }
 
-  redirect(next ?? "/home");
+  redirect(next ?? "/");
 }
 
 export async function signOut() {

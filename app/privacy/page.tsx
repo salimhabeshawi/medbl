@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Privacy Policy" };
 export default function PrivacyPage() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-      <BackLink fallbackHref="/home">Back to home</BackLink>
+      <BackLink fallbackHref="/">Back to home</BackLink>
       <header className="mb-10 border-b border-border/70 pb-8">
         <h1 className="mb-4 text-4xl font-semibold tracking-tight sm:text-5xl">
           Privacy Policy

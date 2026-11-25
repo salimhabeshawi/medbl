@@ -412,11 +412,9 @@ browse/search. Moderators, from a report card, can:
 
 ## Pages / routes (current)
 
-- `/` — public marketing landing page: bilingual purpose statement, collection
-  stats, featured poem/poets, themes, attribution guidance, and calls to
-  read or contribute. It always renders the Latin-script name `Medbl`.
-- `/home` — signed-in app home: featured poets (`get_featured_poets`), featured poems
-  (`get_featured_poems`), recent poems, with favorite counts.
+- `/` — app home: featured poets (`get_featured_poets`), featured poems
+  (`get_featured_poems`), recent poems, category browsing, and favorite counts.
+- `/home` — redirects permanently to `/`.
 - `/poems`, `/poems/[id]` — poem browse and detail. The poem page hosts
   favorite toggle, report dialog, and the disputed tag when applicable.
 - `/poets`, `/poets/[id]` — poet directory and poet detail (their
@@ -448,16 +446,6 @@ browse/search. Moderators, from a report card, can:
 There is no standalone `/categories` or `/search` page: search is the
 `UniversalSearch` component in the header (calls `search_poems`), and
 category administration lives on `/moderate`.
-
-### Landing page
-
-The public `/` landing page must always render the Latin-script name `Medbl`
-and a bilingual purpose statement readable without JavaScript, cookies, or
-login. Landing copy is server-rendered; scroll reveals use the pre-paint `js`
-class plus IntersectionObserver and only hide content under `.js`, count-up
-animation starts from server-rendered final values, and all effects animate
-only opacity/transform. Every landing animation must respect
-`prefers-reduced-motion: reduce`.
 
 ## Profile page (`/profile`)
 
@@ -498,7 +486,7 @@ redirect — the user stays on `/profile`.
 
 ## Poem submission flow (current)
 
-`/submit` is the ONLY entry point for adding a poem. On landing, the
+`/submit` is the ONLY entry point for adding a poem. On entry, the
 user chooses one of two paths:
 
 **1. "This is my own poem"**
@@ -889,11 +877,12 @@ NOT in middleware — it's cookie-based inside `i18n/request.ts`.
    37. Made the public home and legal pages bilingual, server-rendered, and
      readable without cookies, JavaScript, or login, with explicit Medbl
      branding and Google user-data disclosure — done
-   38. Moved the app home to `/home` and added the public bilingual Medbl
-     landing page at `/`, including public collection stats and
-     progressive-enhancement scroll animation rules — done
+   38. Moved the app home to `/home` with bilingual server-rendered app content
+     and public collection statistics — done
   39. Integrated the Medbl brand kit assets, manifest icons, social images,
       favicons, and shared current-color logo component across the site — done
+  40. Removed the marketing landing page; `/` is now the app home and legacy
+     `/home` permanently redirects to `/` — done
 
 ## Guidelines for future changes
 

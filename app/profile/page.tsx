@@ -74,7 +74,7 @@ export default async function ProfilePage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
-      <StaticBackLink href={cameFrom ?? "/home"}>
+      <StaticBackLink href={cameFrom ?? "/"}>
         {tProfile("back")}
       </StaticBackLink>
       <div className="mb-10 max-w-2xl">
@@ -119,7 +119,7 @@ export default async function ProfilePage({
           }}
           linked={Boolean(profile?.poet_id)}
           redirectTo={redirectTo}
-          cameFrom={cameFrom ?? "/home"}
+          cameFrom={cameFrom ?? "/"}
         />
       </section>
 
